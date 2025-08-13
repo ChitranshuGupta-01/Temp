@@ -1,0 +1,51 @@
+:root {
+  --sc-blue: #0072AA;
+  --sc-green: #21AA47;
+  --sc-iceberg: #78ADD2;
+  --sc-eton: #A4D0A0;
+  --sc-white: #FFFFFF;
+  --sc-vivid-green: #38D200;
+  --sc-azure: #0473EA;
+}
+
+body {
+  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  color: #222;
+  background: var(--sc-white);
+  margin: 0;
+}
+
+h1, h2, h3 {
+  color: var(--sc-blue);
+  font-weight: 700;
+}
+
+a {
+  color: var(--sc-azure);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+a:hover {
+  color: var(--sc-green);
+}
+
+.button-primary {
+  background: var(--sc-blue);
+  color: var(--sc-white);
+  border: none;
+  padding: 0.75em 2em;
+  border-radius: 2em;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.button-primary:hover {
+  background: var(--sc-green);
+}
+
+.section-highlight {
+  background: linear-gradient(90deg, var(--sc-iceberg), var(--sc-eton));
+  color: var(--sc-blue);
+  padding: 2em;
+  border-radius: 1em;
+}

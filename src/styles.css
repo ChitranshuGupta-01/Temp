@@ -1,0 +1,164 @@
+body {
+  background-color: #f6f6f6;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Navbar brand styles */
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+}
+
+/* Navbar link styles */
+.nav-link {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #333;
+}
+.nav-link:hover {
+  color: #0d6efd;
+}
+
+/* Notification badge style */
+.badge-notification {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 0.6rem;
+  padding: 3px 6px;
+  border-radius: 12px;
+}
+
+/* Icon wrapper for navbar icons */
+.icon-wrapper {
+  position: relative;
+  margin-left: 20px;
+  cursor: pointer;
+  color: #555;
+}
+.icon-wrapper:hover {
+  color: #0d6efd;
+}
+
+/* Header styles */
+.system-header {
+  font-weight: 500;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+}
+.subtitle {
+  font-size: 1.08rem;
+  font-weight: 500;
+}
+.applications-desc {
+  color: #6c757d;
+  font-size: 0.97rem;
+  margin-bottom: 24px;
+}
+
+/* Create button positioning */
+.create-btn {
+  position: absolute;
+  right: 32px;
+  top: 32px;
+}
+
+/* Application card styles */
+.application-card {
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  padding: 18px 20px 14px 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 12px rgba(20, 32, 40, 0.08);
+}
+
+/* Top row of application card */
+.app-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Application ID style */
+.app-id-title {
+  font-weight: 600;
+  font-size: 1.08rem;
+}
+
+/* Status badge styles */
+.badge-pending {
+  background: #e6eafd;
+  color: #3a4cc1;
+  font-weight: 500;
+  font-size: 0.93rem;
+  border-radius: 8px;
+  padding: 2px 15px;
+}
+.badge-success {
+  background: #e9faec;
+  color: #218838;
+  font-weight: 500;
+  font-size: 0.93rem;
+  border-radius: 8px;
+  padding: 2px 15px;
+}
+.badge-failed {
+  background: #ffeaea;
+  color: #d21e2b;
+  font-weight: 500;
+  font-size: 0.93rem;
+  border-radius: 8px;
+  padding: 2px 15px;
+}
+
+/* Application details text */
+.app-details {
+  font-size: 0.98rem;
+  margin-left: 2px;
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
+.app-details strong {
+  color: #343a40;
+  font-size: 0.99rem;
+}
+
+/* Action buttons container */
+.action-btns {
+  display: flex;
+  gap: 12px;
+  margin-top: 5px;
+}
+
+/* Edit button style */
+.btn-edit {
+  border: 1px solid #ced4da;
+  background: #f9f9f9;
+  color: #343a40;
+  font-size: 0.95rem;
+}
+.btn-edit:hover {
+  background: #eef1f8;
+  color: #214088;
+}
+
+/* Delete button style */
+.btn-delete {
+  border: 1px solid #a7a7a7;
+  background: #fff3f3;
+  color: #c71d2c;
+  font-size: 0.95rem;
+}
+.btn-delete:hover {
+  background: #ffeded;
+  color: #91121b;
+}
+
+/* Main content container with max width */
+.container-custom {
+  max-width: 700px;
+  position: relative;
+  margin-top: 25px;
+}
