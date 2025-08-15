@@ -1,0 +1,390 @@
+body {
+  background-color: #f8f8fa;
+  width: 100%;
+}
+
+/* NAVBAR */
+.sc-navbar .navbar-nav {
+  margin-left: 0;
+  margin-right: 0;
+  gap: 18px;
+}
+
+.navbar-nav .nav-item {
+  margin-right: 0;
+}
+
+.sc-navbar .navbar-brand {
+  display: flex;
+  align-items: center;
+  font-size: 1.17em;
+  font-weight: 400;
+}
+.sc-navbar .navbar-brand img {
+  height: 80px;
+  width: auto; /* Keep the aspect ratio */
+  max-width: 100%;
+  margin-right: 16px;
+  object-fit: contain; /* Ensure it scales inside its box */
+  display: block; /* Removes inline spacing issues */
+  background-color: transparent; /* Avoid background hiding logo */
+}
+
+.sc-navbar .navbar-nav {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.navbar-nav .nav-item:last-child {
+  margin-right: 0;
+}
+
+.sc-navbar .nav-link {
+  color: #232729;
+  font-weight: 400;
+  font-size: 1rem;
+  padding: 0 25px;
+}
+
+.sc-navbar .nav-link.active,
+.sc-navbar .nav-link:focus,
+.sc-navbar .nav-link:hover {
+  color: #22988c;
+}
+
+.btn-login {
+  font-size: 0.98em;
+  padding: 2px 15px;
+  border-radius: 6px;
+  border: 1px solid #cfd8df;
+  background: #fff;
+  font-weight: 500;
+  color: #22988c;
+}
+
+@media (max-width: 992px) {
+  .sc-navbar .navbar-collapse {
+    /* display: flex !important; */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0;
+  }
+}
+
+/* Carousel Component */
+
+.carousel-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 40px auto;
+}
+
+.carousel-bg {
+  background: linear-gradient(100deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 24px;
+  /* box-shadow: 0 8px 32px rgba(60, 60, 100, 0.12); */
+  padding: 2rem 5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-inner {
+  position: relative;
+  min-height: 320px;
+}
+
+.carousel-item {
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+}
+
+.carousel-item.active {
+  opacity: 1;
+  position: relative;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.badge {
+  background: #e3edfc;
+  color: #0062c9;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 18px;
+  padding: 0.4em 1em 0.4em 1em;
+  margin-bottom: 0.8rem;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: #2d3458;
+}
+
+p {
+  font-size: 1.1rem;
+  color: #3a4276;
+  margin-bottom: 1.2rem;
+}
+
+.button-group {
+  margin-top: 1em;
+}
+
+.primary-btn {
+  background: #fffbe6;
+  color: #0072c6;
+  border-radius: 8px;
+  font-weight: 700;
+  border: none;
+  margin-right: 8px;
+  padding: 0.6em 2em;
+  box-shadow: 0 2px 8px rgba(0, 114, 198, 0.09);
+  cursor: pointer;
+}
+
+.secondary-btn {
+  border: 1.5px solid #e0eafc;
+  border-radius: 8px;
+  background: none;
+  color: #0072c6;
+  font-weight: 700;
+  padding: 0.6em 2em;
+  opacity: 0.65;
+  cursor: pointer;
+}
+
+.img-content {
+  text-align: center;
+  height: 15rem;
+  border-radius: 20px;
+  margin: 0.7rem;
+  background-size: 100% 100%;
+}
+
+.carousel-img {
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px 5px rgba(54, 54, 54, 0.13);
+  object-fit: cover;
+}
+
+.carousel-control {
+  position: absolute;
+  top: 48%;
+  background: rgba(80, 110, 170, 0.14);
+  border: none;
+  padding: 8px 18px;
+  font-size: 1.8em;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.2s;
+}
+
+.carousel-control.prev {
+  left: 12px;
+}
+
+.carousel-control.next {
+  right: 12px;
+}
+
+.carousel-control:hover {
+  background: rgba(80, 110, 170, 0.25);
+}
+
+.carousel-indicators {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+  display: flex;
+  gap: 10px;
+}
+
+.carousel-indicators button {
+  width: 13px;
+  height: 13px;
+  background: #d2e3fc;
+  border-radius: 50%;
+  border: none;
+  opacity: 0.38;
+  cursor: pointer;
+}
+
+.carousel-indicators .active {
+  background: #0072c6;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .carousel-bg {
+    padding: 1rem 0.6rem;
+  }
+  .row {
+    flex-direction: column;
+  }
+
+  .img-content {
+    width: 90%;
+    min-height: 20rem;
+  }
+  .carousel-img {
+    max-width: 90%;
+    max-height: 170px;
+  }
+}
+
+/* QUICK ACTIONS */
+.quick-actions .card {
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: none;
+  min-height: 260px;
+  transition: box-shadow 0.18s;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.quick-actions .card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.quick-icon-bg {
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  margin: 0 auto 14px auto;
+  font-size: 2.1rem;
+}
+
+.quick-mobile {
+  background: #ffeee0;
+  color: #f4922e;
+}
+
+.quick-clipboard {
+  background: #e6f2ff;
+  color: #0082e3;
+}
+
+.quick-question {
+  background: #ffe9f5;
+  color: #cc249a;
+}
+
+.quick-card {
+  background: #fffddc;
+  color: #d8b233;
+}
+
+.quick-trophy {
+  background: #e8fbe4;
+  color: #3bc24e;
+}
+
+.quick-phone {
+  background: #f8e7e7;
+  color: #dc3545;
+}
+
+/* FOOTER */
+.footer-links {
+  background: #10131a;
+  color: #fff;
+  font-size: 0.98rem;
+  margin-top: 44px;
+  padding: 32px 0 0 0;
+}
+
+.footer-links .fw-bold {
+  color: #fff;
+}
+
+.footer-links a {
+  color: #efefef;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer-links a:hover {
+  color: #abd9b6;
+}
+
+.footer-policy {
+  border-top: 1px solid #233052;
+  padding-top: 15px;
+  color: #aaa;
+  font-size: 0.93rem;
+}
+
+.footer-logo {
+  height: 34px;
+  margin-right: 15px;
+}
+
+.social-icons a {
+  color: #fff;
+  margin-right: 15px;
+  font-size: 1.37rem;
+}
+
+.social-icons a:hover {
+  color: #abd9b6;
+}
+
+/* Additional React-specific styles */
+.carousel-item {
+  display: none;
+}
+
+.carousel-item.active {
+  display: block;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .carousel-bg {
+    padding: 24px 20px 0 20px;
+  }
+
+  .carousel-bg h2 {
+    font-size: 1.5rem;
+  }
+
+  .sc-hero-img {
+    max-width: 200px;
+    margin-top: 20px;
+  }
+
+  .footer-policy {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
