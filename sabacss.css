@@ -1,83 +1,20 @@
-body { background: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-.main-content { margin-top: 50px; max-width: 1124px; margin-left: auto; margin-right: auto; padding-left: 20px; padding-right: 20px;}
-.app-title { font-size: 2.2rem; font-weight: 700; margin-bottom: 6px;}
-.app-desc { color: #666f7a; margin-bottom: 25px;}
+import React from "react";
+import Navbar from "./Navbar"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import Onboarding from "./Onboarding";
+// import Home from "./Home";
 
-.btn-create { background: #5ea9fa; border: none; font-weight: 500; font-size: 1.05rem; padding: 9px 24px; border-radius: 8px; 
-  box-shadow: 0 2px 6px rgba(30,90,210,0.12); transition: background 0.2s; }
-.btn-create:hover, .btn-create:focus { background: #91c8fd;}
-.create-container { margin-bottom: 25px; text-align: right; }
-
-.app-card { background: #fff; border-radius: 14px; border: 1.4px solid #eaeaeb; 
-  box-shadow: 0 2px 10px rgba(55,93,219,0.05); margin-bottom: 28px; padding: 26px 32px 20px 32px; 
-  transition: background 0.18s; cursor: pointer;}
-.app-card:hover { background: #eef3f9;}
-.app-id { font-size: 1.15rem; font-weight: 600;}
-
-.badge-status { font-size: 0.98rem; padding: 4px 14px; border-radius: 10px; margin-left: 8px; vertical-align: middle;}
-.badge-pending { background: #e5ecfa; color: #247fff; border: 1px solid #b2cdfd;}
-.badge-success { background: #dbf3df; color: #239d4b; border: 1px solid #c3e8c7;}
-.badge-failed { background: #ffe9e9; color: #bd3848; border: 1px solid #ffd0d0;}
-
-.app-action-btn { font-size: 0.95rem; padding: 5px 14px; margin-left: 8px; border-radius: 8px;}
-.app-action-btn-edit { color: #3b4c71; border: 1.5px solid #dbe5ee; background: #eff4f9;}
-.app-action-btn-edit:hover { background: #e0ecfa;}
-.app-action-btn-del { color: #c92c2c; border: 1.5px solid #f6c6c6; background: #fcf3f4;}
-.app-action-btn-del:hover { background: #ffe3e3;}
-.app-action-btn-offer { color: #2563eb; border: 1.5px solid #c7dbfa; background: #eef4ff;}
-.app-action-btn-offer:hover { background: #dce8ff;}
-
-.info-label { font-weight: 600; color: #242d38; margin-right: 6px;}
-.info-value { color: #2d4157;}
-
-.app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-.app-header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.app-header-right {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* Edit Mode */
-.edit-form { margin-top: 10px; }
-.edit-form .form-group { display: flex; flex-direction: column; margin-bottom: 16px; }
-.edit-form .form-control, .edit-form .form-select {
-  border-radius: 10px; font-size: 1rem; padding: 10px; 
-  border: 1.2px solid #dce5f4; background: #f9fbfd;
-}
-.edit-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
-.btn-save { background: #4caf50; color: white; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 500; }
-.btn-save:hover { background: #45a049; }
-.btn-cancel { background: #f8d7da; color: #b71c1c; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 500; }
-.btn-cancel:hover { background: #f5c2c7; }
-
-/* Modal */
-.modal-backdrop-custom { position: fixed; top:0; left:0; width:100vw; height:100vh;
-  z-index: 1050; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center;}
-.modal-box { background: #fff; border-radius: 16px; padding: 40px; min-width: 420px; max-width: 500px;
-  box-shadow: 0 4px 28px rgba(40,65,100,0.2); border: none; position: relative;}
-.modal-title { font-size: 1.55rem; font-weight: 700; margin-bottom: 32px; color: #1f2d3d;}
-.modal-close { position: absolute; top: 14px; right: 20px; cursor: pointer; font-size: 2rem; color: #999; opacity: 0.7;}
-.modal-close:hover { opacity: 1;}
-.modal-form .form-label { font-weight: 500; margin-bottom: 6px;}
-.modal-form .form-control, .modal-form .form-select { border-radius: 10px; font-size: 1.05rem; padding: 10px; margin-bottom: 16px; 
-  background: #f9fbfd; border: 1.2px solid #dce5f4;}
-.modal-actions { margin-top: 30px; display: flex; justify-content: flex-end; gap: 14px;}
-.btn-outline-secondary { border-radius: 8px; padding: 8px 18px;}
-
-.modal-form .form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 16px;
+export default function App() {
+  return (
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/home" element={<h1>Home Page</h1>} />
+        <Route path="/faq" element={<h1>FAQ Page</h1>} />
+        <Route path="/about" element={<h1>About Us Page</h1>} />
+        <Route path="/tracker" element={<h1>Tracker Page</h1>} />
+        <Route path="/offer" element={<h1>Offer Status Page</h1>} />
+      </Routes>
+    </Router>
+  );
 }
