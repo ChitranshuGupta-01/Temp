@@ -1,390 +1,83 @@
-body {
-  background-color: #f8f8fa;
-  width: 100%;
-}
+body { background: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+.main-content { margin-top: 50px; max-width: 1124px; margin-left: auto; margin-right: auto; padding-left: 20px; padding-right: 20px;}
+.app-title { font-size: 2.2rem; font-weight: 700; margin-bottom: 6px;}
+.app-desc { color: #666f7a; margin-bottom: 25px;}
 
-/* NAVBAR */
-.sc-navbar .navbar-nav {
-  margin-left: 0;
-  margin-right: 0;
-  gap: 18px;
-}
+.btn-create { background: #5ea9fa; border: none; font-weight: 500; font-size: 1.05rem; padding: 9px 24px; border-radius: 8px; 
+  box-shadow: 0 2px 6px rgba(30,90,210,0.12); transition: background 0.2s; }
+.btn-create:hover, .btn-create:focus { background: #91c8fd;}
+.create-container { margin-bottom: 25px; text-align: right; }
 
-.navbar-nav .nav-item {
-  margin-right: 0;
-}
+.app-card { background: #fff; border-radius: 14px; border: 1.4px solid #eaeaeb; 
+  box-shadow: 0 2px 10px rgba(55,93,219,0.05); margin-bottom: 28px; padding: 26px 32px 20px 32px; 
+  transition: background 0.18s; cursor: pointer;}
+.app-card:hover { background: #eef3f9;}
+.app-id { font-size: 1.15rem; font-weight: 600;}
 
-.sc-navbar .navbar-brand {
+.badge-status { font-size: 0.98rem; padding: 4px 14px; border-radius: 10px; margin-left: 8px; vertical-align: middle;}
+.badge-pending { background: #e5ecfa; color: #247fff; border: 1px solid #b2cdfd;}
+.badge-success { background: #dbf3df; color: #239d4b; border: 1px solid #c3e8c7;}
+.badge-failed { background: #ffe9e9; color: #bd3848; border: 1px solid #ffd0d0;}
+
+.app-action-btn { font-size: 0.95rem; padding: 5px 14px; margin-left: 8px; border-radius: 8px;}
+.app-action-btn-edit { color: #3b4c71; border: 1.5px solid #dbe5ee; background: #eff4f9;}
+.app-action-btn-edit:hover { background: #e0ecfa;}
+.app-action-btn-del { color: #c92c2c; border: 1.5px solid #f6c6c6; background: #fcf3f4;}
+.app-action-btn-del:hover { background: #ffe3e3;}
+.app-action-btn-offer { color: #2563eb; border: 1.5px solid #c7dbfa; background: #eef4ff;}
+.app-action-btn-offer:hover { background: #dce8ff;}
+
+.info-label { font-weight: 600; color: #242d38; margin-right: 6px;}
+.info-value { color: #2d4157;}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.app-header-left {
   display: flex;
   align-items: center;
-  font-size: 1.17em;
-  font-weight: 400;
+  gap: 8px;
+  flex-wrap: wrap;
 }
-.sc-navbar .navbar-brand img {
-  height: 80px;
-  width: auto; /* Keep the aspect ratio */
-  max-width: 100%;
-  margin-right: 16px;
-  object-fit: contain; /* Ensure it scales inside its box */
-  display: block; /* Removes inline spacing issues */
-  background-color: transparent; /* Avoid background hiding logo */
-}
-
-.sc-navbar .navbar-nav {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.navbar-nav .nav-item:last-child {
-  margin-right: 0;
-}
-
-.sc-navbar .nav-link {
-  color: #232729;
-  font-weight: 400;
-  font-size: 1rem;
-  padding: 0 25px;
-}
-
-.sc-navbar .nav-link.active,
-.sc-navbar .nav-link:focus,
-.sc-navbar .nav-link:hover {
-  color: #22988c;
-}
-
-.btn-login {
-  font-size: 0.98em;
-  padding: 2px 15px;
-  border-radius: 6px;
-  border: 1px solid #cfd8df;
-  background: #fff;
-  font-weight: 500;
-  color: #22988c;
-}
-
-@media (max-width: 992px) {
-  .sc-navbar .navbar-collapse {
-    /* display: flex !important; */
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 0;
-  }
-}
-
-/* Carousel Component */
-
-.carousel-container {
-  width: 100%;
-  max-width: 900px;
-  margin: 40px auto;
-}
-
-.carousel-bg {
-  background: linear-gradient(100deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 24px;
-  /* box-shadow: 0 8px 32px rgba(60, 60, 100, 0.12); */
-  padding: 2rem 5rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.carousel-inner {
-  position: relative;
-  min-height: 320px;
-}
-
-.carousel-item {
-  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0;
-  position: absolute;
-  width: 100%;
-  left: 0;
-  top: 0;
-  display: flex;
-  align-items: center;
-}
-
-.carousel-item.active {
-  opacity: 1;
-  position: relative;
-}
-
-.row {
+.app-header-right {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  gap: 8px;
 }
 
-.card-content {
+/* Edit Mode */
+.edit-form { margin-top: 10px; }
+.edit-form .form-group { display: flex; flex-direction: column; margin-bottom: 16px; }
+.edit-form .form-control, .edit-form .form-select {
+  border-radius: 10px; font-size: 1rem; padding: 10px; 
+  border: 1.2px solid #dce5f4; background: #f9fbfd;
+}
+.edit-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
+.btn-save { background: #4caf50; color: white; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 500; }
+.btn-save:hover { background: #45a049; }
+.btn-cancel { background: #f8d7da; color: #b71c1c; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 500; }
+.btn-cancel:hover { background: #f5c2c7; }
+
+/* Modal */
+.modal-backdrop-custom { position: fixed; top:0; left:0; width:100vw; height:100vh;
+  z-index: 1050; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center;}
+.modal-box { background: #fff; border-radius: 16px; padding: 40px; min-width: 420px; max-width: 500px;
+  box-shadow: 0 4px 28px rgba(40,65,100,0.2); border: none; position: relative;}
+.modal-title { font-size: 1.55rem; font-weight: 700; margin-bottom: 32px; color: #1f2d3d;}
+.modal-close { position: absolute; top: 14px; right: 20px; cursor: pointer; font-size: 2rem; color: #999; opacity: 0.7;}
+.modal-close:hover { opacity: 1;}
+.modal-form .form-label { font-weight: 500; margin-bottom: 6px;}
+.modal-form .form-control, .modal-form .form-select { border-radius: 10px; font-size: 1.05rem; padding: 10px; margin-bottom: 16px; 
+  background: #f9fbfd; border: 1.2px solid #dce5f4;}
+.modal-actions { margin-top: 30px; display: flex; justify-content: flex-end; gap: 14px;}
+.btn-outline-secondary { border-radius: 8px; padding: 8px 18px;}
+
+.modal-form .form-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.badge {
-  background: #e3edfc;
-  color: #0062c9;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 18px;
-  padding: 0.4em 1em 0.4em 1em;
-  margin-bottom: 0.8rem;
-}
-
-h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.6rem;
-  color: #2d3458;
-}
-
-p {
-  font-size: 1.1rem;
-  color: #3a4276;
-  margin-bottom: 1.2rem;
-}
-
-.button-group {
-  margin-top: 1em;
-}
-
-.primary-btn {
-  background: #fffbe6;
-  color: #0072c6;
-  border-radius: 8px;
-  font-weight: 700;
-  border: none;
-  margin-right: 8px;
-  padding: 0.6em 2em;
-  box-shadow: 0 2px 8px rgba(0, 114, 198, 0.09);
-  cursor: pointer;
-}
-
-.secondary-btn {
-  border: 1.5px solid #e0eafc;
-  border-radius: 8px;
-  background: none;
-  color: #0072c6;
-  font-weight: 700;
-  padding: 0.6em 2em;
-  opacity: 0.65;
-  cursor: pointer;
-}
-
-.img-content {
-  text-align: center;
-  height: 15rem;
-  border-radius: 20px;
-  margin: 0.7rem;
-  background-size: 100% 100%;
-}
-
-.carousel-img {
-  max-width: 100%;
-  max-height: 220px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px 5px rgba(54, 54, 54, 0.13);
-  object-fit: cover;
-}
-
-.carousel-control {
-  position: absolute;
-  top: 48%;
-  background: rgba(80, 110, 170, 0.14);
-  border: none;
-  padding: 8px 18px;
-  font-size: 1.8em;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 2;
-  transition: background 0.2s;
-}
-
-.carousel-control.prev {
-  left: 12px;
-}
-
-.carousel-control.next {
-  right: 12px;
-}
-
-.carousel-control:hover {
-  background: rgba(80, 110, 170, 0.25);
-}
-
-.carousel-indicators {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 18px;
-  display: flex;
-  gap: 10px;
-}
-
-.carousel-indicators button {
-  width: 13px;
-  height: 13px;
-  background: #d2e3fc;
-  border-radius: 50%;
-  border: none;
-  opacity: 0.38;
-  cursor: pointer;
-}
-
-.carousel-indicators .active {
-  background: #0072c6;
-  opacity: 1;
-}
-
-@media (max-width: 768px) {
-  .carousel-bg {
-    padding: 1rem 0.6rem;
-  }
-  .row {
-    flex-direction: column;
-  }
-
-  .img-content {
-    width: 90%;
-    min-height: 20rem;
-  }
-  .carousel-img {
-    max-width: 90%;
-    max-height: 170px;
-  }
-}
-
-/* QUICK ACTIONS */
-.quick-actions .card {
-  border-radius: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: none;
-  min-height: 260px;
-  transition: box-shadow 0.18s;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.quick-actions .card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.quick-icon-bg {
-  width: 54px;
-  height: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 14px;
-  margin: 0 auto 14px auto;
-  font-size: 2.1rem;
-}
-
-.quick-mobile {
-  background: #ffeee0;
-  color: #f4922e;
-}
-
-.quick-clipboard {
-  background: #e6f2ff;
-  color: #0082e3;
-}
-
-.quick-question {
-  background: #ffe9f5;
-  color: #cc249a;
-}
-
-.quick-card {
-  background: #fffddc;
-  color: #d8b233;
-}
-
-.quick-trophy {
-  background: #e8fbe4;
-  color: #3bc24e;
-}
-
-.quick-phone {
-  background: #f8e7e7;
-  color: #dc3545;
-}
-
-/* FOOTER */
-.footer-links {
-  background: #10131a;
-  color: #fff;
-  font-size: 0.98rem;
-  margin-top: 44px;
-  padding: 32px 0 0 0;
-}
-
-.footer-links .fw-bold {
-  color: #fff;
-}
-
-.footer-links a {
-  color: #efefef;
-  text-decoration: none;
-  transition: color 0.15s;
-}
-
-.footer-links a:hover {
-  color: #abd9b6;
-}
-
-.footer-policy {
-  border-top: 1px solid #233052;
-  padding-top: 15px;
-  color: #aaa;
-  font-size: 0.93rem;
-}
-
-.footer-logo {
-  height: 34px;
-  margin-right: 15px;
-}
-
-.social-icons a {
-  color: #fff;
-  margin-right: 15px;
-  font-size: 1.37rem;
-}
-
-.social-icons a:hover {
-  color: #abd9b6;
-}
-
-/* Additional React-specific styles */
-.carousel-item {
-  display: none;
-}
-
-.carousel-item.active {
-  display: block;
-}
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-  .carousel-bg {
-    padding: 24px 20px 0 20px;
-  }
-
-  .carousel-bg h2 {
-    font-size: 1.5rem;
-  }
-
-  .sc-hero-img {
-    max-width: 200px;
-    margin-top: 20px;
-  }
-
-  .footer-policy {
-    flex-direction: column;
-    gap: 10px;
-    text-align: center;
-  }
+  margin-bottom: 16px;
 }
