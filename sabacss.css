@@ -1,20 +1,283 @@
-import React from "react";
-import Navbar from "./Navbar"
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-// import Onboarding from "./Onboarding";
-// import Home from "./Home";
+body {
+  background-color: #191a20;
+  margin: 0;
+  width: 100vw;
+  font-family: "Segoe UI", "Inter", "Montserrat", "Nunito Sans", Arial,
+    sans-serif;
+}
 
-export default function App() {
-  return (
-    <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/home" element={<h1>Home Page</h1>} />
-        <Route path="/faq" element={<h1>FAQ Page</h1>} />
-        <Route path="/about" element={<h1>About Us Page</h1>} />
-        <Route path="/tracker" element={<h1>Tracker Page</h1>} />
-        <Route path="/offer" element={<h1>Offer Status Page</h1>} />
-      </Routes>
-    </Router>
-  );
+.sc-navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 120;
+  background: rgba(21, 26, 32, 0.98);
+  box-shadow: 0 2px 18px rgba(42, 75, 165, 0.13);
+  backdrop-filter: blur(6px);
+  transition: box-shadow 0.25s;
+}
+.sc-navbar .navbar-brand {
+  display: flex;
+  align-items: center;
+  font-size: 1.17em;
+  font-weight: 400;
+}
+.sc-navbar .navbar-brand img {
+  height: 80px;
+  width: auto;
+  max-width: 100%;
+  margin-right: 16px;
+  object-fit: contain;
+  display: block;
+  background-color: transparent;
+}
+.sc-navbar .navbar-nav {
+  margin-left: auto;
+  margin-right: auto;
+  gap: 18px;
+}
+.navbar-nav .nav-item {
+  margin-right: 0;
+}
+.navbar-nav .nav-item:last-child {
+  margin-right: 0;
+}
+.sc-navbar .nav-link {
+  color: #f0f4fd;
+  font-weight: 400;
+  font-size: 1rem;
+  padding: 0 25px;
+  transition: color 0.17s;
+}
+.sc-navbar .nav-link.active,
+.sc-navbar .nav-link:focus,
+.sc-navbar .nav-link:hover {
+  color: #33c2ff;
+}
+.btn-login {
+  font-size: 0.98em;
+  padding: 2px 15px;
+  border-radius: 6px;
+  border: 1px solid #2b415d;
+  background: #1d294a;
+  font-weight: 500;
+  color: #33c2ff;
+  transition: background 0.2s;
+}
+.btn-login:hover {
+  background: #283857;
+  color: #fff;
+}
+@media (max-width: 992px) {
+  .sc-navbar .navbar-collapse {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0;
+  }
+}
+
+.carousel-container {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+.carousel-bg {
+  background: linear-gradient(112deg, #0b2347 25%, #1a2c60 100%);
+  border-radius: 0;
+  margin: 44px 24px 0 24px;
+  box-shadow: 0 8px 32px rgba(25, 50, 110, 0.13);
+  padding: 3rem 3rem;
+  max-width: 1750px;
+  min-width: 360px;
+  width: calc(100vw - 48px);
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+@media (max-width: 1800px) {
+  .carousel-bg {
+    width: calc(100vw - 32px);
+    max-width: 99vw;
+    margin: 32px 8px 0 8px;
+    padding: 2rem 1rem;
+  }
+}
+.carousel-inner {
+  position: relative;
+  min-height: 320px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 28px;
+}
+.card-content {
+  max-width: 600px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-left: 16px;
+}
+.badge {
+  background: #142f50;
+  color: #69cfff;
+  font-size: 1rem;
+}
+/* Headline styling */
+.card-content h2 {
+  color: #fff;
+  font-size: 2.35rem;
+  font-weight: 700;
+  margin-bottom: 0.7rem;
+  letter-spacing: 0.02em;
+}
+.card-content p {
+  color: #c3d5ef;
+  font-size: 1.12rem;
+}
+.primary-btn {
+  background: linear-gradient(90deg, #21a3f3, #2179b8 80%);
+  color: #fffbe6;
+  border-radius: 8px;
+  font-weight: 700;
+  margin-right: 8px;
+  padding: 0.65em 2.1em;
+  box-shadow: 0 2px 8px rgba(0, 114, 198, 0.09);
+  cursor: pointer;
+  border: none;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.primary-btn:hover {
+  background: linear-gradient(90deg, #228ef2, #17446a 90%);
+  box-shadow: 0 8px 32px #1955b0d7;
+}
+.img-content {
+  text-align: center;
+  border-radius: 16px;
+  min-width: 340px;
+  max-width: 450px;
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.carousel-img {
+  width: 400px;
+  height: 250px;
+  max-width: 95vw;
+  max-height: 330px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px 5px rgba(62, 140, 255, 0.13);
+  object-fit: cover;
+  border: 2px solid #2352a7;
+  transition: box-shadow 0.18s, border-color 0.18s;
+  background: #132c53;
+}
+.carousel-img:hover {
+  box-shadow: 0 10px 36px 10px #227afc25;
+  border-color: #69cfff;
+}
+.carousel-control {
+  position: absolute;
+  top: 50%;
+  background: rgba(38, 57, 128, 0.14);
+  border: none;
+  padding: 8px 22px;
+  font-size: 2em;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2;
+  color: #d2e3fc;
+  transition: background 0.2s, transform 0.18s;
+}
+.carousel-control.prev {
+  left: 18px;
+}
+.carousel-control.next {
+  right: 18px;
+}
+.carousel-control:hover {
+  background: #24326a;
+  color: #fff;
+  transform: scale(1.1);
+}
+.carousel-indicators {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+  display: flex;
+  gap: 10px;
+}
+.carousel-indicators button {
+  width: 13px;
+  height: 13px;
+  background: #22346b;
+  border-radius: 50%;
+  border: none;
+  opacity: 0.45;
+  cursor: pointer;
+  transition: background 0.17s;
+}
+.carousel-indicators .active {
+  background: linear-gradient(100deg, #326aff 20%, #33c2ff 100%);
+  box-shadow: 0 2px 8px #55aad6;
+  opacity: 1;
+  animation: pulse 1s infinite alternate;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.18);
+  }
+}
+@media (max-width: 1100px) {
+  .carousel-bg {
+    flex-direction: column;
+    padding: 1.2rem 1.2rem;
+    margin: 24px 8px 0 8px;
+  }
+  .row {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .card-content {
+    padding-left: 0;
+    max-width: 100vw;
+  }
+  .img-content {
+    min-width: 200px;
+    max-width: 98vw;
+    min-height: 120px;
+    margin-bottom: 12px;
+  }
+  .carousel-img {
+    width: 90vw;
+    height: 140px;
+    border-radius: 14px;
+  }
+}
+@media (max-width: 600px) {
+  .carousel-bg {
+    padding: 0.7rem 0.7rem 0.5rem 0.7rem;
+    margin: 12px 2px 0 2px;
+    border-radius: 10px;
+  }
+  .carousel-img {
+    width: 100%;
+    height: 90px;
+    min-height: 60px;
+    border-radius: 10px;
+    max-width: 95vw;
+  }
 }
