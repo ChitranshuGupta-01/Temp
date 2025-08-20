@@ -1,0 +1,177 @@
+Student.java
+public class Student {
+    private int rollno;
+    private String name;
+    private int science;
+    private int maths;
+
+    // Getters and setters
+    public int getRollno() { return rollno; }
+    public void setRollno(int rollno) { this.rollno = rollno; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public int getScience() { return science; }
+    public void setScience(int science) { this.science = science; }
+
+    public int getMaths() { return maths; }
+    public void setMaths(int maths) { this.maths = maths; }
+}
+
+/////////////////////////////////////////
+ReportCard.java
+public class ReportCard {
+    private int rollno;
+    private String name;
+    private String grade;
+
+    public ReportCard(int rollno, String name, String grade) {
+        this.rollno = rollno;
+        this.name = name;
+        this.grade = grade;
+    }
+
+    // Getters and setters
+    public int getRollno() { return rollno; }
+    public void setRollno(int rollno) { this.rollno = rollno; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
+}
+
+
+////////////////////////////////////////////////////////////////////
+ReportCardService.java (Service)
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class ReportCardService {
+    public ReportCard generateReport(Student student) {
+        String grade;
+        if (student.getScience() > 75 && student.getMaths() > 75) {
+            grade = "Good";
+        } else {
+            grade = "Average";
+        }
+        return new ReportCard(student.getRollno(), student.getName(), grade);
+    }
+}
+
+
+////////////////////////////////////////////////////////////
+ReportCardController.java (Controller)
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api")
+public class ReportCardController {
+
+    @Autowired
+    private ReportCardService reportCardService;
+
+    @PostMapping("/report-card")
+    public ResponseEntity<ReportCard> generateReport(@RequestBody Student student) {
+        ReportCard reportCard = reportCardService.generateReport(student);
+
+        if ("Good".equals(reportCard.getGrade())) {
+            return new ResponseEntity<>(reportCard, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(reportCard, HttpStatus.NOT_ACCEPTABLE); // 406
+        }
+    }
+}
+
+
+////////////////////////////////////////////////
+
+ ReportCardService.js
+import axios from 'axios';
+
+export const generateReportCard = async (student) => {
+  return axios.post('/api/report-card', student); // API URL as per Spring Boot mapping
+};
+
+/////////////////////////
+import React, { useState } from 'react';
+import { generateReportCard } from './ReportCardService';
+
+function ReportCardForm() {
+  const [form, setForm] = useState({ rollno: '', name: '', science: '', maths: '' });
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+
+  const handleChange = e => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setResult(null);
+    setError('');
+    try {
+      const response = await generateReportCard({
+        ...form,
+        science: parseInt(form.science, 10),
+        maths: parseInt(form.maths, 10)
+      });
+      setResult(response.data);
+    } catch (err) {
+      if (err.response && err.response.data) {
+        setResult(err.response.data);
+      } else {
+        setError('Error connecting to server');
+      }
+    }
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input name="rollno" type="text" placeholder="Roll No" value={form.rollno} onChange={handleChange} required />
+        <input name="name" type="text" placeholder="Name" value={form.name} onChange={handleChange} required />
+        <input name="science" type="number" placeholder="Science" value={form.science} onChange={handleChange} required />
+        <input name="maths" type="number" placeholder="Maths" value={form.maths} onChange={handleChange} required />
+        <button type="submit">Submit</button>
+      </form>
+      {result && (
+        <div>
+          <p>Roll No: {result.rollno}</p>
+          <p>Name: {result.name}</p>
+          <p>Grade: {result.grade}</p>
+        </div>
+      )}
+      {error && <div>{error}</div>}
+    </div>
+  );
+}
+
+export default ReportCardForm;
+//////////////
+
+// App.js
+import React from 'react';
+import ReportCardForm from './ReportCardForm';
+
+function App() {
+  return (
+    <div>
+      <h2>Student Report Card</h2>
+      <ReportCardForm />
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
