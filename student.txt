@@ -1,63 +1,318 @@
-import axios from 'axios';
+ config/DBConnection.java
 
-export const generateReportCard = async (student) => {
-  return axios.post('http://localhost:8080/api/report-card', student);
-};
+package usecasejdbc.studentdb.config;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 
+public class DBConnection {
+    private static Connection connection;
 
-
-
-
-import React, { useState } from 'react';
-import { generateReportCard } from './ReportCardService';
-
-function ReportCardForm() {
-  const [form, setForm] = useState({ rollno: '', name: '', science: '', maths: '' });
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setError('');
-    try {
-      const response = await generateReportCard({
-        ...form,
-        science: parseInt(form.science, 10),
-        maths: parseInt(form.maths, 10)
-      });
-      // If backend returns 200 OK, student is good
-      if (response.status === 200) {
-        setMessage('Student is Good');
-      }
-    } catch (err) {
-      if (err.response && err.response.status === 406) {
-        setMessage('Student is Not Good');
-      } else {
-        setError('Error connecting to server');
-      }
+    public static Connection getConnection() {
+        if (connection == null) {
+            try {
+                Class.forName("org.postgresql.Driver");
+                connection = DriverManager.getConnection(
+                    "jdbc:postgresql://localhost:5400/postgres",
+                    "postgres",
+                    "" // password
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return connection;
     }
-  };
-
-  return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input name="rollno" type="text" placeholder="Roll No" value={form.rollno} onChange={handleChange} required />
-        <input name="name" type="text" placeholder="Name" value={form.name} onChange={handleChange} required />
-        <input name="science" type="number" placeholder="Science" value={form.science} onChange={handleChange} required />
-        <input name="maths" type="number" placeholder="Maths" value={form.maths} onChange={handleChange} required />
-        <button type="submit">Submit</button>
-      </form>
-
-      {message && <p>{message}</p>}
-      {error && <p style={{color: 'red'}}>{error}</p>}
-    </div>
-  );
 }
 
-export default ReportCardForm;
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+model/Customer.java
+
+package usecasejdbc.studentdb.model;
+
+public class Customer {
+    private int customerId;
+    private String name;
+    private String mailId;
+    private String contact;
+    private String accountType;
+
+    public Customer(int customerId, String name, String mailId, String contact, String accountType) {
+        this.customerId = customerId;
+        this.name = name;
+        this.mailId = mailId;
+        this.contact = contact;
+        this.accountType = accountType;
+    }
+
+    public Customer(String name, String mailId, String contact, String accountType) {
+        this.name = name;
+        this.mailId = mailId;
+        this.contact = contact;
+        this.accountType = accountType;
+    }
+
+    // Getters and Setters
+
+    public int getCustomerId() { return customerId; }
+    public void setCustomerId(int customerId) { this.customerId = customerId; }
+    public String getName() { return name; }
+    public String getMailId() { return mailId; }
+    public String getContact() { return contact; }
+    public String getAccountType() { return accountType; }
+
+    @Override
+    public String toString() {
+        return "Customer Id = " + customerId +
+               ", Customer name = " + name +
+               ", Customer email = " + mailId +
+               ", Customer contact = " + contact +
+               ", Account Type = " + accountType;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+dao/CustomerDAO.java
+package usecasejdbc.studentdb.dao;
+
+import java.util.List;
+import usecasejdbc.studentdb.model.Customer;
+
+public interface CustomerDAO {
+    void insertCustomer(Customer customer);
+    List<Customer> getAllCustomers();
+    Customer getCustomerById(int customerId);
+    boolean deleteCustomer(int customerId);
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+dao/CustomerDAOImpl.java
+package usecasejdbc.studentdb.dao;
+
+import java.sql.*;
+import java.util.*;
+import usecasejdbc.studentdb.model.Customer;
+import usecasejdbc.studentdb.config.DBConnection;
+
+public class CustomerDAOImpl implements CustomerDAO {
+    private final Connection connection;
+
+    public CustomerDAOImpl() {
+        this.connection = DBConnection.getConnection();
+        createTableIfNotExists();
+    }
+
+    private void createTableIfNotExists() {
+        String sql = "CREATE TABLE IF NOT EXISTS customers (" +
+                     "customerid SERIAL PRIMARY KEY," +
+                     "name VARCHAR(100) NOT NULL," +
+                     "mailid VARCHAR(100) NOT NULL," +
+                     "contact VARCHAR(10) NOT NULL," +
+                     "accounttype VARCHAR(10) NOT NULL" +
+                     ")";
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void insertCustomer(Customer customer) {
+        String sql = "INSERT INTO customers (name, mailid, contact, accounttype) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, customer.getName());
+            pstmt.setString(2, customer.getMailId());
+            pstmt.setString(3, customer.getContact());
+            pstmt.setString(4, customer.getAccountType());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<Customer> getAllCustomers() {
+        List<Customer> customers = new ArrayList<>();
+        String sql = "SELECT * FROM customers";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Customer c = new Customer(
+                    rs.getInt("customerid"),
+                    rs.getString("name"),
+                    rs.getString("mailid"),
+                    rs.getString("contact"),
+                    rs.getString("accounttype")
+                );
+                customers.add(c);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return customers;
+    }
+
+    @Override
+    public Customer getCustomerById(int customerId) {
+        String sql = "SELECT * FROM customers WHERE customerid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, customerId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Customer(
+                        rs.getInt("customerid"),
+                        rs.getString("name"),
+                        rs.getString("mailid"),
+                        rs.getString("contact"),
+                        rs.getString("accounttype")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean deleteCustomer(int customerId) {
+        String sql = "DELETE FROM customers WHERE customerid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, customerId);
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+Main.java
+
+package usecasejdbc.studentdb;
+
+import usecasejdbc.studentdb.model.Customer;
+import usecasejdbc.studentdb.dao.CustomerDAO;
+import usecasejdbc.studentdb.dao.CustomerDAOImpl;
+import java.util.*;
+
+public class Main {
+    private static final Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        CustomerDAO dao = new CustomerDAOImpl();
+
+        while (true) {
+            System.out.println("\nWelcome to Standard Chartered Bank");
+            System.out.println("1 for Add new Customer");
+            System.out.println("2 for Display Customers");
+            System.out.println("3 for Search Customer");
+            System.out.println("4 for Delete Customer");
+            System.out.println("5 for Exit the bank application");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                    addCustomer(dao);
+                    break;
+                case 2:
+                    displayCustomers(dao);
+                    break;
+                case 3:
+                    searchCustomer(dao);
+                    break;
+                case 4:
+                    deleteCustomer(dao);
+                    break;
+                case 5:
+                    System.out.println("Exiting...");
+                    return;
+                default:
+                    System.out.println("Invalid option.");
+            }
+        }
+    }
+
+    private static void addCustomer(CustomerDAO dao) {
+        System.out.println("Enter name: ");
+        String name = scanner.nextLine();
+        if (!name.matches("[A-Za-z ]+")) {
+            System.out.println("Invalid name.");
+            return;
+        }
+
+        System.out.println("Enter email: ");
+        String mailId = scanner.nextLine();
+        if (!mailId.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            System.out.println("Invalid email.");
+            return;
+        }
+
+        System.out.println("Enter contact: ");
+        String contact = scanner.nextLine();
+        if (!contact.matches("\\d{10}")) {
+            System.out.println("Invalid contact number.");
+            return;
+        }
+
+        System.out.println("Enter account type (Savings or Current): ");
+        String accountType = scanner.nextLine();
+        if (!accountType.equalsIgnoreCase("Savings") && !accountType.equalsIgnoreCase("Current")) {
+            System.out.println("Invalid account type.");
+            return;
+        }
+
+        Customer customer = new Customer(name, mailId, contact, accountType);
+        dao.insertCustomer(customer);
+        System.out.println("Customer added successfully!");
+    }
+
+    private static void displayCustomers(CustomerDAO dao) {
+        List<Customer> customers = dao.getAllCustomers();
+        if (customers.isEmpty()) {
+            System.out.println("No customers found.");
+            return;
+        }
+        customers.forEach(System.out::println);
+    }
+
+    private static void searchCustomer(CustomerDAO dao) {
+        System.out.println("Please enter customer id:");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+        Customer customer = dao.getCustomerById(id);
+        if (customer != null) {
+            System.out.println(customer);
+        } else {
+            System.out.println("Customer not found.");
+        }
+    }
+
+    private static void deleteCustomer(CustomerDAO dao) {
+        System.out.println("Please enter customer id to be deleted:");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+        boolean deleted = dao.deleteCustomer(id);
+        if (deleted) {
+            System.out.println("Deleted customer with id =" + id);
+        } else {
+            System.out.println("Customer not found or could not be deleted.");
+        }
+    }
+}
