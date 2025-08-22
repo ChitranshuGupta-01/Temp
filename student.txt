@@ -54,11 +54,51 @@ export const checkMultipleOfFive = async (number) => {
 
 //////////////////////////////////////////
 
-// Import Axios library to make HTTP requests
-import axios from 'axios';
+// Import React and useState hook for state management
+import React, { useState } from "react";
+// Import the Axios function from service.js
+import { checkMultipleOfFive } from "./service";
 
-// Define an async function to hit the Spring Boot API with given number
-export const checkMultipleOfFive = async (number) => {
-    // Make GET request to backend, passing number in URL path
-    return axios.get(`http://localhost:8080/api/check/${number}`);
+// Main functional component
+const CheckNumber = () => {
+    // State to hold the input number from user
+    const [number, setNumber] = useState('');
+    // State to hold API response ("yes", "no", or error)
+    const [result, setResult] = useState('');
+
+    // Function to handle "Check" button click
+    const handleCheck = async () => {
+        // If no number is entered, stop function
+        if (!number) return;
+        try {
+            // Call the backend API and wait for response
+            const response = await checkMultipleOfFive(number);
+            // Set result state to response data ("yes" or "no")
+            setResult(response.data);  
+        } catch (error) {
+            // If error, show server message if available, else generic error
+            setResult(error.response?.data || "Error occured");
+        }
+    };
+
+    // JSX: Renders input box, button, and result div
+    return (
+        <div>
+            {/* Input box for user to enter a number */}
+            <input
+                type="number"
+                value={number}
+                onChange={e => setNumber(e.target.value)}
+                placeholder="Enter number"
+            />
+            {/* Button to check if number is multiple of 5 */}
+            <button onClick={handleCheck}>Check</button>
+            {/* Display result from backend */}
+            <div>Result: {result}</div>
+        </div>
+    );
 };
+
+// Export component for use elsewhere
+export default CheckNumber;
+
