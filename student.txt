@@ -100,3 +100,20 @@ public class Asgmnt2Application {
     }
 }
 
+/////////////////////////
+
+CREATE TABLE location (
+  pincode INT PRIMARY KEY,
+  city VARCHAR(255),
+  area VARCHAR(255)
+);
+////////////////////////
+
+INSERT INTO location (pincode, city, area) VALUES
+(123456, 'Mumbai', 'Andheri'),
+(123457, 'Mumbai', 'Bandra'),
+(234567, 'Pune', 'Kothrud'),
+(345678, 'Delhi', 'Dwarka');
+
+
+
