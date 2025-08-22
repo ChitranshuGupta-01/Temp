@@ -1,318 +1,64 @@
- config/DBConnection.java
+// Import necessary classes for REST Controller, HTTP status, and path variable
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-package usecasejdbc.studentdb.config;
+// Mark this class as a REST controller
+@RestController
+public class MultipleOfFiveController {
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+    // Define a GET endpoint with path variable 'number'
+    @GetMapping("/api/check/{number}")
+    public ResponseEntity<String> checkMultipleOfFive(@PathVariable int number) {
+        // Check if the number is a multiple of 5
+        boolean isMultiple = number % 5 == 0;
 
-public class DBConnection {
-    private static Connection connection;
+        // Set message to "yes" if multiple, "no" if not
+        String message = isMultiple ? "yes" : "no";
 
-    public static Connection getConnection() {
-        if (connection == null) {
-            try {
-                Class.forName("org.postgresql.Driver");
-                connection = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost:5400/postgres",
-                    "postgres",
-                    "" // password
-                );
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return connection;
+        // Return HTTP status 200 (OK) if multiple, 400 (Bad Request) otherwise, and the message
+        return ResponseEntity
+                .status(isMultiple ? HttpStatus.OK : HttpStatus.BAD_REQUEST)
+                .body(message);
     }
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-model/Customer.java
+// Main Spring Boot application annotation
+@SpringBootApplication
+public class MultipleOfFiveApplication {
 
-package usecasejdbc.studentdb.model;
-
-public class Customer {
-    private int customerId;
-    private String name;
-    private String mailId;
-    private String contact;
-    private String accountType;
-
-    public Customer(int customerId, String name, String mailId, String contact, String accountType) {
-        this.customerId = customerId;
-        this.name = name;
-        this.mailId = mailId;
-        this.contact = contact;
-        this.accountType = accountType;
-    }
-
-    public Customer(String name, String mailId, String contact, String accountType) {
-        this.name = name;
-        this.mailId = mailId;
-        this.contact = contact;
-        this.accountType = accountType;
-    }
-
-    // Getters and Setters
-
-    public int getCustomerId() { return customerId; }
-    public void setCustomerId(int customerId) { this.customerId = customerId; }
-    public String getName() { return name; }
-    public String getMailId() { return mailId; }
-    public String getContact() { return contact; }
-    public String getAccountType() { return accountType; }
-
-    @Override
-    public String toString() {
-        return "Customer Id = " + customerId +
-               ", Customer name = " + name +
-               ", Customer email = " + mailId +
-               ", Customer contact = " + contact +
-               ", Account Type = " + accountType;
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-dao/CustomerDAO.java
-package usecasejdbc.studentdb.dao;
-
-import java.util.List;
-import usecasejdbc.studentdb.model.Customer;
-
-public interface CustomerDAO {
-    void insertCustomer(Customer customer);
-    List<Customer> getAllCustomers();
-    Customer getCustomerById(int customerId);
-    boolean deleteCustomer(int customerId);
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-dao/CustomerDAOImpl.java
-package usecasejdbc.studentdb.dao;
-
-import java.sql.*;
-import java.util.*;
-import usecasejdbc.studentdb.model.Customer;
-import usecasejdbc.studentdb.config.DBConnection;
-
-public class CustomerDAOImpl implements CustomerDAO {
-    private final Connection connection;
-
-    public CustomerDAOImpl() {
-        this.connection = DBConnection.getConnection();
-        createTableIfNotExists();
-    }
-
-    private void createTableIfNotExists() {
-        String sql = "CREATE TABLE IF NOT EXISTS customers (" +
-                     "customerid SERIAL PRIMARY KEY," +
-                     "name VARCHAR(100) NOT NULL," +
-                     "mailid VARCHAR(100) NOT NULL," +
-                     "contact VARCHAR(10) NOT NULL," +
-                     "accounttype VARCHAR(10) NOT NULL" +
-                     ")";
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void insertCustomer(Customer customer) {
-        String sql = "INSERT INTO customers (name, mailid, contact, accounttype) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, customer.getName());
-            pstmt.setString(2, customer.getMailId());
-            pstmt.setString(3, customer.getContact());
-            pstmt.setString(4, customer.getAccountType());
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public List<Customer> getAllCustomers() {
-        List<Customer> customers = new ArrayList<>();
-        String sql = "SELECT * FROM customers";
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                Customer c = new Customer(
-                    rs.getInt("customerid"),
-                    rs.getString("name"),
-                    rs.getString("mailid"),
-                    rs.getString("contact"),
-                    rs.getString("accounttype")
-                );
-                customers.add(c);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return customers;
-    }
-
-    @Override
-    public Customer getCustomerById(int customerId) {
-        String sql = "SELECT * FROM customers WHERE customerid = ?";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, customerId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return new Customer(
-                        rs.getInt("customerid"),
-                        rs.getString("name"),
-                        rs.getString("mailid"),
-                        rs.getString("contact"),
-                        rs.getString("accounttype")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public boolean deleteCustomer(int customerId) {
-        String sql = "DELETE FROM customers WHERE customerid = ?";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, customerId);
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////
-Main.java
-
-package usecasejdbc.studentdb;
-
-import usecasejdbc.studentdb.model.Customer;
-import usecasejdbc.studentdb.dao.CustomerDAO;
-import usecasejdbc.studentdb.dao.CustomerDAOImpl;
-import java.util.*;
-
-public class Main {
-    private static final Scanner scanner = new Scanner(System.in);
-
+    // Main method to start the Spring Boot application
     public static void main(String[] args) {
-        CustomerDAO dao = new CustomerDAOImpl();
-
-        while (true) {
-            System.out.println("\nWelcome to Standard Chartered Bank");
-            System.out.println("1 for Add new Customer");
-            System.out.println("2 for Display Customers");
-            System.out.println("3 for Search Customer");
-            System.out.println("4 for Delete Customer");
-            System.out.println("5 for Exit the bank application");
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // consume newline
-
-            switch (choice) {
-                case 1:
-                    addCustomer(dao);
-                    break;
-                case 2:
-                    displayCustomers(dao);
-                    break;
-                case 3:
-                    searchCustomer(dao);
-                    break;
-                case 4:
-                    deleteCustomer(dao);
-                    break;
-                case 5:
-                    System.out.println("Exiting...");
-                    return;
-                default:
-                    System.out.println("Invalid option.");
-            }
-        }
-    }
-
-    private static void addCustomer(CustomerDAO dao) {
-        System.out.println("Enter name: ");
-        String name = scanner.nextLine();
-        if (!name.matches("[A-Za-z ]+")) {
-            System.out.println("Invalid name.");
-            return;
-        }
-
-        System.out.println("Enter email: ");
-        String mailId = scanner.nextLine();
-        if (!mailId.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-            System.out.println("Invalid email.");
-            return;
-        }
-
-        System.out.println("Enter contact: ");
-        String contact = scanner.nextLine();
-        if (!contact.matches("\\d{10}")) {
-            System.out.println("Invalid contact number.");
-            return;
-        }
-
-        System.out.println("Enter account type (Savings or Current): ");
-        String accountType = scanner.nextLine();
-        if (!accountType.equalsIgnoreCase("Savings") && !accountType.equalsIgnoreCase("Current")) {
-            System.out.println("Invalid account type.");
-            return;
-        }
-
-        Customer customer = new Customer(name, mailId, contact, accountType);
-        dao.insertCustomer(customer);
-        System.out.println("Customer added successfully!");
-    }
-
-    private static void displayCustomers(CustomerDAO dao) {
-        List<Customer> customers = dao.getAllCustomers();
-        if (customers.isEmpty()) {
-            System.out.println("No customers found.");
-            return;
-        }
-        customers.forEach(System.out::println);
-    }
-
-    private static void searchCustomer(CustomerDAO dao) {
-        System.out.println("Please enter customer id:");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-        Customer customer = dao.getCustomerById(id);
-        if (customer != null) {
-            System.out.println(customer);
-        } else {
-            System.out.println("Customer not found.");
-        }
-    }
-
-    private static void deleteCustomer(CustomerDAO dao) {
-        System.out.println("Please enter customer id to be deleted:");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-        boolean deleted = dao.deleteCustomer(id);
-        if (deleted) {
-            System.out.println("Deleted customer with id =" + id);
-        } else {
-            System.out.println("Customer not found or could not be deleted.");
-        }
+        SpringApplication.run(MultipleOfFiveApplication.class, args);
     }
 }
+
+
+
+////////////////////////////////////////////
+
+// Import Axios library to make HTTP requests
+import axios from 'axios';
+
+// Define an async function to hit the Spring Boot API with given number
+export const checkMultipleOfFive = async (number) => {
+    // Make GET request to backend, passing number in URL path
+    return axios.get(`http://localhost:8080/api/check/${number}`);
+};
+
+//////////////////////////////////////////
+
+// Import Axios library to make HTTP requests
+import axios from 'axios';
+
+// Define an async function to hit the Spring Boot API with given number
+export const checkMultipleOfFive = async (number) => {
+    // Make GET request to backend, passing number in URL path
+    return axios.get(`http://localhost:8080/api/check/${number}`);
+};
