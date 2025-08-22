@@ -1,104 +1,102 @@
-// Import necessary classes for REST Controller, HTTP status, and path variable
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+Location Entity (Model
 
-// Mark this class as a REST controller
-@RestController
-public class MultipleOfFiveController {
+package asgmnt2;
 
-    // Define a GET endpoint with path variable 'number'
-    @GetMapping("/api/check/{number}")
-    public ResponseEntity<String> checkMultipleOfFive(@PathVariable int number) {
-        // Check if the number is a multiple of 5
-        boolean isMultiple = number % 5 == 0;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
-        // Set message to "yes" if multiple, "no" if not
-        String message = isMultiple ? "yes" : "no";
+@Entity
+public class Location {
+    @Id
+    private Integer pincode;
+    private String city;
+    private String area;
 
-        // Return HTTP status 200 (OK) if multiple, 400 (Bad Request) otherwise, and the message
-        return ResponseEntity
-                .status(isMultiple ? HttpStatus.OK : HttpStatus.BAD_REQUEST)
-                .body(message);
+    public Location() {}
+
+    public Location(Integer pincode, String city, String area) {
+        this.pincode = pincode;
+        this.city = city;
+        this.area = area;
     }
+
+    public Integer getPincode() { return pincode; }
+    public void setPincode(Integer pincode) { this.pincode = pincode; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
+    public String getArea() { return area; }
+    public void setArea(String area) { this.area = area; }
 }
 
 
-///////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+
+
+LocationRepository
+
+package asgmnt2;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface LocationRepository extends JpaRepository<Location, Integer> {
+    List<Location> findByCity(String city);
+    Location findByPincode(Integer pincode);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+ LocationController
+
+package asgmnt2;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/locations")
+public class LocationController {
+
+    @Autowired
+    private LocationRepository repository;
+
+    @GetMapping("/pincode/{pincode}")
+    public Location getByPincode(@PathVariable Integer pincode) {
+        return repository.findByPincode(pincode);
+    }
+
+    @GetMapping("/city/{city}/pincodes")
+    public List<Integer> getPincodesByCity(@PathVariable String city) {
+        List<Location> locations = repository.findByCity(city);
+        return locations.stream().map(Location::getPincode).toList();
+    }
+}
+
+///////////////////////////////////////////////////////////////
+
+
+
+
+Main
+
+// src/main/java/asgmnt2/Asgmnt2Application.java
+
+package asgmnt2;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// Main Spring Boot application annotation
 @SpringBootApplication
-public class MultipleOfFiveApplication {
+public class Asgmnt2Application {
 
-    // Main method to start the Spring Boot application
     public static void main(String[] args) {
-        SpringApplication.run(MultipleOfFiveApplication.class, args);
+        SpringApplication.run(Asgmnt2Application.class, args);
     }
 }
-
-
-
-////////////////////////////////////////////
-
-// Import Axios library to make HTTP requests
-import axios from 'axios';
-
-// Define an async function to hit the Spring Boot API with given number
-export const checkMultipleOfFive = async (number) => {
-    // Make GET request to backend, passing number in URL path
-    return axios.get(`http://localhost:8080/api/check/${number}`);
-};
-
-//////////////////////////////////////////
-
-// Import React and useState hook for state management
-import React, { useState } from "react";
-// Import the Axios function from service.js
-import { checkMultipleOfFive } from "./service";
-
-// Main functional component
-const CheckNumber = () => {
-    // State to hold the input number from user
-    const [number, setNumber] = useState('');
-    // State to hold API response ("yes", "no", or error)
-    const [result, setResult] = useState('');
-
-    // Function to handle "Check" button click
-    const handleCheck = async () => {
-        // If no number is entered, stop function
-        if (!number) return;
-        try {
-            // Call the backend API and wait for response
-            const response = await checkMultipleOfFive(number);
-            // Set result state to response data ("yes" or "no")
-            setResult(response.data);  
-        } catch (error) {
-            // If error, show server message if available, else generic error
-            setResult(error.response?.data || "Error occured");
-        }
-    };
-
-    // JSX: Renders input box, button, and result div
-    return (
-        <div>
-            {/* Input box for user to enter a number */}
-            <input
-                type="number"
-                value={number}
-                onChange={e => setNumber(e.target.value)}
-                placeholder="Enter number"
-            />
-            {/* Button to check if number is multiple of 5 */}
-            <button onClick={handleCheck}>Check</button>
-            {/* Display result from backend */}
-            <div>Result: {result}</div>
-        </div>
-    );
-};
-
-// Export component for use elsewhere
-export default CheckNumber;
 
