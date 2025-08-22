@@ -1,37 +1,136 @@
-// src/main/java/com/example/location/LocationController.java
-package com.example.location;
+LocationService.js
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import axios from 'axios';
 
-import java.util.List;
+const API_BASE_URL = 'http://localhost:8080/locations'; // Adjust port if needed
 
-@RestController
-@RequestMapping("/locations")
-public class LocationController {
+const LocationService = {
+  getLocationByPincode: (pincode) => {
+    return axios.get(`${API_BASE_URL}/pincode/${pincode}`);
+  },
 
-    @Autowired
-    private LocationRepository repository;
+  getPincodesByCity: (city) => {
+    return axios.get(`${API_BASE_URL}/city/${city}/pincodes`);
+  }
+};
 
-    // 1) Get info by pincode
-    @GetMapping("/pincode/{pincode}")
-    public ResponseEntity<Location> getByPincode(@PathVariable Integer pincode) {
-        return repository.findById(pincode)
-                .map(ResponseEntity::ok)     // If found return 200 + object
-                .orElse(ResponseEntity.notFound().build()); // else 404
+export default LocationService;
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+ LocationComponent.js 
+
+import React, { useState } from 'react';
+import LocationService from './LocationService';
+
+function LocationComponent() {
+  const [pincode, setPincode] = useState('');
+  const [city, setCity] = useState('');
+  const [locationData, setLocationData] = useState(null);
+  const [pincodesList, setPincodesList] = useState([]);
+  const [error, setError] = useState('');
+
+  // Fetch Location by pincode
+  const fetchByPincode = () => {
+    setError('');
+    setLocationData(null);
+    if (!pincode) {
+      setError('Please enter a pincode');
+      return;
     }
-
-    // 2) Get all pincodes for a city
-    @GetMapping("/city/{city}/pincodes")
-    public ResponseEntity<List<Integer>> getPincodesByCity(@PathVariable String city) {
-        List<Location> locations = repository.findByCity(city);
-        if (locations.isEmpty()) {
-            return ResponseEntity.notFound().build();
+    LocationService.getLocationByPincode(pincode)
+      .then(response => {
+        setLocationData(response.data);
+      })
+      .catch(error => {
+        if (error.response && error.response.status === 404) {
+          setError('Location not found for this pincode');
+        } else {
+          setError('Error fetching data');
         }
-        List<Integer> pincodes = locations.stream()
-                .map(Location::getPincode)
-                .toList();
-        return ResponseEntity.ok(pincodes);
+      });
+  };
+
+  // Fetch pincodes by city
+  const fetchPincodesByCity = () => {
+    setError('');
+    setPincodesList([]);
+    if (!city) {
+      setError('Please enter a city name');
+      return;
     }
+    LocationService.getPincodesByCity(city)
+      .then(response => {
+        setPincodesList(response.data);
+      })
+      .catch(error => {
+        if (error.response && error.response.status === 404) {
+          setError('No pincodes found for this city');
+        } else {
+          setError('Error fetching data');
+        }
+      });
+  };
+
+  return (
+    <div style={{ padding: 20, maxWidth: 400 }}>
+      <h2>Location Search</h2>
+
+      <div style={{ marginBottom: 20 }}>
+        <input
+          type="number"
+          placeholder="Enter Pincode"
+          value={pincode}
+          onChange={e => setPincode(e.target.value)}
+          style={{ width: '100%', padding: 8, marginBottom: 6 }}
+        />
+        <button onClick={fetchByPincode} style={{ width: '100%', padding: 8 }}>
+          Get Location by Pincode
+        </button>
+
+        {locationData && (
+          <div style={{ marginTop: 10 }}>
+            <b>City:</b> {locationData.city}<br />
+            <b>Area:</b> {locationData.area}
+          </div>
+        )}
+      </div>
+
+      <hr />
+
+      <div style={{ marginTop: 20 }}>
+        <input
+          type="text"
+          placeholder="Enter City Name"
+          value={city}
+          onChange={e => setCity(e.target.value)}
+          style={{ width: '100%', padding: 8, marginBottom: 6 }}
+        />
+        <button onClick={fetchPincodesByCity} style={{ width: '100%', padding: 8 }}>
+          Get Pincodes by City
+        </button>
+
+        {pincodesList.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            <b>Pincodes:</b>
+            <ul>
+              {pincodesList.map(pin => (
+                <li key={pin}>{pin}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <div style={{ color: 'red', marginTop: 10 }}>
+          {error}
+        </div>
+      )}
+    </div>
+  );
 }
+
+export default LocationComponent;
+
