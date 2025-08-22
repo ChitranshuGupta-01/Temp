@@ -1,60 +1,8 @@
-Location Entity (Model
-
-package asgmnt2;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
-@Entity
-public class Location {
-    @Id
-    private Integer pincode;
-    private String city;
-    private String area;
-
-    public Location() {}
-
-    public Location(Integer pincode, String city, String area) {
-        this.pincode = pincode;
-        this.city = city;
-        this.area = area;
-    }
-
-    public Integer getPincode() { return pincode; }
-    public void setPincode(Integer pincode) { this.pincode = pincode; }
-
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
-
-    public String getArea() { return area; }
-    public void setArea(String area) { this.area = area; }
-}
-
-
-
-////////////////////////////////////////////////////////////////////////
-
-
-LocationRepository
-
-package asgmnt2;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
-
-public interface LocationRepository extends JpaRepository<Location, Integer> {
-    List<Location> findByCity(String city);
-    Location findByPincode(Integer pincode);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
- LocationController
-
-package asgmnt2;
+// src/main/java/com/example/location/LocationController.java
+package com.example.location;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,54 +14,24 @@ public class LocationController {
     @Autowired
     private LocationRepository repository;
 
+    // 1) Get info by pincode
     @GetMapping("/pincode/{pincode}")
-    public Location getByPincode(@PathVariable Integer pincode) {
-        return repository.findByPincode(pincode);
+    public ResponseEntity<Location> getByPincode(@PathVariable Integer pincode) {
+        return repository.findById(pincode)
+                .map(ResponseEntity::ok)     // If found return 200 + object
+                .orElse(ResponseEntity.notFound().build()); // else 404
     }
 
+    // 2) Get all pincodes for a city
     @GetMapping("/city/{city}/pincodes")
-    public List<Integer> getPincodesByCity(@PathVariable String city) {
+    public ResponseEntity<List<Integer>> getPincodesByCity(@PathVariable String city) {
         List<Location> locations = repository.findByCity(city);
-        return locations.stream().map(Location::getPincode).toList();
+        if (locations.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Integer> pincodes = locations.stream()
+                .map(Location::getPincode)
+                .toList();
+        return ResponseEntity.ok(pincodes);
     }
 }
-
-///////////////////////////////////////////////////////////////
-
-
-
-
-Main
-
-// src/main/java/asgmnt2/Asgmnt2Application.java
-
-package asgmnt2;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class Asgmnt2Application {
-
-    public static void main(String[] args) {
-        SpringApplication.run(Asgmnt2Application.class, args);
-    }
-}
-
-/////////////////////////
-
-CREATE TABLE location (
-  pincode INT PRIMARY KEY,
-  city VARCHAR(255),
-  area VARCHAR(255)
-);
-////////////////////////
-
-INSERT INTO location (pincode, city, area) VALUES
-(123456, 'Mumbai', 'Andheri'),
-(123457, 'Mumbai', 'Bandra'),
-(234567, 'Pune', 'Kothrud'),
-(345678, 'Delhi', 'Dwarka');
-
-
-
