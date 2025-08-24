@@ -1,238 +1,332 @@
-.offer-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
-  background: linear-gradient(135deg, #f8fffe 0%, #e6f7f5 100%);
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Onboarding.css";
+
+// Preloaded applications
+const defaultApplications = [
+  {
+    id: "SC101234",
+    applicant: "Chitranshu Gupta",
+    handler: "Harsha",
+    status: "Application Submitted",
+  },
+  {
+    id: "SC101235",
+    applicant: "Chitranshu Gupta",
+    handler: "Harsha",
+    status: "Credit Card Accepted",
+  },
+  {
+    id: "SC101236",
+    applicant: "Chitranshu Gupta",
+    handler: "Harsha",
+    status: "Application Processing",
+  },
+];
+
+// New status list
+const statusList = [
+  {
+    value: "Application Submitted",
+    label: "Application Submitted",
+    badge: "badge-submitted",
+  },
+  {
+    value: "Application Processing",
+    label: "Application Processing",
+    badge: "badge-processing",
+  },
+  {
+    value: "Credit Card Offer",
+    label: "Credit Card Offer",
+    badge: "badge-offer",
+  },
+  {
+    value: "Credit Card Accepted",
+    label: "Credit Card Accepted",
+    badge: "badge-accepted",
+  },
+  {
+    value: "Printed & Shipped",
+    label: "Printed & Shipped",
+    badge: "badge-shipped",
+  },
+];
+
+// Helper: generate unique application ID
+function generateAppId() {
+  return "SC" + Math.floor(100000 + Math.random() * 900000);
 }
 
-.offer-card {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  padding: 40px;
-  max-width: 900px;
-  width: 100%;
-}
+function Onboarding() {
+  const [applications, setApplications] = useState(defaultApplications);
+  const [editingIdx, setEditingIdx] = useState(-1);
+  const [editData, setEditData] = useState({});
+  const [creating, setCreating] = useState(false);
+  const [createData, setCreateData] = useState({
+    applicant: "",
+    handler: "",
+    status: "Application Submitted",
+  });
 
-.header {
-  text-align: center;
-  margin-bottom: 40px;
-}
+  const navigate = useNavigate();
 
-.congratulations {
-  font-size: 2.5rem;
-  color: #003A70;
-  margin-bottom: 15px;
-  font-weight: 700;
-}
-
-.subtitle {
-  font-size: 1.1rem;
-  color: #5A6C7D;
-  line-height: 1.6;
-}
-
-.highlight {
-  color: #228B22;
-  font-weight: 600;
-}
-
-.content {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 50px;
-  margin-bottom: 40px;
-}
-
-.card-section {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.credit-card-image {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.card-img {
-  width: 320px;
-  height: auto;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
-}
-
-.card-img:hover {
-  transform: scale(1.05);
-}
-
-.details-section {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-.credit-limit {
-  text-align: center;
-}
-
-.credit-limit h2 {
-  color: #003A70;
-  margin-bottom: 10px;
-  font-size: 1.3rem;
-}
-
-.amount {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #228B22;
-  margin-bottom: 5px;
-}
-
-.availability {
-  color: #5A6C7D;
-  font-size: 0.9rem;
-}
-
-.interest-rate h3 {
-  color: #003A70;
-  margin-bottom: 15px;
-  font-size: 1.1rem;
-}
-
-.rates {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.rate-item {
-  text-align: center;
-  padding: 8px;
-  border-radius: 6px;
-  background: #F5F8FA;
-}
-
-.rate-item.special {
-  background: linear-gradient(135deg, #228B22 0%, #1F7A1F 100%);
-  color: white;
-}
-
-.rate-label {
-  display: block;
-  font-size: 0.7rem;
-  margin-bottom: 3px;
-  opacity: 0.8;
-}
-
-.rate-value {
-  display: block;
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin-bottom: 2px;
-}
-
-.rate-desc {
-  display: block;
-  font-size: 0.7rem;
-  opacity: 0.8;
-}
-
-.rate-item small {
-  display: block;
-  margin-top: 3px;
-  font-size: 0.6rem;
-  opacity: 0.7;
-}
-
-.features {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: #F5F8FA;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  color: #003A70;
-}
-
-.feature-icon {
-  font-size: 1.2rem;
-}
-
-.actions {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-}
-
-.accept-btn, .decline-btn {
-  padding: 15px 40px;
-  border: none;
-  border-radius: 25px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 120px;
-}
-
-.accept-btn {
-  background: linear-gradient(135deg, #228B22 0%, #1F7A1F 100%);
-  color: white;
-}
-
-.accept-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(34, 139, 34, 0.4);
-}
-
-.decline-btn {
-  background: #F5F8FA;
-  color: #5A6C7D;
-  border: 2px solid #C8D4E0;
-}
-
-.decline-btn:hover {
-  background: #E6EDF3;
-  transform: translateY(-2px);
-}
-
-@media (max-width: 768px) {
-  .offer-card {
-    padding: 20px;
+  // --- Edit handlers ---
+  function handleEdit(idx) {
+    setEditingIdx(idx);
+    setEditData(applications[idx]);
   }
-  
-  .content {
-    grid-template-columns: 1fr;
-    gap: 30px;
+
+  function handleEditChange(e) {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
   }
-  
-  .credit-card {
-    width: 280px;
-    height: 180px;
+
+  function handleEditSave(idx) {
+    const newApps = [...applications];
+    newApps[idx] = { ...editData };
+    setApplications(newApps);
+    setEditingIdx(-1);
+    setEditData({});
   }
-  
-  .congratulations {
-    font-size: 2rem;
+
+  function handleDelete(idx) {
+    setApplications(applications.filter((_, i) => i !== idx));
+    if (editingIdx === idx) setEditingIdx(-1);
   }
-  
-  .actions {
-    flex-direction: column;
-    align-items: center;
+
+  // --- Create handlers ---
+  function handleCreateOpen() {
+    setCreating(true);
+    setCreateData({
+      applicant: "",
+      handler: "",
+      status: "Application Submitted",
+    });
   }
-  
-  .accept-btn, .decline-btn {
-    width: 200px;
+
+  function handleCreateChange(e) {
+    setCreateData({ ...createData, [e.target.name]: e.target.value });
   }
+
+  function handleCreateSave() {
+    const newApp = {
+      id: generateAppId(),
+      ...createData,
+    };
+    setApplications([newApp, ...applications]);
+    setCreating(false);
+    setCreateData({
+      applicant: "",
+      handler: "",
+      status: "Application Submitted",
+    });
+  }
+
+  // --- UI ---
+  return (
+    <div className="main-content">
+      <div>
+        <div className="app-title">Applications</div>
+        <div className="app-desc">Manage customer onboarding applications</div>
+      </div>
+
+      <div className="create-container">
+        <button className="btn btn-create" onClick={handleCreateOpen}>
+          + Create New
+        </button>
+      </div>
+
+      {applications.map((app, idx) => (
+        <div
+          className="app-card"
+          tabIndex={0}
+          key={idx}
+          style={{
+            outline: editingIdx === idx ? "2px solid #5ea9fa" : undefined,
+          }}
+        >
+          {editingIdx === idx ? (
+            // --- Editing Form ---
+            <div className="edit-form">
+              <div className="form-group">
+                <label className="form-label">Application ID</label>
+                <input className="form-control" value={editData.id} disabled />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={editData.status}
+                  onChange={handleEditChange}
+                >
+                  {statusList.map((st) => (
+                    <option value={st.value} key={st.value}>
+                      {st.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={editData.applicant}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={editData.handler}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="edit-actions">
+                <button
+                  className="btn-save"
+                  onClick={() => handleEditSave(idx)}
+                >
+                  ✔ Save
+                </button>
+                <button
+                  className="btn-cancel"
+                  onClick={() => setEditingIdx(-1)}
+                >
+                  ✖ Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            // --- Card View ---
+            <>
+              <div className="app-header">
+                <div className="app-header-left">
+                  <span className="app-id">Application ID - {app.id}</span>
+                  <span
+                    className={`badge badge-status ${
+                      app.status === "Application Submitted"
+                        ? "badge-submitted"
+                        : app.status === "Application Processing"
+                        ? "badge-processing"
+                        : app.status === "Credit Card Offer"
+                        ? "badge-offer"
+                        : app.status === "Credit Card Accepted"
+                        ? "badge-accepted"
+                        : "badge-shipped"
+                    }`}
+                  >
+                    {app.status}
+                  </span>
+                </div>
+                <div className="app-header-right">
+                  <button
+                    className="app-action-btn app-action-btn-edit"
+                    onClick={() => handleEdit(idx)}
+                  >
+                    ✎ Edit
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-offer"
+                    onClick={() => navigate("/home")}
+                  >
+                    💼 Offer Page
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-del"
+                    onClick={() => handleDelete(idx)}
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
+              </div>
+              <div className="ms-1" style={{ lineHeight: 1.8 }}>
+                <span className="info-label">Applicant:</span>{" "}
+                <span className="info-value">{app.applicant}</span>
+                <br />
+                <span className="info-label">Handled By:</span>{" "}
+                <span className="info-value">{app.handler}</span>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+
+      {/* Create Modal */}
+      {creating && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-box">
+            <span className="modal-close" onClick={() => setCreating(false)}>
+              &times;
+            </span>
+            <div className="modal-title">Create New Application</div>
+            <form className="modal-form" onSubmit={(e) => e.preventDefault()}>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={createData.applicant}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Applicant Name"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={createData.handler}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Handler Name"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={createData.status}
+                  onChange={handleCreateChange}
+                >
+                  {statusList.map((st) => (
+                    <option key={st.value} value={st.value}>
+                      {st.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="modal-actions">
+                <button
+                  type="submit"
+                  className="btn btn-create"
+                  onClick={handleCreateSave}
+                  disabled={
+                    !createData.applicant.trim() || !createData.handler.trim()
+                  }
+                >
+                  Create
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setCreating(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
+
+export default Onboarding;
+
