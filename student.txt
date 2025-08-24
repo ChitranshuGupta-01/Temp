@@ -1,51 +1,29 @@
-import React from 'react';
-import Carousel from './Carousel'; // Your existing carousel component
-import QuickActionCard from './QuickActionCard'; // Component for quick actions
-import './CreditCardComparison.css'; // Optional styles
+import { Link } from "react-router-dom"; // ✅ import Link
 
-// Example quick actions data
-const quickActions = [
-  {
-    icon: "fa-solid fa-credit-card",
-    title: "Compare Cards",
-    description: "Explore and compare different credit card options.",
-    buttonText: "Start Comparing",
-    iconClass: "quick-card"
-  },
-  {
-    icon: "fa-solid fa-hand-holding-dollar",
-    title: "Best Offers",
-    description: "Find the best rewards and offers tailored for you.",
-    buttonText: "View Offers",
-    iconClass: "quick-offers"
-  }
-];
-
-const CreditCardComparison = () => {
+const QuickActionCard = ({
+  icon,
+  title,
+  description,
+  buttonText,
+  iconClass,
+}) => {
   return (
-    <div className="credit-card-comparison-page container">
-      {/* Carousel Section */}
-      <Carousel />
+    <div className="card h-100 p-3 text-center">
+      <div className={quick-icon-bg ${iconClass}}>
+        <i className={icon}></i>
+      </div>
+      <h5 className="card-title">{title}</h5>
+      <p className="card-text">{description}</p>
 
-      {/* Quick Actions Section */}
-      <section className="quick-actions-section mt-5">
-        <h3>Quick Actions</h3>
-        <div className="row g-4">
-          {quickActions.map((action, index) => (
-            <div key={index} className="col-sm-6 col-md-4">
-              <QuickActionCard 
-                icon={action.icon}
-                title={action.title}
-                description={action.description}
-                buttonText={action.buttonText}
-                iconClass={action.iconClass}
-              />
-            </div>
-          ))}
-        </div>
-      </section>
+      {buttonText === "Compare Cards" ? (
+        <Link to="/creditCardComparison" className="btn btn-outline-primary btn-sm">
+          {buttonText}
+        </Link>
+      ) : (
+        <a href="#" className="btn btn-outline-primary btn-sm">
+          {buttonText}
+        </a>
+      )}
     </div>
   );
 };
-
-export default CreditCardComparison;
