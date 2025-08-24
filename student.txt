@@ -1,633 +1,289 @@
-body {
-  background-color: #ffffff;
-  margin: 0;
-  width: 100vw;
-  font-family: "Segoe UI", "Inter", "Montserrat", "Nunito Sans", Arial,
-    sans-serif;
-  color: #222222;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ===============================
-    Navbar Styling (sc-navbar) - Light Theme
-================================= */
-.sc-navbar {
-  position: sticky;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  z-index: 120;
-  background: linear-gradient(90deg, #f0f4ff 0%, #d9e2ff 50%, #f0f4ff 100%);
-  box-shadow: 0 4px 24px rgba(100, 120, 160, 0.25);
-  backdrop-filter: saturate(180%) blur(10px);
-  transition: box-shadow 0.3s ease, background-color 0.3s ease;
-  border-bottom: 2px solid #4a90e2;
-  padding: 0.3rem 1rem;
-}
-
-.sc-navbar:hover {
-  box-shadow: 0 6px 30px rgba(100, 120, 160, 0.35);
-  background: linear-gradient(90deg, #e6ebff 0%, #b3c1ff 50%, #e6ebff 100%);
-}
-
-.sc-navbar .navbar-brand {
-  display: flex;
-  align-items: center;
-  font-size: 1.3em;
-  font-weight: 600;
-  color: #3366cc;
-  letter-spacing: 0.04em;
-  user-select: none;
-}
-
-.sc-navbar .navbar-brand img {
-  height: 56px;
-  width: auto;
-  max-width: 100%;
-  margin-right: 14px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 1px #3366cc88);
-  transition: filter 0.3s ease;
-}
-
-.sc-navbar .navbar-brand img:hover {
-  filter: drop-shadow(0 0 6px #3366cccc);
-}
-
-.sc-navbar .navbar-nav {
-  margin-left: auto;
-  margin-right: auto;
-  gap: 24px;
-  display: flex;
-}
-
-.navbar-nav .nav-item {
-  margin-right: 0;
-  position: relative;
-}
-
-.sc-navbar .nav-link {
-  color: #4a6fa5;
-  font-weight: 500;
-  font-size: 1.05rem;
-  padding: 0 28px;
-  border-radius: 8px;
-  transition: color 0.25s, background-color 0.25s;
-  cursor: pointer;
-  user-select: none;
-}
-
-.sc-navbar .nav-link.active,
-.sc-navbar .nav-link:focus,
-.sc-navbar .nav-link:hover {
-  color: #1a4db7;
-  background-color: rgba(26, 77, 183, 0.15);
-  box-shadow: 0 2px 10px rgba(26, 77, 183, 0.3);
-}
-
-.btn-login {
-  font-size: 1em;
-  padding: 6px 20px;
-  border-radius: 8px;
-  border: none;
-  background: linear-gradient(135deg, #4a90e2 0%, #1a4db7 100%);
-  font-weight: 600;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
-  box-shadow: 0 0 12px #1a4db7aa;
-}
-
-.btn-login:hover,
-.btn-login:focus {
-  background: linear-gradient(135deg, #1a4db7 0%, #13407a 100%);
-  box-shadow: 0 0 20px #4a90e2dd;
-  transform: translateY(-2px);
-  color: #e0f0ff;
-}
-
-@media (max-width: 992px) {
-  .sc-navbar .navbar-collapse {
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 0;
-  }
-}
-
-/* ===============================
-       Carousel Styling - Light Theme & No Arrows
-================================= */
-.carousel-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
-}
-
-.carousel-bg {
-  background: linear-gradient(112deg, #e6ebff 25%, #c9d7ff 100%);
-  border-radius: 20px;
-  margin: 44px auto 0 auto;
-  box-shadow: 0 12px 48px rgba(100, 120, 160, 0.15);
-  padding: 3.5rem 3rem;
-  max-width: 960px;
-  width: 100%;
-  display: flex;
-  position: relative;
-  overflow: hidden;
-  transition: box-shadow 0.3s ease;
-}
-
-.carousel-bg:hover {
-  box-shadow: 0 16px 64px rgba(100, 120, 160, 0.25);
-}
-
-@media (max-width: 1800px) {
-  .carousel-bg {
-    width: calc(100vw - 40px);
-    max-width: 98vw;
-    margin: 32px 10px 0 10px;
-    padding: 2.5rem 1.5rem;
-  }
-}
-
-.carousel-inner {
-  position: relative;
-  min-height: 340px;
-  width: 100%;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 32px;
-  flex-wrap: wrap;
-}
-
-.card-content {
-  max-width: 600px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding-left: 24px;
-}
-
-.badge {
-  background: #8a9fe9;
-  color: #2a3e85;
-  font-size: 1.1rem;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 12px;
-  align-self: flex-start;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  box-shadow: 0 2px 12px #8a9fe988;
-}
-
-.card-content h2 {
-  color: #2a3e85;
-  font-size: 2.6rem;
-  font-weight: 800;
-  margin-bottom: 0.8rem;
-  letter-spacing: 0.02em;
-  line-height: 1.15;
-  text-shadow: 1px 1px 3px #a7b3ffaa;
-}
-
-.card-content p {
-  color: #4a5a8a;
-  font-size: 1.18rem;
-  line-height: 1.5;
-  font-weight: 400;
-}
-
-.primary-btn {
-  background: linear-gradient(90deg, #4a90e2, #1a4db7 85%);
-  color: #fff;
-  border-radius: 10px;
-  font-weight: 700;
-  margin-right: 12px;
-  padding: 0.75em 2.5em;
-  box-shadow: 0 4px 14px rgba(26, 77, 183, 0.35);
-  cursor: pointer;
-  border: none;
-  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.18s ease;
-  user-select: none;
-}
-
-.primary-btn:hover {
-  background: linear-gradient(90deg, #1a4db7, #13407a 95%);
-  box-shadow: 0 10px 40px #13407acc;
-  transform: translateY(-2px);
-}
-
-.secondary-btn {
-  background: transparent;
-  color: #8a9fe9;
-  border: 2px solid #8a9fe9;
-  border-radius: 10px;
-  font-weight: 600;
-  padding: 0.65em 2.2em;
-  cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease;
-  user-select: none;
-}
-
-.secondary-btn:hover {
-  background: #8a9fe9;
-  color: #1a2b71;
-  border-color: #8a9fe9;
-  box-shadow: 0 6px 18px #8a9fe9aa;
-}
-
-.img-content {
-  text-align: center;
-  border-radius: 18px;
-  min-width: 360px;
-  max-width: 460px;
-  min-height: 280px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #c9d7ff;
-  box-shadow: inset 0 0 20px #8a9fe988;
-  transition: box-shadow 0.3s ease;
-  overflow: hidden;
-}
-
-.img-content:hover {
-  box-shadow: inset 0 0 28px #4a90e2bb;
-}
-
-.carousel-img {
-  width: 420px;
-  height: 280px;
-  max-width: 95vw;
-  max-height: 340px;
-  border-radius: 18px;
-  box-shadow: 0 6px 28px 8px rgba(74, 144, 226, 0.18);
-  object-fit: cover;
-  border: 3px solid #a3b8ff;
-  background: #d6e1ff;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
-  user-select: none;
-}
-
-.carousel-img:hover {
-  box-shadow: 0 14px 42px 12px #4a90e244;
-  border-color: #4a90e2;
-}
-
-/* Hide carousel controls so no arrow keys appear */
-.carousel-control {
-  display: none !important;
-}
-
-.carousel-indicators {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 24px;
-  display: flex;
-  gap: 14px;
-  user-select: none;
-}
-
-.carousel-indicators button {
-  width: 16px;
-  height: 16px;
-  background: #a3b8ff;
-  border-radius: 50%;
-  border: none;
-  opacity: 0.5;
-  cursor: pointer;
-  transition: background 0.25s ease, box-shadow 0.3s ease;
-  box-shadow: inset 0 0 3px #6c85ff;
-}
-
-.carousel-indicators .active {
-  background: linear-gradient(100deg, #4a90e2 20%, #6c85ff 100%);
-  box-shadow: 0 0 12px #4a90e2cc;
-  opacity: 1;
-  animation: pulse 1.2s infinite alternate;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.25);
-  }
-}
-
-@media (max-width: 1100px) {
-  .carousel-bg {
-    flex-direction: column;
-    padding: 1.5rem 1.5rem;
-    margin: 28px auto 0 auto;
-  }
-  .row {
-    flex-direction: column;
-    gap: 22px;
-  }
-  .card-content {
-    padding-left: 0;
-    max-width: 100vw;
-  }
-  .img-content {
-    min-width: 240px;
-    max-width: 98vw;
-    min-height: 140px;
-    margin-bottom: 16px;
-  }
-  .carousel-img {
-    width: 90vw;
-    height: 160px;
-    border-radius: 16px;
-  }
-}
-
-@media (max-width: 600px) {
-  .carousel-bg {
-    padding: 1rem;
-    margin: 14px auto 0 auto;
-    border-radius: 14px;
-  }
-  .carousel-img {
-    width: 100%;
-    height: 100px;
-    min-height: 70px;
-    border-radius: 14px;
-    max-width: 95vw;
-  }
-}
-
-/* ===============================
-     Quick Actions Styling - Light Theme
-================================= */
-.quick-actions-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 36px;
-  max-width: 1400px;
-  margin: 40px auto;
-  padding: 0 1rem;
-}
-
-.quick-actions .card {
-  flex: 1;
-  min-width: 280px;
-  max-width: 100%;
-  border-radius: 20px;
-  background: #f9fbff;
-  box-shadow: 0 8px 20px rgba(100, 120, 160, 0.1);
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
-  padding: 2rem 1.8rem 2.5rem 1.8rem;
-  color: #222222;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  user-select: none;
-}
-
-.quick-actions .card:hover {
-  box-shadow: 0 12px 36px rgba(74, 144, 226, 0.3);
-  transform: translateY(-6px) scale(1.06);
-  background: linear-gradient(135deg, #e6ebff 0%, #c9d7ff 98%);
-}
-
-.quick-icon-bg {
-  width: 64px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 18px;
-  margin: 0 auto 18px auto;
-  font-size: 2.4rem;
-  box-shadow: 0 0 10px #00000020;
-  transition: box-shadow 0.3s ease;
-}
-
-/* Icon background colors - lighter with subtle glow */
-.quick-mobile {
-  background: #fff1d6;
-  color: #d48806;
-  box-shadow: 0 0 14px #d48806aa;
-}
-.quick-clipboard {
-  background: #d7ecff;
-  color: #005bb5;
-  box-shadow: 0 0 14px #005bb5aa;
-}
-.quick-question {
-  background: #ffd6e2;
-  color: #b31772;
-  box-shadow: 0 0 14px #b31772aa;
-}
-.quick-card {
-  background: #fff4a3;
-  color: #b48f03;
-  box-shadow: 0 0 14px #b48f03aa;
-}
-.quick-trophy {
-  background: #d8f7d3;
-  color: #2b8a2b;
-  box-shadow: 0 0 14px #2b8a2baa;
-}
-.quick-phone {
-  background: #f9dada;
-  color: #b02a2a;
-  box-shadow: 0 0 14px #b02a2aaa;
-}
-
-.quick-actions .card-title {
-  font-weight: 700;
-  font-size: 1.3rem;
-  margin-bottom: 0.5rem;
-  color: #334066;
-  letter-spacing: 0.02em;
-}
-
-.quick-actions .card-text {
-  font-size: 1.05rem;
-  font-weight: 400;
-  color: #5a5f7d;
-  margin-bottom: 1.3rem;
-  line-height: 1.4;
-}
-
-.quick-actions .btn-outline-primary.btn-sm {
-  font-weight: 700;
-  font-size: 0.9rem;
-  padding: 0.45em 1.6em;
-  border-radius: 12px;
-  border-color: #4a90e2;
-  color: #4a90e2;
-  transition: all 0.3s ease;
-  user-select: none;
-}
-
-.quick-actions .btn-outline-primary.btn-sm:hover {
-  background-color: #4a90e2;
-  color: #f0f4ff;
-  box-shadow: 0 6px 20px #4a90e2cc;
-}
-
-/* Responsive fixes */
-@media (max-width: 600px) {
-  .quick-actions-row {
-    grid-template-columns: 1fr;
-    padding: 0 0.5rem;
-  }
-  .quick-actions .card {
-    min-width: auto;
-  }
-}
-
-/* ===============================
-    Footer Styling - Light Theme
-================================= */
-footer {
-  background: linear-gradient(135deg, #e6ebff 0%, #c9d7ff 100%);
-  color: #334066;
-  padding: 40px 0;
-  font-family: "Segoe UI", "Inter", "Montserrat", "Nunito Sans", Arial,
-    sans-serif;
-  box-shadow: inset 0 10px 30px rgba(255, 255, 255, 0.8);
-  user-select: none;
-}
-
-footer a {
-  color: #4a90e2;
-  text-decoration: none;
-  transition: color 0.3s ease, text-shadow 0.3s ease;
-}
-
-footer a:hover,
-footer a:focus {
-  color: #13407a;
-  text-shadow: 0 0 8px #4a90e2;
-  outline: none;
-}
-
-footer img {
-  max-width: 180px;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 0 5px #4a90e2aa);
-  transition: filter 0.3s ease;
-}
-
-footer img:hover {
-  filter: drop-shadow(0 0 14px #4a90e2ee);
-}
-
-footer ul {
-  padding-left: 0;
-  max-height: 280px;
-  overflow-y: auto;
-  padding-right: 5px;
-  scrollbar-width: thin;
-  scrollbar-color: #4a90e233 transparent;
-}
-
-footer ul li {
-  list-style: none;
-  margin-bottom: 12px;
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-footer ul::-webkit-scrollbar {
-  width: 6px;
-}
-
-footer ul::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-footer ul::-webkit-scrollbar-thumb {
-  background-color: #4a90e233;
-  border-radius: 20px;
-  border: none;
-}
-
-footer .row > div {
-  border-right: 1px solid rgba(74, 144, 226, 0.15);
-  padding-right: 20px;
-}
-
-footer .row > div:last-child {
-  border-right: none;
-  padding-right: 0;
-}
-
-@media (max-width: 767.98px) {
-  footer .row > div {
-    border-right: none;
-    padding-right: 0;
-    margin-bottom: 30px;
-  }
-}
-
-footer .text-center {
-  font-size: 13px;
-  color: #7a8bb9;
-  user-select: text;
-}
-
-footer .mb-3 a {
-  color: #4a90e2;
-  margin-right: 18px;
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-
-footer .mb-3 a:last-child {
-  margin-right: 0;
-}
-
-footer .mb-3 a:hover,
-footer .mb-3 a:focus {
-  color: #13407a;
-  transform: scale(1.15);
-  text-shadow: 0 0 8px #4a90e2;
-  outline: none;
-}
-
-footer .mb-3 svg {
-  vertical-align: middle;
-  filter: drop-shadow(0 0 3px #4a90e2cc);
-  transition: filter 0.3s ease;
-}
-
-footer .mb-3 a:hover svg,
-footer .mb-3 a:focus svg {
-  filter: drop-shadow(0 0 10px #4a90e2ee);
-}
-
-/* Accessibility focus outline for keyboard users */
-footer a:focus-visible {
-  outline: 2px solid #4a90e2;
-  outline-offset: 3px;
-}
-
-/* Smooth fade-in effect for footer on page load */
-footer {
-  opacity: 0;
-  animation: fadeInFooter 1s ease forwards;
-  animation-delay: 0.2s;
-}
-
-@keyframes fadeInFooter {
-  to {
-    opacity: 1;
-  }
-}
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './CreditCardOffer.css';
+
+const CreditCardOfferCustomer = () => {
+  const navigate = useNavigate();
+  const [notification, setNotification] = useState({
+    show: false,
+    message: '',
+    type: ''
+  });
+
+  const handleAccept = () => {
+    setNotification({
+      show: true,
+      message: 'Application Accepted! Redirecting to tracking page...',
+      type: 'success'
+    });
+    
+    // Navigate to tracking page after showing notification
+    setTimeout(() => {
+      navigate('/tracking');
+    }, 3000);
+  };
+
+  const handleDecline = () => {
+    setNotification({
+      show: true,
+      message: 'Offer declined. You can reconsider and apply again anytime.',
+      type: 'info'
+    });
+    
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }));
+    }, 4000);
+  };
+
+  return (
+    <div className="offer-container">
+      <div className="offer-card">
+        <div className="header">
+          <h1 className="congratulations">Congratulations!</h1>
+          <p className="subtitle">
+            User, here is your <span className="highlight">lifetime-free</span> Standard Chartered<br />
+            Credit Card offer
+          </p>
+        </div>
+
+        <div className="content">
+          <div className="card-section">
+            <div className="credit-card-image">
+              <img 
+                src="/credit-card.png" 
+                alt="Standard Chartered Platinum Credit Card" 
+                className="card-img"
+              />
+            </div>
+          </div>
+
+          <div className="details-section">
+            <div className="credit-limit">
+              <h2>Credit Limit</h2>
+              <div className="amount">₹1,50,000</div>
+              <p className="availability">Available immediately upon approval</p>
+            </div>
+
+            <div className="interest-rate">
+              <h3>Interest Rate ⓘ</h3>
+              <div className="rates">
+                <div className="rate-item">
+                  <span className="rate-label">Starting 2.49% p.m.</span>
+                  <span className="rate-value">2.75%</span>
+                  <span className="rate-desc">per month</span>
+                  <small>*Interest charged only on outstanding balance</small>
+                </div>
+                <div className="rate-item special">
+                  <span className="rate-label">Special Offer</span>
+                  <span className="rate-value">33.00%</span>
+                  <span className="rate-desc">per annum</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="features">
+              <div className="feature-item">
+                <span className="feature-icon">🆓</span>
+                <span>Lifetime free</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">⚡</span>
+                <span>Instant Approval</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">🎁</span>
+                <span>Reward Points</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">📞</span>
+                <span>Contactless Pay</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {notification.show && (
+          <div className={inline-notification ${notification.type}}>
+            <div className="notification-content">
+              <span className="notification-icon">
+                {notification.type === 'success' ? '✅' : 'ℹ'}
+              </span>
+              <span className="notification-message">{notification.message}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="actions">
+          <button 
+            className="accept-btn" 
+            onClick={handleAccept}
+            disabled={notification.show && notification.type === 'success'}
+          >
+            Accept
+          </button>
+          <button 
+            className="decline-btn" 
+            onClick={handleDecline}
+            disabled={notification.show}
+          >
+            Decline
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CreditCardOfferCustomer;
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////
+
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './CreditCardOffer.css';
+
+const CreditCardOfferSales = () => {
+  const navigate = useNavigate();
+  const [notification, setNotification] = useState({
+    show: false,
+    message: '',
+    type: ''
+  });
+
+  const handleAccept = () => {
+    setNotification({
+      show: true,
+      message: 'Offer has been sent to the customer',
+      type: 'success'
+    });
+    
+    // Navigate to onboarding after showing notification
+    setTimeout(() => {
+      navigate('/onboarding');
+    }, 3000);
+  };
+
+  const handleDecline = () => {
+    setNotification({
+      show: true,
+      message: 'Offer declined. You can always reconsider and apply again in the future.',
+      type: 'warning'
+    });
+    
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }));
+    }, 4000);
+  };
+
+  return (
+    <div className="offer-container">
+      <div className="offer-card">
+        <div className="header">
+          <h1 className="congratulations">Congratulations!</h1>
+          <p className="subtitle">
+            User, here is your <span className="highlight">lifetime-free</span> Standard Chartered<br />
+            Credit Card offer
+          </p>
+        </div>
+
+        <div className="content">
+          <div className="card-section">
+            <div className="credit-card-image">
+              <img 
+                src="/credit-card.png" 
+                alt="Standard Chartered Platinum Credit Card" 
+                className="card-img"
+              />
+            </div>
+          </div>
+
+          <div className="details-section">
+            <div className="credit-limit">
+              <h2>Credit Limit</h2>
+              <div className="amount">₹1,50,000</div>
+              <p className="availability">Available immediately upon approval</p>
+            </div>
+
+            <div className="interest-rate">
+              <h3>Interest Rate ⓘ</h3>
+              <div className="rates">
+                <div className="rate-item">
+                  <span className="rate-label">Starting 2.49% p.m.</span>
+                  <span className="rate-value">2.75%</span>
+                  <span className="rate-desc">per month</span>
+                  <small>*Interest charged only on outstanding balance</small>
+                </div>
+                <div className="rate-item special">
+                  <span className="rate-label">Special Offer</span>
+                  <span className="rate-value">33.00%</span>
+                  <span className="rate-desc">per annum</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="features">
+              <div className="feature-item">
+                <span className="feature-icon">🆓</span>
+                <span>Lifetime free</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">⚡</span>
+                <span>Instant Approval</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">🎁</span>
+                <span>Reward Points</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">📞</span>
+                <span>Contactless Pay</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {notification.show && (
+          <div className={inline-notification ${notification.type}}>
+            <div className="notification-content">
+              <span className="notification-icon">
+                {notification.type === 'success' ? '✅' : '⚠'}
+              </span>
+              <span className="notification-message">{notification.message}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="actions">
+          <button 
+            className="accept-btn" 
+            onClick={handleAccept}
+            disabled={notification.show}
+          >
+            Proceed
+          </button>
+          <button 
+            className="decline-btn" 
+            onClick={handleDecline}
+            disabled={notification.show}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CreditCardOfferSales;
