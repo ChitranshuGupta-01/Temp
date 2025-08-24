@@ -1,289 +1,238 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './CreditCardOffer.css';
+.offer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fffe 0%, #e6f7f5 100%);
+}
 
-const CreditCardOfferCustomer = () => {
-  const navigate = useNavigate();
-  const [notification, setNotification] = useState({
-    show: false,
-    message: '',
-    type: ''
-  });
+.offer-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  max-width: 900px;
+  width: 100%;
+}
 
-  const handleAccept = () => {
-    setNotification({
-      show: true,
-      message: 'Application Accepted! Redirecting to tracking page...',
-      type: 'success'
-    });
-    
-    // Navigate to tracking page after showing notification
-    setTimeout(() => {
-      navigate('/tracking');
-    }, 3000);
-  };
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
 
-  const handleDecline = () => {
-    setNotification({
-      show: true,
-      message: 'Offer declined. You can reconsider and apply again anytime.',
-      type: 'info'
-    });
-    
-    setTimeout(() => {
-      setNotification(prev => ({ ...prev, show: false }));
-    }, 4000);
-  };
+.congratulations {
+  font-size: 2.5rem;
+  color: #003A70;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
 
-  return (
-    <div className="offer-container">
-      <div className="offer-card">
-        <div className="header">
-          <h1 className="congratulations">Congratulations!</h1>
-          <p className="subtitle">
-            User, here is your <span className="highlight">lifetime-free</span> Standard Chartered<br />
-            Credit Card offer
-          </p>
-        </div>
+.subtitle {
+  font-size: 1.1rem;
+  color: #5A6C7D;
+  line-height: 1.6;
+}
 
-        <div className="content">
-          <div className="card-section">
-            <div className="credit-card-image">
-              <img 
-                src="/credit-card.png" 
-                alt="Standard Chartered Platinum Credit Card" 
-                className="card-img"
-              />
-            </div>
-          </div>
+.highlight {
+  color: #228B22;
+  font-weight: 600;
+}
 
-          <div className="details-section">
-            <div className="credit-limit">
-              <h2>Credit Limit</h2>
-              <div className="amount">₹1,50,000</div>
-              <p className="availability">Available immediately upon approval</p>
-            </div>
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 50px;
+  margin-bottom: 40px;
+}
 
-            <div className="interest-rate">
-              <h3>Interest Rate ⓘ</h3>
-              <div className="rates">
-                <div className="rate-item">
-                  <span className="rate-label">Starting 2.49% p.m.</span>
-                  <span className="rate-value">2.75%</span>
-                  <span className="rate-desc">per month</span>
-                  <small>*Interest charged only on outstanding balance</small>
-                </div>
-                <div className="rate-item special">
-                  <span className="rate-label">Special Offer</span>
-                  <span className="rate-value">33.00%</span>
-                  <span className="rate-desc">per annum</span>
-                </div>
-              </div>
-            </div>
+.card-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-            <div className="features">
-              <div className="feature-item">
-                <span className="feature-icon">🆓</span>
-                <span>Lifetime free</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">⚡</span>
-                <span>Instant Approval</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">🎁</span>
-                <span>Reward Points</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">📞</span>
-                <span>Contactless Pay</span>
-              </div>
-            </div>
-          </div>
-        </div>
+.credit-card-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-        {notification.show && (
-          <div className={inline-notification ${notification.type}}>
-            <div className="notification-content">
-              <span className="notification-icon">
-                {notification.type === 'success' ? '✅' : 'ℹ'}
-              </span>
-              <span className="notification-message">{notification.message}</span>
-            </div>
-          </div>
-        )}
+.card-img {
+  width: 320px;
+  height: auto;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
 
-        <div className="actions">
-          <button 
-            className="accept-btn" 
-            onClick={handleAccept}
-            disabled={notification.show && notification.type === 'success'}
-          >
-            Accept
-          </button>
-          <button 
-            className="decline-btn" 
-            onClick={handleDecline}
-            disabled={notification.show}
-          >
-            Decline
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+.card-img:hover {
+  transform: scale(1.05);
+}
 
-export default CreditCardOfferCustomer;
+.details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
 
+.credit-limit {
+  text-align: center;
+}
 
+.credit-limit h2 {
+  color: #003A70;
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
 
+.amount {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #228B22;
+  margin-bottom: 5px;
+}
 
+.availability {
+  color: #5A6C7D;
+  font-size: 0.9rem;
+}
 
+.interest-rate h3 {
+  color: #003A70;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
 
+.rates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
 
+.rate-item {
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  background: #F5F8FA;
+}
 
+.rate-item.special {
+  background: linear-gradient(135deg, #228B22 0%, #1F7A1F 100%);
+  color: white;
+}
 
+.rate-label {
+  display: block;
+  font-size: 0.7rem;
+  margin-bottom: 3px;
+  opacity: 0.8;
+}
 
+.rate-value {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
 
+.rate-desc {
+  display: block;
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
 
-///////////////////////////////////////////////////////////
+.rate-item small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
 
+.features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './CreditCardOffer.css';
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #F5F8FA;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #003A70;
+}
 
-const CreditCardOfferSales = () => {
-  const navigate = useNavigate();
-  const [notification, setNotification] = useState({
-    show: false,
-    message: '',
-    type: ''
-  });
+.feature-icon {
+  font-size: 1.2rem;
+}
 
-  const handleAccept = () => {
-    setNotification({
-      show: true,
-      message: 'Offer has been sent to the customer',
-      type: 'success'
-    });
-    
-    // Navigate to onboarding after showing notification
-    setTimeout(() => {
-      navigate('/onboarding');
-    }, 3000);
-  };
+.actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
 
-  const handleDecline = () => {
-    setNotification({
-      show: true,
-      message: 'Offer declined. You can always reconsider and apply again in the future.',
-      type: 'warning'
-    });
-    
-    setTimeout(() => {
-      setNotification(prev => ({ ...prev, show: false }));
-    }, 4000);
-  };
+.accept-btn, .decline-btn {
+  padding: 15px 40px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
 
-  return (
-    <div className="offer-container">
-      <div className="offer-card">
-        <div className="header">
-          <h1 className="congratulations">Congratulations!</h1>
-          <p className="subtitle">
-            User, here is your <span className="highlight">lifetime-free</span> Standard Chartered<br />
-            Credit Card offer
-          </p>
-        </div>
+.accept-btn {
+  background: linear-gradient(135deg, #228B22 0%, #1F7A1F 100%);
+  color: white;
+}
 
-        <div className="content">
-          <div className="card-section">
-            <div className="credit-card-image">
-              <img 
-                src="/credit-card.png" 
-                alt="Standard Chartered Platinum Credit Card" 
-                className="card-img"
-              />
-            </div>
-          </div>
+.accept-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(34, 139, 34, 0.4);
+}
 
-          <div className="details-section">
-            <div className="credit-limit">
-              <h2>Credit Limit</h2>
-              <div className="amount">₹1,50,000</div>
-              <p className="availability">Available immediately upon approval</p>
-            </div>
+.decline-btn {
+  background: #F5F8FA;
+  color: #5A6C7D;
+  border: 2px solid #C8D4E0;
+}
 
-            <div className="interest-rate">
-              <h3>Interest Rate ⓘ</h3>
-              <div className="rates">
-                <div className="rate-item">
-                  <span className="rate-label">Starting 2.49% p.m.</span>
-                  <span className="rate-value">2.75%</span>
-                  <span className="rate-desc">per month</span>
-                  <small>*Interest charged only on outstanding balance</small>
-                </div>
-                <div className="rate-item special">
-                  <span className="rate-label">Special Offer</span>
-                  <span className="rate-value">33.00%</span>
-                  <span className="rate-desc">per annum</span>
-                </div>
-              </div>
-            </div>
+.decline-btn:hover {
+  background: #E6EDF3;
+  transform: translateY(-2px);
+}
 
-            <div className="features">
-              <div className="feature-item">
-                <span className="feature-icon">🆓</span>
-                <span>Lifetime free</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">⚡</span>
-                <span>Instant Approval</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">🎁</span>
-                <span>Reward Points</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">📞</span>
-                <span>Contactless Pay</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {notification.show && (
-          <div className={inline-notification ${notification.type}}>
-            <div className="notification-content">
-              <span className="notification-icon">
-                {notification.type === 'success' ? '✅' : '⚠'}
-              </span>
-              <span className="notification-message">{notification.message}</span>
-            </div>
-          </div>
-        )}
-
-        <div className="actions">
-          <button 
-            className="accept-btn" 
-            onClick={handleAccept}
-            disabled={notification.show}
-          >
-            Proceed
-          </button>
-          <button 
-            className="decline-btn" 
-            onClick={handleDecline}
-            disabled={notification.show}
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default CreditCardOfferSales;
+@media (max-width: 768px) {
+  .offer-card {
+    padding: 20px;
+  }
+  
+  .content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .credit-card {
+    width: 280px;
+    height: 180px;
+  }
+  
+  .congratulations {
+    font-size: 2rem;
+  }
+  
+  .actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .accept-btn, .decline-btn {
+    width: 200px;
+  }
+}
