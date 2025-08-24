@@ -1,174 +1,51 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from 'react';
+import Carousel from './Carousel'; // Your existing carousel component
+import QuickActionCard from './QuickActionCard'; // Component for quick actions
+import './CreditCardComparison.css'; // Optional styles
 
-function Header() {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const navigate = useNavigate();
+// Example quick actions data
+const quickActions = [
+  {
+    icon: "fa-solid fa-credit-card",
+    title: "Compare Cards",
+    description: "Explore and compare different credit card options.",
+    buttonText: "Start Comparing",
+    iconClass: "quick-card"
+  },
+  {
+    icon: "fa-solid fa-hand-holding-dollar",
+    title: "Best Offers",
+    description: "Find the best rewards and offers tailored for you.",
+    buttonText: "View Offers",
+    iconClass: "quick-offers"
+  }
+];
 
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-  const closeDropdown = () => setDropdownOpen(false);
-
+const CreditCardComparison = () => {
   return (
-    <>
-      <style>{`
-        body {
-          margin: 0;
-          font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-        }
-        .sc-navbar {
-          background: #fff;
-          border-bottom: 2px solid #ececec;
-          height: 80px;
-          display: flex;
-          align-items: center;
-          box-sizing: border-box;
-          padding: 0 40px;
-          justify-content: space-between;
-          color: #222;
-        }
-        .sc-navbar .navbar-left img {
-          height: 80px;
-          cursor: pointer;
-        }
-        .sc-navbar .navbar-center {
-          display: flex;
-          gap: 48px;
-          font-size: 20px;
-          font-weight: 500;
-          align-items: center;
-        }
-        .sc-navbar .navbar-center a {
-          color: #222;
-          text-decoration: none;
-          padding: 4px 8px;
-          border-radius: 5px;
-          transition: background 0.2s, color 0.2s;
-          cursor: pointer;
-        }
-        .sc-navbar .navbar-center a:hover,
-        .sc-navbar .navbar-center a:focus {
-          background: #f2f9ff;
-          color: #1976d2;
-        }
-        .sc-navbar .navbar-right {
-          position: relative;
-        }
-        .sc-navbar .dropdown-btn {
-          background: none;
-          border: none;
-          font-size: 18px;
-          font-weight: 500;
-          color: #222;
-          cursor: pointer;
-          padding: 8px 22px;
-          border-radius: 6px;
-          transition: background 0.2s;
-        }
-        .sc-navbar .dropdown-btn:hover,
-        .sc-navbar .dropdown-btn:focus {
-          background: #f1f1f1;
-          outline: none;
-        }
-        .sc-navbar .dropdown-content {
-          position: absolute;
-          right: 0;
-          top: 100%;
-          background: white;
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.07);
-          border-radius: 8px;
-          width: 180px;
-          margin-top: 8px;
-          z-index: 1000;
-          display: ${dropdownOpen ? "block" : "none"};
-          user-select: none;
-        }
-        .sc-navbar .dropdown-content a,
-        .sc-navbar .dropdown-content button {
-          display: block;
-          width: 100%;
-          padding: 12px 18px;
-          color: #222;
-          background: none;
-          border: none;
-          text-align: left;
-          font-size: 16px;
-          font-weight: 500;
-          text-decoration: none;
-          cursor: pointer;
-          border-radius: 5px;
-          transition: background 0.2s;
-        }
-        .sc-navbar .dropdown-content a:hover,
-        .sc-navbar .dropdown-content button:hover {
-          background: #f5faff;
-        }
-        .sc-navbar .login-btn {
-          background: #008000;
-          color: white;
-          border: none;
-          padding: 8px 24px;
-          border-radius: 5px;
-          font-size: 18px;
-          font-weight: 500;
-          cursor: pointer;
-          margin-left: 30px;
-          width: 100px;
-          user-select: none;
-        }
-      `}</style>
+    <div className="credit-card-comparison-page container">
+      {/* Carousel Section */}
+      <Carousel />
 
-      <nav className="sc-navbar">
-        {/* Logo Left */}
-        <div
-          className="navbar-left"
-          onClick={() => navigate("/home")}
-          style={{ cursor: "pointer" }}
-        >
-          <img
-            src="https://www.sc.com/wp-content/uploads/2019/04/standard-chartered-logo.png"
-            alt="Standard Chartered Logo"
-          />
+      {/* Quick Actions Section */}
+      <section className="quick-actions-section mt-5">
+        <h3>Quick Actions</h3>
+        <div className="row g-4">
+          {quickActions.map((action, index) => (
+            <div key={index} className="col-sm-6 col-md-4">
+              <QuickActionCard 
+                icon={action.icon}
+                title={action.title}
+                description={action.description}
+                buttonText={action.buttonText}
+                iconClass={action.iconClass}
+              />
+            </div>
+          ))}
         </div>
-
-        {/* Center Nav Links */}
-        <div className="navbar-center">
-          <Link to="/about">About Us</Link>
-          <Link to="/invest">Invest</Link>
-          <Link to="/offer">Offers</Link>
-          <Link to="/help">Help</Link>
-          <Link to="/services">Services</Link>
-        </div>
-
-        {/* Dropdown (Logout Menu) Right */}
-        <div className="navbar-right">
-          <button
-            className="dropdown-btn"
-            onClick={toggleDropdown}
-            aria-expanded={dropdownOpen}
-            aria-haspopup="true"
-          >
-            Logout ▾
-          </button>
-          <div className="dropdown-content" onMouseLeave={closeDropdown}>
-            <Link to="/tracker" onClick={closeDropdown}>
-              Tracker
-            </Link>
-            <button
-              onClick={() => {
-                closeDropdown();
-                navigate("/home");
-              }}
-            >
-              Logout
-            </button>
-            <Link to="/offer" onClick={closeDropdown}>
-              Offer Status
-            </Link>
-          </div>
-        </div>
-      </nav>
-    </>
+      </section>
+    </div>
   );
-}
+};
 
-export default Header;
+export default CreditCardComparison;
