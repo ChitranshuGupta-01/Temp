@@ -1,208 +1,281 @@
-const navItemContent = {
-  "About Us": (
-    <div
-      style={{
-        position: "absolute",
-        top: "38px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        minWidth: "220px",
-        maxWidth: "270px",
-        background: "#fff",
-        borderRadius: "12px",
-        boxShadow: "0 10px 20px 5px rgba(0, 0, 0, 0.1)",
-        padding: "16px 18px",
-        zIndex: 10,
-        color: "#1b3246",
-        fontSize: "1rem",
-        pointerEvents: "none",
-      }}
-    >
-      <strong
-        style={{
-          fontSize: "1.08rem",
-          color: "#299989",
-          marginBottom: "8px",
-          display: "block",
-        }}
-      >
-        About Standard Chartered Bank
-      </strong>
-      <p style={{ margin: "8px 0", fontSize: "1rem" }}>
-        Empowering communities for 160+ years, Standard Chartered serves clients
-        in over 50 markets, driven by values of Integrity, Collaboration,
-        Respect, and Excellence.
-      </p>
-      <ul style={{ paddingLeft: "18px", margin: 0 }}>
-        <li style={{ fontSize: "0.98rem" }}>Global Presence</li>
-        <li style={{ fontSize: "0.98rem" }}>Sustainable Finance</li>
-        <li style={{ fontSize: "0.98rem" }}>Responsible Banking</li>
-      </ul>
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Onboarding.css";
+
+function Onboarding() {
+  const [applications, setApplications] = useState([
+    {
+      id: "SC101234",
+      applicant: "Chitranshu Gupta",
+      handler: "Harsha",
+      status: "Application Submitted",
+    },
+    {
+      id: "SC101235",
+      applicant: "Chitranshu Gupta",
+      handler: "Harsha",
+      status: "Credit Card Accepted",
+    },
+    {
+      id: "SC101236",
+      applicant: "Chitranshu Gupta",
+      handler: "Harsha",
+      status: "Application Processing",
+    },
+  ]);
+
+  const [editingIdx, setEditingIdx] = useState(-1);
+  const [editData, setEditData] = useState({});
+  const [creating, setCreating] = useState(false);
+  const [createData, setCreateData] = useState({
+    applicant: "",
+    handler: "",
+    status: "Application Submitted",
+  });
+
+  const navigate = useNavigate();
+
+  function handleEdit(idx) {
+    setEditingIdx(idx);
+    setEditData(applications[idx]);
+  }
+
+  function handleEditChange(e) {
+    let copy = { ...editData };
+    copy[e.target.name] = e.target.value;
+    setEditData(copy);
+  }
+
+  function handleEditSave(idx) {
+    let copy = [...applications];
+    copy[idx] = editData;
+    setApplications(copy);
+    setEditingIdx(-1);
+  }
+
+  function handleDelete(idx) {
+    let copy = [...applications];
+    copy.splice(idx, 1);
+    setApplications(copy);
+    setEditingIdx(-1);
+  }
+
+  function handleCreateOpen() {
+    setCreating(true);
+    setCreateData({
+      applicant: "",
+      handler: "",
+      status: "Application Submitted",
+    });
+  }
+
+  function handleCreateChange(e) {
+    let copy = { ...createData };
+    copy[e.target.name] = e.target.value;
+    setCreateData(copy);
+  }
+
+  function handleCreateSave() {
+    let newId = "SC" + Math.floor(100000 + Math.random() * 900000);
+    let newApp = { id: newId, ...createData };
+    let copy = [...applications];
+    copy.unshift(newApp);
+    setApplications(copy);
+    setCreating(false);
+  }
+
+  return (
+    <div className="main-content">
+      <div>
+        <div className="app-title">Applications</div>
+        <div className="app-desc">Manage customer onboarding applications</div>
+      </div>
+
+      <div className="create-container">
+        <button className="btn btn-create" onClick={handleCreateOpen}>
+          + Create New
+        </button>
+      </div>
+
+      {applications.map((app, idx) => (
+        <div
+          className="app-card"
+          key={idx}
+          style={{ outline: editingIdx === idx ? "2px solid #5ea9fa" : "" }}
+        >
+          {editingIdx === idx ? (
+            <div className="edit-form">
+              <div className="form-group">
+                <label className="form-label">Application ID</label>
+                <input className="form-control" value={editData.id} disabled />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={editData.status}
+                  onChange={handleEditChange}
+                >
+                  <option>Application Submitted</option>
+                  <option>Application Processing</option>
+                  <option>Credit Card Offer</option>
+                  <option>Credit Card Accepted</option>
+                  <option>Printed & Shipped</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={editData.applicant}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={editData.handler}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="edit-actions">
+                <button
+                  className="btn-save"
+                  onClick={() => handleEditSave(idx)}
+                >
+                  ✔ Save
+                </button>
+                <button
+                  className="btn-cancel"
+                  onClick={() => setEditingIdx(-1)}
+                >
+                  ✖ Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="app-header">
+                <div className="app-header-left">
+                  <span className="app-id">Application ID - {app.id}</span>
+                  <span
+                    className={`badge badge-status ${
+                      app.status === "Application Submitted"
+                        ? "badge-submitted"
+                        : app.status === "Application Processing"
+                        ? "badge-processing"
+                        : app.status === "Credit Card Offer"
+                        ? "badge-offer"
+                        : app.status === "Credit Card Accepted"
+                        ? "badge-accepted"
+                        : "badge-shipped"
+                    }`}
+                  >
+                    {app.status}
+                  </span>
+                </div>
+                <div className="app-header-right">
+                  <button
+                    className="app-action-btn app-action-btn-edit"
+                    onClick={() => handleEdit(idx)}
+                  >
+                    ✎ Edit
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-offer"
+                    onClick={() => navigate("/home")}
+                  >
+                    💼 Offer Page
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-del"
+                    onClick={() => handleDelete(idx)}
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
+              </div>
+              <div className="ms-1" style={{ lineHeight: 1.8 }}>
+                <span className="info-label">Applicant:</span>{" "}
+                <span className="info-value">{app.applicant}</span>
+                <br />
+                <span className="info-label">Handled By:</span>{" "}
+                <span className="info-value">{app.handler}</span>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+
+      {creating && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-box">
+            <span className="modal-close" onClick={() => setCreating(false)}>
+              &times;
+            </span>
+            <div className="modal-title">Create New Application</div>
+            <form className="modal-form" onSubmit={(e) => e.preventDefault()}>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={createData.applicant}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Applicant Name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={createData.handler}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Handler Name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={createData.status}
+                  onChange={handleCreateChange}
+                >
+                  <option>Application Submitted</option>
+                  <option>Application Processing</option>
+                  <option>Credit Card Offer</option>
+                  <option>Credit Card Accepted</option>
+                  <option>Printed & Shipped</option>
+                </select>
+              </div>
+              <div className="modal-actions">
+                <button
+                  type="submit"
+                  className="btn btn-create"
+                  onClick={handleCreateSave}
+                >
+                  Create
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setCreating(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
-  ),
-  Invest: (
-    <div
-      style={{
-        position: "absolute",
-        top: "38px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        minWidth: "220px",
-        maxWidth: "270px",
-        background: "#fff",
-        borderRadius: "12px",
-        boxShadow: "0 8px 32px rgba(80,110,130,0.10)",
-        padding: "16px 18px",
-        zIndex: 10,
-        color: "#1b3246",
-        fontSize: "1rem",
-        pointerEvents: "none",
-      }}
-    >
-      <strong
-        style={{
-          fontSize: "1.08rem",
-          color: "#299989",
-          marginBottom: "8px",
-          display: "block",
-        }}
-      >
-        Invest with Confidence
-      </strong>
-      <p style={{ margin: "8px 0", fontSize: "1rem" }}>
-        Unlock your wealth potential with global market access, expert advice,
-        and tailored opportunities.
-      </p>
-      <ul style={{ paddingLeft: "18px", margin: 0 }}>
-        <li style={{ fontSize: "0.98rem" }}>Mutual Funds & Equities</li>
-        <li style={{ fontSize: "0.98rem" }}>Fixed Income & Bonds</li>
-        <li style={{ fontSize: "0.98rem" }}>Wealth Advisory</li>
-        <li style={{ fontSize: "0.98rem" }}>ESG Investing</li>
-      </ul>
-    </div>
-  ),
-  Offers: (
-    <div
-      style={{
-        position: "absolute",
-        top: "38px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        minWidth: "220px",
-        maxWidth: "270px",
-        background: "#fff",
-        borderRadius: "12px",
-        boxShadow: "0 8px 32px rgba(80,110,130,0.10)",
-        padding: "16px 18px",
-        zIndex: 10,
-        color: "#1b3246",
-        fontSize: "1rem",
-        pointerEvents: "none",
-      }}
-    >
-      <strong
-        style={{
-          fontSize: "1.08rem",
-          color: "#299989",
-          marginBottom: "8px",
-          display: "block",
-        }}
-      >
-        Exclusive Rewards
-      </strong>
-      <p style={{ margin: "8px 0", fontSize: "1rem" }}>
-        Enjoy cashback, travel upgrades, dining specials, and shopping discounts
-        as a valued client.
-      </p>
-      <ul style={{ paddingLeft: "18px", margin: 0 }}>
-        <li style={{ fontSize: "0.98rem" }}>Cashback & Miles</li>
-        <li style={{ fontSize: "0.98rem" }}>Partner Deals</li>
-        <li style={{ fontSize: "0.98rem" }}>Seasonal Travel Promos</li>
-        <li style={{ fontSize: "0.98rem" }}>Lifestyle Privileges</li>
-      </ul>
-    </div>
-  ),
-  Help: (
-    <div
-      style={{
-        position: "absolute",
-        top: "38px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        minWidth: "220px",
-        maxWidth: "270px",
-        background: "#fff",
-        borderRadius: "12px",
-        boxShadow: "0 8px 32px rgba(80,110,130,0.10)",
-        padding: "16px 18px",
-        zIndex: 10,
-        color: "#1b3246",
-        fontSize: "1rem",
-        pointerEvents: "none",
-      }}
-    >
-      <strong
-        style={{
-          fontSize: "1.08rem",
-          color: "#299989",
-          marginBottom: "8px",
-          display: "block",
-        }}
-      >
-        24/7 Customer Support
-      </strong>
-      <p style={{ margin: "8px 0", fontSize: "1rem" }}>
-        Easy access to FAQs, guides, and live support. Security and satisfaction
-        first.
-      </p>
-      <ul style={{ paddingLeft: "18px", margin: 0 }}>
-        <li style={{ fontSize: "0.98rem" }}>Online Assistance</li>
-        <li style={{ fontSize: "0.98rem" }}>Fraud Reporting</li>
-        <li style={{ fontSize: "0.98rem" }}>Financial Guidance</li>
-        <li style={{ fontSize: "0.98rem" }}>Branches</li>
-      </ul>
-    </div>
-  ),
-  Services: (
-    <div
-      style={{
-        position: "absolute",
-        top: "38px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        minWidth: "220px",
-        maxWidth: "270px",
-        background: "#fff",
-        borderRadius: "12px",
-        boxShadow: "0 8px 32px rgba(80,110,130,0.10)",
-        padding: "16px 18px",
-        zIndex: 10,
-        color: "#1b3246",
-        fontSize: "1rem",
-        pointerEvents: "none",
-      }}
-    >
-      <strong
-        style={{
-          fontSize: "1.08rem",
-          color: "#299989",
-          marginBottom: "8px",
-          display: "block",
-        }}
-      >
-        Comprehensive Banking
-      </strong>
-      <p style={{ margin: "8px 0", fontSize: "1rem" }}>
-        Full suite of digital and personal banking solutions—from accounts to
-        global transactions.
-      </p>
-      <ul style={{ paddingLeft: "18px", margin: 0 }}>
-        <li style={{ fontSize: "0.98rem" }}>Digital Account Opening</li>
-        <li style={{ fontSize: "0.98rem" }}>Card Services</li>
-        <li style={{ fontSize: "0.98rem" }}>Loans & Mortgages</li>
-        <li style={{ fontSize: "0.98rem" }}>International Banking</li>
-        <li style={{ fontSize: "0.98rem" }}>Fund Transfers</li>
-      </ul>
-    </div>
-  ),
-};
+  );
+}
+
+export default Onboarding;
