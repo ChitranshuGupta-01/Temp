@@ -1,43 +1,28 @@
 import axios from "axios";
 
-// Base URL of your Spring Boot backend
-const API_BASE_URL = "http://localhost:8080/applications";
+const API_BASE_URL = "http://localhost:8080/api/onboarding/";
 
-class ApplicationService {
-  // Get all applications
-  getAllApplications() {
-    return axios.get(API_BASE_URL);
-  }
+export const getAllApplications = () => axios.get(API_BASE_URL);
 
-  // Get application by ID
-  getApplicationById(id) {
-    return axios.get(`${API_BASE_URL}/${id}`);
-  }
+export const getApplicationById = (id) => axios.get(`${API_BASE_URL}${id}`);
 
-  // Create a new application
-  createApplication(application) {
-    return axios.post(API_BASE_URL, application);
-  }
+export const createApplication = (application) => axios.post(API_BASE_URL, application);
 
-  // Update application
-  updateApplication(id, application) {
-    return axios.put(`${API_BASE_URL}/${id}`, application);
-  }
+export const updateApplication = (id, application) => axios.put(`${API_BASE_URL}${id}`, application);
 
-  // Delete application
-  deleteApplication(id) {
-    return axios.delete(`${API_BASE_URL}/${id}`);
-  }
-}
+export const deleteApplication = (id) => axios.delete(`${API_BASE_URL}${id}`);
 
-export default new ApplicationService();
-
-................................................
+///////////////
 
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import ApplicationService from "./service"; // Axios service
+import {
+  getAllApplications,
+  createApplication,
+  updateApplication,
+  deleteApplication,
+} from "./service";
 import "./Onboarding.css";
 
 function Onboarding() {
@@ -53,12 +38,15 @@ function Onboarding() {
 
   const navigate = useNavigate();
 
-  // Load applications from backend on mount
   useEffect(() => {
-    ApplicationService.getAllApplications()
+    fetchApplications();
+  }, []);
+
+  const fetchApplications = () => {
+    getAllApplications()
       .then((res) => setApplications(res.data))
       .catch((err) => console.error("Error fetching applications:", err));
-  }, []);
+  };
 
   function handleEdit(idx) {
     setEditingIdx(idx);
@@ -72,24 +60,18 @@ function Onboarding() {
   }
 
   function handleEditSave(idx) {
-    let app = editData;
-    ApplicationService.updateApplication(app.id, app)
+    updateApplication(editData.id, editData)
       .then(() => {
-        let copy = [...applications];
-        copy[idx] = app;
-        setApplications(copy);
+        fetchApplications();
         setEditingIdx(-1);
       })
       .catch((err) => console.error("Error updating application:", err));
   }
 
   function handleDelete(idx) {
-    let appId = applications[idx].id;
-    ApplicationService.deleteApplication(appId)
+    deleteApplication(applications[idx].id)
       .then(() => {
-        let copy = [...applications];
-        copy.splice(idx, 1);
-        setApplications(copy);
+        fetchApplications();
         setEditingIdx(-1);
       })
       .catch((err) => console.error("Error deleting application:", err));
@@ -111,12 +93,11 @@ function Onboarding() {
   }
 
   function handleCreateSave() {
-    ApplicationService.createApplication(createData)
-      .then((res) => {
-        let newApp = res.data;
-        let copy = [...applications];
-        copy.unshift(newApp);
-        setApplications(copy);
+    let newId = "SC" + Math.floor(100000 + Math.random() * 900000);
+    let newApp = { id: newId, ...createData };
+    createApplication(newApp)
+      .then(() => {
+        fetchApplications();
         setCreating(false);
       })
       .catch((err) => console.error("Error creating application:", err));
