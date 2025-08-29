@@ -1,254 +1,43 @@
-Table: applications:
-
-CREATE TABLE applications (
-    id VARCHAR(20) PRIMARY KEY,
-    applicant VARCHAR(100) NOT NULL,
-    handler VARCHAR(100) NOT NULL,
-    status VARCHAR(50) NOT NULL
-);
-
-3. Code Files:
-
-Xmodel.java:
-
-
-package com.scb.creditcardorigination.xfeature.model;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "applications")
-public class Xmodel {
-
-    @Id
-    private String id;
-    private String applicant;
-    private String handler;
-    private String status;
-
-    // Getters and setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public String getApplicant() { return applicant; }
-    public void setApplicant(String applicant) { this.applicant = applicant; }
-
-    public String getHandler() { return handler; }
-    public void setHandler(String handler) { this.handler = handler; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-}
-
-Xrepository.java:
-package com.scb.creditcardorigination.xfeature.repository;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import com.scb.creditcardorigination.xfeature.model.Xmodel;
-
-public interface Xrepository extends JpaRepository<Xmodel, String> {
-}
-
-
-Xservice.java:
-
-package com.scb.creditcardorigination.xfeature.service;
-
-import com.scb.creditcardorigination.xfeature.model.Xmodel;
-import com.scb.creditcardorigination.xfeature.repository.Xrepository;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-
-@Service
-public class Xservice {
-    private final Xrepository repository;
-
-    public Xservice(Xrepository repository) {
-        this.repository = repository;
-    }
-
-    public List<Xmodel> getAllApplications() {
-        return repository.findAll();
-    }
-
-    public Optional<Xmodel> getApplicationById(String id) {
-        return repository.findById(id);
-    }
-
-    public Xmodel createApplication(Xmodel application) {
-        return repository.save(application);
-    }
-
-    public Xmodel updateApplication(String id, Xmodel application) {
-        application.setId(id);
-        return repository.save(application);
-    }
-
-    public void deleteApplication(String id) {
-        repository.deleteById(id);
-    }
-}
-
-
-
-Xcontroller.java:
-
-package com.scb.creditcardorigination.xfeature.controller;
-
-import com.scb.creditcardorigination.xfeature.model.Xmodel;
-import com.scb.creditcardorigination.xfeature.service.Xservice;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/applications")
-public class Xcontroller {
-
-    private final Xservice service;
-
-    public Xcontroller(Xservice service) {
-        this.service = service;
-    }
-
-    @GetMapping
-    public List<Xmodel> getAllApplications() {
-        return service.getAllApplications();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Xmodel> getApplicationById(@PathVariable String id) {
-        return service.getApplicationById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public Xmodel createApplication(@RequestBody Xmodel application) {
-        return service.createApplication(application);
-    }
-
-    @PutMapping("/{id}")
-    public Xmodel updateApplication(@PathVariable String id, @RequestBody Xmodel application) {
-        return service.updateApplication(id, application);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteApplication(@PathVariable String id) {
-        service.deleteApplication(id);
-        return ResponseEntity.noContent().build();
-    }
-}
-
-
-XexceptionHandling.java:
-
-package com.scb.creditcardorigination.xfeature.exceptionHandling;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-
-@ControllerAdvice
-public class XexceptionHandling {
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleAllExceptions(Exception ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
-
-
-DatabaseConfig.java:
-package com.scb.creditcardorigination.config;
-
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class DatabaseConfig {
-    // If you use application.properties for DB configs, this can stay empty.
-}
-
-
-SecurityConfig.java:
-package com.scb.creditcardorigination.config;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-
-@Configuration
-public class SecurityConfig {
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-            .authorizeHttpRequests()
-            .anyRequest().permitAll();
-        return http.build();
-    }
-}
-
-
-4. application.properties:
-spring.datasource.url=jdbc:mysql://localhost:3306/creditcarddb
-spring.datasource.username=root
-spring.datasource.password=yourpassword
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
-
-
-service.js:
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/applications"; 
-// Adjust if backend runs on a different port or context-path
+// Base URL of your Spring Boot backend
+const API_BASE_URL = "http://localhost:8080/applications";
 
-// Get all applications
-export const getApplications = () => {
-  return axios.get(API_URL);
-};
+class ApplicationService {
+  // Get all applications
+  getAllApplications() {
+    return axios.get(API_BASE_URL);
+  }
 
-// Get single application by ID
-export const getApplicationById = (id) => {
-  return axios.get(`${API_URL}/${id}`);
-};
+  // Get application by ID
+  getApplicationById(id) {
+    return axios.get(`${API_BASE_URL}/${id}`);
+  }
 
-// Create new application
-export const createApplication = (application) => {
-  return axios.post(API_URL, application);
-};
+  // Create a new application
+  createApplication(application) {
+    return axios.post(API_BASE_URL, application);
+  }
 
-// Update application
-export const updateApplication = (id, application) => {
-  return axios.put(`${API_URL}/${id}`, application);
-};
+  // Update application
+  updateApplication(id, application) {
+    return axios.put(`${API_BASE_URL}/${id}`, application);
+  }
 
-// Delete application
-export const deleteApplication = (id) => {
-  return axios.delete(`${API_URL}/${id}`);
-};
+  // Delete application
+  deleteApplication(id) {
+    return axios.delete(`${API_BASE_URL}/${id}`);
+  }
+}
+
+export default new ApplicationService();
+
+................................................
 
 
-Onboarding.js:
-
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getApplications,
-  createApplication,
-  updateApplication,
-  deleteApplication,
-} from "../services/service";   // 👈 import service.js
-
+import ApplicationService from "./service"; // Axios service
 import "./Onboarding.css";
 
 function Onboarding() {
@@ -264,47 +53,267 @@ function Onboarding() {
 
   const navigate = useNavigate();
 
-  // Load data from backend when component mounts
+  // Load applications from backend on mount
   useEffect(() => {
-    getApplications().then((res) => {
-      setApplications(res.data);
-    });
+    ApplicationService.getAllApplications()
+      .then((res) => setApplications(res.data))
+      .catch((err) => console.error("Error fetching applications:", err));
   }, []);
 
-  // Save edited record
+  function handleEdit(idx) {
+    setEditingIdx(idx);
+    setEditData(applications[idx]);
+  }
+
+  function handleEditChange(e) {
+    let copy = { ...editData };
+    copy[e.target.name] = e.target.value;
+    setEditData(copy);
+  }
+
   function handleEditSave(idx) {
-    const app = applications[idx];
-    updateApplication(app.id, editData).then(() => {
-      let copy = [...applications];
-      copy[idx] = editData;
-      setApplications(copy);
-      setEditingIdx(-1);
-    });
+    let app = editData;
+    ApplicationService.updateApplication(app.id, app)
+      .then(() => {
+        let copy = [...applications];
+        copy[idx] = app;
+        setApplications(copy);
+        setEditingIdx(-1);
+      })
+      .catch((err) => console.error("Error updating application:", err));
   }
 
-  // Delete record
   function handleDelete(idx) {
-    const app = applications[idx];
-    deleteApplication(app.id).then(() => {
-      let copy = [...applications];
-      copy.splice(idx, 1);
-      setApplications(copy);
-      setEditingIdx(-1);
+    let appId = applications[idx].id;
+    ApplicationService.deleteApplication(appId)
+      .then(() => {
+        let copy = [...applications];
+        copy.splice(idx, 1);
+        setApplications(copy);
+        setEditingIdx(-1);
+      })
+      .catch((err) => console.error("Error deleting application:", err));
+  }
+
+  function handleCreateOpen() {
+    setCreating(true);
+    setCreateData({
+      applicant: "",
+      handler: "",
+      status: "Application Submitted",
     });
   }
 
-  // Create record
+  function handleCreateChange(e) {
+    let copy = { ...createData };
+    copy[e.target.name] = e.target.value;
+    setCreateData(copy);
+  }
+
   function handleCreateSave() {
-    createApplication(createData).then((res) => {
-      setApplications([res.data, ...applications]);
-      setCreating(false);
-    });
+    ApplicationService.createApplication(createData)
+      .then((res) => {
+        let newApp = res.data;
+        let copy = [...applications];
+        copy.unshift(newApp);
+        setApplications(copy);
+        setCreating(false);
+      })
+      .catch((err) => console.error("Error creating application:", err));
   }
 
-  // ... keep rest of your JSX same
+  return (
+    <div className="main-content">
+      <div>
+        <div className="app-title">Applications</div>
+        <div className="app-desc">Manage customer onboarding applications</div>
+      </div>
+
+      <div className="create-container">
+        <button className="btn btn-create" onClick={handleCreateOpen}>
+          + Create New
+        </button>
+      </div>
+
+      {applications.map((app, idx) => (
+        <div
+          className="app-card"
+          key={idx}
+          style={{ outline: editingIdx === idx ? "2px solid #5ea9fa" : "" }}
+        >
+          {editingIdx === idx ? (
+            <div className="edit-form">
+              <div className="form-group">
+                <label className="form-label">Application ID</label>
+                <input className="form-control" value={editData.id} disabled />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={editData.status}
+                  onChange={handleEditChange}
+                >
+                  <option>Application Submitted</option>
+                  <option>Application Processing</option>
+                  <option>Credit Card Offer</option>
+                  <option>Credit Card Accepted</option>
+                  <option>Printed & Shipped</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={editData.applicant}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={editData.handler}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="edit-actions">
+                <button
+                  className="btn-save"
+                  onClick={() => handleEditSave(idx)}
+                >
+                  ✔ Save
+                </button>
+                <button
+                  className="btn-cancel"
+                  onClick={() => setEditingIdx(-1)}
+                >
+                  ✖ Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="app-header">
+                <div className="app-header-left">
+                  <span className="app-id">Application ID - {app.id}</span>
+                  <span
+                    className={`badge badge-status ${
+                      app.status === "Application Submitted"
+                        ? "badge-submitted"
+                        : app.status === "Application Processing"
+                        ? "badge-processing"
+                        : app.status === "Credit Card Offer"
+                        ? "badge-offer"
+                        : app.status === "Credit Card Accepted"
+                        ? "badge-accepted"
+                        : "badge-shipped"
+                    }`}
+                  >
+                    {app.status}
+                  </span>
+                </div>
+                <div className="app-header-right">
+                  <button
+                    className="app-action-btn app-action-btn-edit"
+                    onClick={() => handleEdit(idx)}
+                  >
+                    ✎ Edit
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-offer"
+                    onClick={() => navigate("/home")}
+                  >
+                    💼 Offer Page
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-del"
+                    onClick={() => handleDelete(idx)}
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
+              </div>
+              <div className="ms-1" style={{ lineHeight: 1.8 }}>
+                <span className="info-label">Applicant:</span>{" "}
+                <span className="info-value">{app.applicant}</span>
+                <br />
+                <span className="info-label">Handled By:</span>{" "}
+                <span className="info-value">{app.handler}</span>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+
+      {creating && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-box">
+            <span className="modal-close" onClick={() => setCreating(false)}>
+              &times;
+            </span>
+            <div className="modal-title">Create New Application</div>
+            <form className="modal-form" onSubmit={(e) => e.preventDefault()}>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={createData.applicant}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Applicant Name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={createData.handler}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Handler Name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={createData.status}
+                  onChange={handleCreateChange}
+                >
+                  <option>Application Submitted</option>
+                  <option>Application Processing</option>
+                  <option>Credit Card Offer</option>
+                  <option>Credit Card Accepted</option>
+                  <option>Printed & Shipped</option>
+                </select>
+              </div>
+              <div className="modal-actions">
+                <button
+                  type="submit"
+                  className="btn btn-create"
+                  onClick={handleCreateSave}
+                >
+                  Create
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setCreating(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default Onboarding;
-
-
-
