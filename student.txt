@@ -1,581 +1,520 @@
-// Application.java - Main Spring Boot Application
-package com.scb.creditcardorigination;
+Xmodel.java
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package com.scb.creditcardorigination.xfeature.model;
 
-@SpringBootApplication
-public class CreditCardOriginationApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(CreditCardOriginationApplication.class, args);
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
+public class Xmodel {
+
+    @Id
+    private String id;       // e.g. SC101234
+    private String applicant;
+    private String handler;
+    private String status;
+
+    public Xmodel() {}
+
+    public Xmodel(String id, String applicant, String handler, String status) {
+        this.id = id;
+        this.applicant = applicant;
+        this.handler = handler;
+        this.status = status;
     }
+
+    // Getters and setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getApplicant() { return applicant; }
+    public void setApplicant(String applicant) { this.applicant = applicant; }
+
+    public String getHandler() { return handler; }
+    public void setHandler(String handler) { this.handler = handler; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
 
-// ========================================
-// APPLICATION FEATURE
-// ========================================
 
-// ApplicationController.java
-package com.scb.creditcardorigination.application.controller;
+//////////////////
 
-import com.scb.creditcardorigination.application.model.Application;
-import com.scb.creditcardorigination.application.service.ApplicationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+
+Xrepository.java
+
+package com.scb.creditcardorigination.xfeature.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.scb.creditcardorigination.xfeature.model.Xmodel;
+
+// JPA repository gives CRUD methods automatically
+public interface Xrepository extends JpaRepository<Xmodel, String> {
+}
+
+
+///////////////////
+
+
+Xservice.java
+
+package com.scb.creditcardorigination.xfeature.service;
+
+import com.scb.creditcardorigination.xfeature.model.Xmodel;
+import com.scb.creditcardorigination.xfeature.repository.Xrepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/applications")
-@CrossOrigin(origins = "http://localhost:3000") // Allow React frontend
-public class ApplicationController {
+@Service
+public class Xservice {
 
-    @Autowired
-    private ApplicationService applicationService;
+    private final Xrepository repo;
+
+    public Xservice(Xrepository repo) {
+        this.repo = repo;
+    }
+
+    public List<Xmodel> getAllApplications() {
+        return repo.findAll();
+    }
+
+    public Optional<Xmodel> getApplicationById(String id) {
+        return repo.findById(id);
+    }
+
+    public Xmodel createApplication(Xmodel app) {
+        return repo.save(app);
+    }
+
+    public Xmodel updateApplication(String id, Xmodel updatedApp) {
+        return repo.findById(id).map(app -> {
+            app.setApplicant(updatedApp.getApplicant());
+            app.setHandler(updatedApp.getHandler());
+            app.setStatus(updatedApp.getStatus());
+            return repo.save(app);
+        }).orElse(null);
+    }
+
+    public boolean deleteApplication(String id) {
+        if (repo.existsById(id)) {
+            repo.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+}
+
+
+/////////////////////////////
+
+
+XexceptionHandling.java
+
+package com.scb.creditcardorigination.xfeature.exceptionHandling;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+// Global exception handler
+@ControllerAdvice
+public class XexceptionHandling {
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGeneralException(Exception e) {
+        return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
+/////////////////////////////////////////
+
+
+Xcontroller.java
+package com.scb.creditcardorigination.xfeature.controller;
+
+import com.scb.creditcardorigination.xfeature.model.Xmodel;
+import com.scb.creditcardorigination.xfeature.service.Xservice;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/applications")
+@CrossOrigin(origins = "http://localhost:3000") // ✅ allow React frontend
+public class Xcontroller {
+
+    private final Xservice service;
+
+    public Xcontroller(Xservice service) {
+        this.service = service;
+    }
 
     // Get all applications
     @GetMapping
-    public ResponseEntity<List<Application>> getAllApplications() {
-        try {
-            List<Application> applications = applicationService.getAllApplications();
-            return ResponseEntity.ok(applications);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<List<Xmodel>> getAll() {
+        return ResponseEntity.ok(service.getAllApplications());
     }
 
     // Get application by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Application> getApplicationById(@PathVariable String id) {
-        try {
-            Optional<Application> application = applicationService.getApplicationById(id);
-            return application.map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<Xmodel> getById(@PathVariable String id) {
+        return service.getApplicationById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // Create new application
     @PostMapping
-    public ResponseEntity<Application> createApplication(@RequestBody Application application) {
-        try {
-            Application createdApplication = applicationService.createApplication(application);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdApplication);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    public ResponseEntity<Xmodel> create(@RequestBody Xmodel app) {
+        return ResponseEntity.ok(service.createApplication(app));
     }
 
-    // Update existing application
+    // Update application
     @PutMapping("/{id}")
-    public ResponseEntity<Application> updateApplication(
-            @PathVariable String id, 
-            @RequestBody Application application) {
-        try {
-            Application updatedApplication = applicationService.updateApplication(id, application);
-            if (updatedApplication != null) {
-                return ResponseEntity.ok(updatedApplication);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    public ResponseEntity<Xmodel> update(@PathVariable String id, @RequestBody Xmodel app) {
+        Xmodel updated = service.updateApplication(id, app);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
     // Delete application
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteApplication(@PathVariable String id) {
-        try {
-            boolean deleted = applicationService.deleteApplication(id);
-            if (deleted) {
-                return ResponseEntity.noContent().build();
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    public ResponseEntity<String> delete(@PathVariable String id) {
+        boolean deleted = service.deleteApplication(id);
+        if (deleted) {
+            return ResponseEntity.ok("Application deleted successfully");
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 }
+/////////////////////
 
-// ApplicationExceptionHandling.java
-package com.scb.creditcardorigination.application.exceptionHandling;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+applicationService.js
 
-import java.util.HashMap;
-import java.util.Map;
+import axios from "axios";
 
-@RestControllerAdvice
-public class ApplicationExceptionHandling {
+const API_URL = "http://localhost:8080/applications"; // backend URL
 
-    @ExceptionHandler(ApplicationNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleApplicationNotFound(ApplicationNotFoundException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Application Not Found");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-    }
+// Get all applications
+export const getApplications = () => axios.get(API_URL);
 
-    @ExceptionHandler(InvalidApplicationDataException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidApplicationData(InvalidApplicationDataException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Invalid Application Data");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
+// Get application by ID
+export const getApplicationById = (id) => axios.get(`${API_URL}/${id}`);
 
-    @ExceptionHandler(ApplicationServiceException.class)
-    public ResponseEntity<Map<String, String>> handleApplicationServiceException(ApplicationServiceException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Service Error");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
+// Create new application
+export const createApplication = (app) => axios.post(API_URL, app);
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Internal Server Error");
-        errorResponse.put("message", "An unexpected error occurred");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
+// Update application
+export const updateApplication = (id, app) => axios.put(`${API_URL}/${id}`, app);
 
-    // Custom Exception Classes
-    public static class ApplicationNotFoundException extends RuntimeException {
-        public ApplicationNotFoundException(String message) {
-            super(message);
-        }
-    }
+// Delete application
+export const deleteApplication = (id) => axios.delete(`${API_URL}/${id}`);
 
-    public static class InvalidApplicationDataException extends RuntimeException {
-        public InvalidApplicationDataException(String message) {
-            super(message);
-        }
-    }
 
-    public static class ApplicationServiceException extends RuntimeException {
-        public ApplicationServiceException(String message) {
-            super(message);
-        }
-    }
+////////////////////
+
+
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  getApplications,
+  createApplication,
+  updateApplication,
+  deleteApplication,
+} from "../services/applicationService"; // import service functions
+import "./Onboarding.css";
+
+function Onboarding() {
+  const [applications, setApplications] = useState([]);
+  const [editingIdx, setEditingIdx] = useState(-1);
+  const [editData, setEditData] = useState({});
+  const [creating, setCreating] = useState(false);
+  const [createData, setCreateData] = useState({
+    applicant: "",
+    handler: "",
+    status: "Application Submitted",
+  });
+
+  const navigate = useNavigate();
+
+  // 🔹 Load data from backend when page loads
+  useEffect(() => {
+    loadApplications();
+  }, []);
+
+  const loadApplications = () => {
+    getApplications()
+      .then((res) => setApplications(res.data))
+      .catch((err) => console.error(err));
+  };
+
+  // 🔹 Handle Edit
+  function handleEdit(idx) {
+    setEditingIdx(idx);
+    setEditData(applications[idx]);
+  }
+
+  function handleEditChange(e) {
+    let copy = { ...editData };
+    copy[e.target.name] = e.target.value;
+    setEditData(copy);
+  }
+
+  function handleEditSave(idx) {
+    let appId = applications[idx].id;
+    updateApplication(appId, editData)
+      .then((res) => {
+        let copy = [...applications];
+        copy[idx] = res.data;
+        setApplications(copy);
+        setEditingIdx(-1);
+      })
+      .catch((err) => console.error(err));
+  }
+
+  // 🔹 Handle Delete
+  function handleDelete(idx) {
+    let appId = applications[idx].id;
+    deleteApplication(appId)
+      .then(() => {
+        let copy = [...applications];
+        copy.splice(idx, 1);
+        setApplications(copy);
+        setEditingIdx(-1);
+      })
+      .catch((err) => console.error(err));
+  }
+
+  // 🔹 Handle Create
+  function handleCreateOpen() {
+    setCreating(true);
+    setCreateData({
+      applicant: "",
+      handler: "",
+      status: "Application Submitted",
+    });
+  }
+
+  function handleCreateChange(e) {
+    let copy = { ...createData };
+    copy[e.target.name] = e.target.value;
+    setCreateData(copy);
+  }
+
+  function handleCreateSave() {
+    let newId = "SC" + Math.floor(100000 + Math.random() * 900000);
+    let newApp = { id: newId, ...createData };
+
+    createApplication(newApp)
+      .then((res) => {
+        setApplications([res.data, ...applications]);
+        setCreating(false);
+      })
+      .catch((err) => console.error(err));
+  }
+
+  return (
+    <div className="main-content">
+      <div>
+        <div className="app-title">Applications</div>
+        <div className="app-desc">Manage customer onboarding applications</div>
+      </div>
+
+      <div className="create-container">
+        <button className="btn btn-create" onClick={handleCreateOpen}>
+          + Create New
+        </button>
+      </div>
+
+      {applications.map((app, idx) => (
+        <div
+          className="app-card"
+          key={idx}
+          style={{ outline: editingIdx === idx ? "2px solid #5ea9fa" : "" }}
+        >
+          {editingIdx === idx ? (
+            <div className="edit-form">
+              <div className="form-group">
+                <label className="form-label">Application ID</label>
+                <input className="form-control" value={editData.id} disabled />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={editData.status}
+                  onChange={handleEditChange}
+                >
+                  <option>Application Submitted</option>
+                  <option>Application Processing</option>
+                  <option>Credit Card Offer</option>
+                  <option>Credit Card Accepted</option>
+                  <option>Printed & Shipped</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={editData.applicant}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={editData.handler}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="edit-actions">
+                <button
+                  className="btn-save"
+                  onClick={() => handleEditSave(idx)}
+                >
+                  ✔ Save
+                </button>
+                <button
+                  className="btn-cancel"
+                  onClick={() => setEditingIdx(-1)}
+                >
+                  ✖ Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="app-header">
+                <div className="app-header-left">
+                  <span className="app-id">Application ID - {app.id}</span>
+                  <span
+                    className={`badge badge-status ${
+                      app.status === "Application Submitted"
+                        ? "badge-submitted"
+                        : app.status === "Application Processing"
+                        ? "badge-processing"
+                        : app.status === "Credit Card Offer"
+                        ? "badge-offer"
+                        : app.status === "Credit Card Accepted"
+                        ? "badge-accepted"
+                        : "badge-shipped"
+                    }`}
+                  >
+                    {app.status}
+                  </span>
+                </div>
+                <div className="app-header-right">
+                  <button
+                    className="app-action-btn app-action-btn-edit"
+                    onClick={() => handleEdit(idx)}
+                  >
+                    ✎ Edit
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-offer"
+                    onClick={() => navigate("/home")}
+                  >
+                    💼 Offer Page
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-del"
+                    onClick={() => handleDelete(idx)}
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
+              </div>
+              <div className="ms-1" style={{ lineHeight: 1.8 }}>
+                <span className="info-label">Applicant:</span>{" "}
+                <span className="info-value">{app.applicant}</span>
+                <br />
+                <span className="info-label">Handled By:</span>{" "}
+                <span className="info-value">{app.handler}</span>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+
+      {creating && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-box">
+            <span className="modal-close" onClick={() => setCreating(false)}>
+              &times;
+            </span>
+            <div className="modal-title">Create New Application</div>
+            <form className="modal-form" onSubmit={(e) => e.preventDefault()}>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={createData.applicant}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Applicant Name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={createData.handler}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Handler Name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={createData.status}
+                  onChange={handleCreateChange}
+                >
+                  <option>Application Submitted</option>
+                  <option>Application Processing</option>
+                  <option>Credit Card Offer</option>
+                  <option>Credit Card Accepted</option>
+                  <option>Printed & Shipped</option>
+                </select>
+              </div>
+              <div className="modal-actions">
+                <button
+                  type="submit"
+                  className="btn btn-create"
+                  onClick={handleCreateSave}
+                >
+                  Create
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setCreating(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
-// Application.java - Model
-package com.scb.creditcardorigination.application.model;
-
-import javax.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "applications")
-public class Application {
-    
-    @Id
-    private String id;
-    
-    @Column(nullable = false)
-    private String applicant;
-    
-    @Column(nullable = false)
-    private String handler;
-    
-    @Column(nullable = false)
-    private String status;
-    
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-    
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    // Default constructor
-    public Application() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    // Constructor with parameters
-    public Application(String id, String applicant, String handler, String status) {
-        this.id = id;
-        this.applicant = applicant;
-        this.handler = handler;
-        this.status = status;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    // Getters and Setters
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getApplicant() {
-        return applicant;
-    }
-
-    public void setApplicant(String applicant) {
-        this.applicant = applicant;
-    }
-
-    public String getHandler() {
-        return handler;
-    }
-
-    public void setHandler(String handler) {
-        this.handler = handler;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @Override
-    public String toString() {
-        return "Application{" +
-                "id='" + id + '\'' +
-                ", applicant='" + applicant + '\'' +
-                ", handler='" + handler + '\'' +
-                ", status='" + status + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
-}
-
-// ApplicationRepository.java
-package com.scb.creditcardorigination.application.repository;
-
-import com.scb.creditcardorigination.application.model.Application;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
-
-@Repository
-public interface ApplicationRepository extends JpaRepository<Application, String> {
-    
-    // Find applications by status
-    List<Application> findByStatus(String status);
-    
-    // Find applications by applicant name
-    List<Application> findByApplicantContainingIgnoreCase(String applicant);
-    
-    // Find applications by handler
-    List<Application> findByHandler(String handler);
-    
-    // Custom query to find applications by applicant and handler
-    @Query("SELECT a FROM Application a WHERE a.applicant = :applicant AND a.handler = :handler")
-    List<Application> findByApplicantAndHandler(@Param("applicant") String applicant, @Param("handler") String handler);
-    
-    // Check if application exists by ID
-    boolean existsById(String id);
-}
-
-// ApplicationService.java
-package com.scb.creditcardorigination.application.service;
-
-import com.scb.creditcardorigination.application.exceptionHandling.ApplicationExceptionHandling.*;
-import com.scb.creditcardorigination.application.model.Application;
-import com.scb.creditcardorigination.application.repository.ApplicationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-
-@Service
-public class ApplicationService {
-
-    @Autowired
-    private ApplicationRepository applicationRepository;
-
-    private final List<String> validStatuses = Arrays.asList(
-        "Application Submitted",
-        "Application Processing", 
-        "Credit Card Offer",
-        "Credit Card Accepted",
-        "Printed & Shipped"
-    );
-
-    // Get all applications
-    public List<Application> getAllApplications() {
-        try {
-            return applicationRepository.findAll();
-        } catch (Exception e) {
-            throw new ApplicationServiceException("Error retrieving applications: " + e.getMessage());
-        }
-    }
-
-    // Get application by ID
-    public Optional<Application> getApplicationById(String id) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new InvalidApplicationDataException("Application ID cannot be null or empty");
-        }
-        
-        try {
-            return applicationRepository.findById(id);
-        } catch (Exception e) {
-            throw new ApplicationServiceException("Error retrieving application with ID: " + id);
-        }
-    }
-
-    // Create new application
-    public Application createApplication(Application application) {
-        validateApplicationData(application);
-        
-        try {
-            // Generate unique ID
-            String newId = generateUniqueId();
-            application.setId(newId);
-            
-            return applicationRepository.save(application);
-        } catch (Exception e) {
-            throw new ApplicationServiceException("Error creating application: " + e.getMessage());
-        }
-    }
-
-    // Update existing application
-    public Application updateApplication(String id, Application updatedApplication) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new InvalidApplicationDataException("Application ID cannot be null or empty");
-        }
-
-        validateApplicationData(updatedApplication);
-
-        try {
-            Optional<Application> existingApp = applicationRepository.findById(id);
-            if (existingApp.isPresent()) {
-                Application app = existingApp.get();
-                app.setApplicant(updatedApplication.getApplicant());
-                app.setHandler(updatedApplication.getHandler());
-                app.setStatus(updatedApplication.getStatus());
-                
-                return applicationRepository.save(app);
-            } else {
-                throw new ApplicationNotFoundException("Application with ID " + id + " not found");
-            }
-        } catch (ApplicationNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ApplicationServiceException("Error updating application: " + e.getMessage());
-        }
-    }
-
-    // Delete application
-    public boolean deleteApplication(String id) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new InvalidApplicationDataException("Application ID cannot be null or empty");
-        }
-
-        try {
-            if (applicationRepository.existsById(id)) {
-                applicationRepository.deleteById(id);
-                return true;
-            } else {
-                throw new ApplicationNotFoundException("Application with ID " + id + " not found");
-            }
-        } catch (ApplicationNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ApplicationServiceException("Error deleting application: " + e.getMessage());
-        }
-    }
-
-    // Get applications by status
-    public List<Application> getApplicationsByStatus(String status) {
-        if (!validStatuses.contains(status)) {
-            throw new InvalidApplicationDataException("Invalid status: " + status);
-        }
-        
-        try {
-            return applicationRepository.findByStatus(status);
-        } catch (Exception e) {
-            throw new ApplicationServiceException("Error retrieving applications by status: " + e.getMessage());
-        }
-    }
-
-    // Get applications by handler
-    public List<Application> getApplicationsByHandler(String handler) {
-        if (handler == null || handler.trim().isEmpty()) {
-            throw new InvalidApplicationDataException("Handler name cannot be null or empty");
-        }
-        
-        try {
-            return applicationRepository.findByHandler(handler);
-        } catch (Exception e) {
-            throw new ApplicationServiceException("Error retrieving applications by handler: " + e.getMessage());
-        }
-    }
-
-    // Private helper methods
-    private void validateApplicationData(Application application) {
-        if (application == null) {
-            throw new InvalidApplicationDataException("Application data cannot be null");
-        }
-        
-        if (application.getApplicant() == null || application.getApplicant().trim().isEmpty()) {
-            throw new InvalidApplicationDataException("Applicant name is required");
-        }
-        
-        if (application.getHandler() == null || application.getHandler().trim().isEmpty()) {
-            throw new InvalidApplicationDataException("Handler name is required");
-        }
-        
-        if (application.getStatus() == null || !validStatuses.contains(application.getStatus())) {
-            throw new InvalidApplicationDataException("Invalid or missing status. Valid statuses: " + validStatuses);
-        }
-    }
-
-    private String generateUniqueId() {
-        String id;
-        do {
-            Random random = new Random();
-            int randomNum = 100000 + random.nextInt(900000);
-            id = "SC" + randomNum;
-        } while (applicationRepository.existsById(id));
-        
-        return id;
-    }
-}
-
-// ========================================
-// CONFIGURATION FILES
-// ========================================
-
-// application.properties
-# Server Configuration
-server.port=8080
-
-# Database Configuration (H2 for development)
-spring.datasource.url=jdbc:h2:mem:creditcard
-spring.datasource.driver-class-name=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=
-
-# JPA Configuration
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-spring.jpa.hibernate.ddl-auto=create-drop
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-
-# H2 Console (for development)
-spring.h2.console.enabled=true
-spring.h2.console.path=/h2-console
-
-# CORS Configuration
-spring.web.cors.allow-credentials=true
-
-# ========================================
-// pom.xml dependencies (add these to your existing pom.xml)
-# ========================================
-
-/*
-<dependencies>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-    
-    <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <scope>runtime</scope>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-validation</artifactId>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-test</artifactId>
-        <scope>test</scope>
-    </dependency>
-</dependencies>
-*/
-
-// ========================================
-// DATA INITIALIZATION (Optional)
-// ========================================
-
-// DataInitializer.java
-package com.scb.creditcardorigination.application.service;
-
-import com.scb.creditcardorigination.application.model.Application;
-import com.scb.creditcardorigination.application.repository.ApplicationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
-
-@Component
-public class DataInitializer implements CommandLineRunner {
-
-    @Autowired
-    private ApplicationRepository applicationRepository;
-
-    @Override
-    public void run(String... args) throws Exception {
-        // Initialize with some sample data if the database is empty
-        if (applicationRepository.count() == 0) {
-            Application app1 = new Application("SC101234", "Chitranshu Gupta", "Harsha", "Application Submitted");
-            Application app2 = new Application("SC101235", "Chitranshu Gupta", "Harsha", "Credit Card Accepted");
-            Application app3 = new Application("SC101236", "Chitranshu Gupta", "Harsha", "Application Processing");
-            
-            applicationRepository.save(app1);
-            applicationRepository.save(app2);
-            applicationRepository.save(app3);
-            
-            System.out.println("Sample data initialized successfully!");
-        }
-    }
-}
+export default Onboarding;
