@@ -4,24 +4,17 @@ package com.scb.creditcardorigination.xfeature.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "applications")
 public class Xmodel {
 
     @Id
-    private String id;       // e.g. SC101234
+    private String id;
     private String applicant;
     private String handler;
     private String status;
-
-    public Xmodel() {}
-
-    public Xmodel(String id, String applicant, String handler, String status) {
-        this.id = id;
-        this.applicant = applicant;
-        this.handler = handler;
-        this.status = status;
-    }
 
     // Getters and setters
     public String getId() { return id; }
@@ -48,9 +41,9 @@ package com.scb.creditcardorigination.xfeature.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.scb.creditcardorigination.xfeature.model.Xmodel;
 
-// JPA repository gives CRUD methods automatically
 public interface Xrepository extends JpaRepository<Xmodel, String> {
 }
+
 
 
 ///////////////////
@@ -69,40 +62,31 @@ import java.util.Optional;
 
 @Service
 public class Xservice {
+    private final Xrepository repository;
 
-    private final Xrepository repo;
-
-    public Xservice(Xrepository repo) {
-        this.repo = repo;
+    public Xservice(Xrepository repository) {
+        this.repository = repository;
     }
 
     public List<Xmodel> getAllApplications() {
-        return repo.findAll();
+        return repository.findAll();
     }
 
     public Optional<Xmodel> getApplicationById(String id) {
-        return repo.findById(id);
+        return repository.findById(id);
     }
 
-    public Xmodel createApplication(Xmodel app) {
-        return repo.save(app);
+    public Xmodel createApplication(Xmodel application) {
+        return repository.save(application);
     }
 
-    public Xmodel updateApplication(String id, Xmodel updatedApp) {
-        return repo.findById(id).map(app -> {
-            app.setApplicant(updatedApp.getApplicant());
-            app.setHandler(updatedApp.getHandler());
-            app.setStatus(updatedApp.getStatus());
-            return repo.save(app);
-        }).orElse(null);
+    public Xmodel updateApplication(String id, Xmodel application) {
+        application.setId(id);
+        return repository.save(application);
     }
 
-    public boolean deleteApplication(String id) {
-        if (repo.existsById(id)) {
-            repo.deleteById(id);
-            return true;
-        }
-        return false;
+    public void deleteApplication(String id) {
+        repository.deleteById(id);
     }
 }
 
@@ -119,13 +103,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-// Global exception handler
 @ControllerAdvice
 public class XexceptionHandling {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGeneralException(Exception e) {
-        return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> handleAllExceptions(Exception ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -145,7 +128,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/applications")
-@CrossOrigin(origins = "http://localhost:3000") // ✅ allow React frontend
 public class Xcontroller {
 
     private final Xservice service;
@@ -154,46 +136,32 @@ public class Xcontroller {
         this.service = service;
     }
 
-    // Get all applications
     @GetMapping
-    public ResponseEntity<List<Xmodel>> getAll() {
-        return ResponseEntity.ok(service.getAllApplications());
+    public List<Xmodel> getAllApplications() {
+        return service.getAllApplications();
     }
 
-    // Get application by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Xmodel> getById(@PathVariable String id) {
+    public ResponseEntity<Xmodel> getApplicationById(@PathVariable String id) {
         return service.getApplicationById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Create new application
     @PostMapping
-    public ResponseEntity<Xmodel> create(@RequestBody Xmodel app) {
-        return ResponseEntity.ok(service.createApplication(app));
+    public Xmodel createApplication(@RequestBody Xmodel application) {
+        return service.createApplication(application);
     }
 
-    // Update application
     @PutMapping("/{id}")
-    public ResponseEntity<Xmodel> update(@PathVariable String id, @RequestBody Xmodel app) {
-        Xmodel updated = service.updateApplication(id, app);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public Xmodel updateApplication(@PathVariable String id, @RequestBody Xmodel application) {
+        return service.updateApplication(id, application);
     }
 
-    // Delete application
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable String id) {
-        boolean deleted = service.deleteApplication(id);
-        if (deleted) {
-            return ResponseEntity.ok("Application deleted successfully");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deleteApplication(@PathVariable String id) {
+        service.deleteApplication(id);
+        return ResponseEntity.noContent().build();
     }
 }
 /////////////////////
@@ -518,3 +486,4 @@ function Onboarding() {
 }
 
 export default Onboarding;
+
