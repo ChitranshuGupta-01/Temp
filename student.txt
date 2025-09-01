@@ -1,20 +1,157 @@
-// inside Xcontroller
-@PostMapping
-public ResponseEntity<Xmodel> createApplication(@RequestBody Xmodel application) {
-    if (application.getApplicant() == null || application.getApplicant().isEmpty() ||
-        application.getHandler() == null || application.getHandler().isEmpty() ||
-        application.getStatus() == null || application.getStatus().isEmpty()) {
-        return ResponseEntity.badRequest().build();
-    }
-    return ResponseEntity.ok(service.createApplication(application));
+Model 
+package com.scb.creditcardorigination.xfeature.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
+public class Application {
+    @Id
+    private String id;
+    private String applicant;
+    private String handler;
+    private String status;
+
+    // Getters and setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public String getApplicant() { return applicant; }
+    public void setApplicant(String applicant) { this.applicant = applicant; }
+    public String getHandler() { return handler; }
+    public void setHandler(String handler) { this.handler = handler; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
 
-@PutMapping("/{id}")
-public ResponseEntity<Xmodel> updateApplication(@PathVariable String id, @RequestBody Xmodel application) {
-    if (application.getApplicant() == null || application.getApplicant().isEmpty() ||
-        application.getHandler() == null || application.getHandler().isEmpty() ||
-        application.getStatus() == null || application.getStatus().isEmpty()) {
-        return ResponseEntity.badRequest().build();
+/////
+
+
+
+Repository (repository/Xrepository.java)
+
+package com.scb.creditcardorigination.xfeature.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.scb.creditcardorigination.xfeature.model.Application;
+
+public interface ApplicationRepository extends JpaRepository<Application, String> {}
+
+
+//////////////////////
+
+
+Service (service/Xservice.java)
+
+
+package com.scb.creditcardorigination.xfeature.service;
+
+import org.springframework.stereotype.Service;
+import com.scb.creditcardorigination.xfeature.model.Application;
+import com.scb.creditcardorigination.xfeature.repository.ApplicationRepository;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ApplicationService {
+    private final ApplicationRepository repo;
+    public ApplicationService(ApplicationRepository repo) { this.repo = repo; }
+
+    public List<Application> getAllApplications() { return repo.findAll(); }
+    public Optional<Application> getApplication(String id) { return repo.findById(id); }
+    public Application createApplication(Application app) { return repo.save(app); }
+    public Application updateApplication(String id, Application app) {
+        app.setId(id);
+        return repo.save(app);
     }
-    return ResponseEntity.ok(service.updateApplication(id, application));
+    public void deleteApplication(String id) { repo.deleteById(id); }
 }
+
+
+
+////////////
+
+
+Controller (controller/Xcontroller.java)
+
+package com.scb.creditcardorigination.xfeature.controller;
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.scb.creditcardorigination.xfeature.model.Application;
+import com.scb.creditcardorigination.xfeature.service.ApplicationService;
+import java.util.List;
+import java.util.Optional;
+
+@CrossOrigin
+@RestController
+@RequestMapping("/applications")
+public class ApplicationController {
+
+    @Autowired
+    private ApplicationService service;
+
+    @GetMapping
+    public ResponseEntity<List<Application>> getAll() {
+        return ResponseEntity.ok(service.getAllApplications());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Application> getById(@PathVariable String id) {
+        Optional<Application> app = service.getApplication(id);
+        return app.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<Application> create(@RequestBody Application app) {
+        return ResponseEntity.ok(service.createApplication(app));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Application> update(@PathVariable String id, @RequestBody Application app) {
+        return ResponseEntity.ok(service.updateApplication(id, app));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable String id) {
+        service.deleteApplication(id);
+        return ResponseEntity.ok("Deleted");
+    }
+}
+
+//////////////////////////
+
+
+
+Exception Handling (exceptionHandling/XexceptionHandling.java)
+
+
+package com.scb.creditcardorigination.xfeature.exceptionHandling;
+
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.http.ResponseEntity;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleAnyException(Exception e) {
+        return ResponseEntity.status(500).body("Error: " + e.getMessage());
+    }
+}
+
+
+
+////////////////////////
+
+
+SQL Schema (schema.sql)
+
+
+CREATE TABLE application (
+    id VARCHAR(20) PRIMARY KEY,
+    applicant VARCHAR(100),
+    handler VARCHAR(100),
+    status VARCHAR(50)
+);
+
