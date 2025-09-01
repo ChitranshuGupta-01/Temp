@@ -1,164 +1,325 @@
-Model 
-package com.scb.creditcardorigination.xfeature.model;
+import axios from "axios";
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+const BASE_URL = "http://localhost:8080/applications";
 
-@Entity
-public class Xmodel {
-    @Id
-    private String id;
-    private String applicant;
-    private String handler;
-    private String status;
+const service = {
+  getAllApplications: () => axios.get(BASE_URL),
 
-    // Getters and setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getApplicant() { return applicant; }
-    public void setApplicant(String applicant) { this.applicant = applicant; }
-    public String getHandler() { return handler; }
-    public void setHandler(String handler) { this.handler = handler; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+  getApplicationById: (id) => axios.get(`${BASE_URL}/${id}`),
+
+  createApplication: (appData) => axios.post(BASE_URL, appData),
+
+  updateApplication: (id, appData) => axios.put(`${BASE_URL}/${id}`, appData),
+
+  deleteApplication: (id) => axios.delete(`${BASE_URL}/${id}`),
+};
+
+export default service;
+
+
+///////////////////////
+
+
+
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import service from "./service"; // import the axios service
+import "./Onboarding.css";
+
+function Onboarding() {
+  const [applications, setApplications] = useState([]);
+  const [editingIdx, setEditingIdx] = useState(-1);
+  const [editData, setEditData] = useState({});
+  const [creating, setCreating] = useState(false);
+  const [createData, setCreateData] = useState({
+    applicant: "",
+    handler: "",
+    status: "Application Submitted",
+  });
+
+  const navigate = useNavigate();
+
+  // Load applications on component mount
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  function fetchApplications() {
+    service
+      .getAllApplications()
+      .then((response) => {
+        setApplications(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching applications:", error);
+      });
+  }
+
+  function handleEdit(idx) {
+    setEditingIdx(idx);
+    setEditData({ ...applications[idx] });
+  }
+
+  function handleEditChange(e) {
+    let copy = { ...editData };
+    copy[e.target.name] = e.target.value;
+    setEditData(copy);
+  }
+
+  function handleEditSave(idx) {
+    const app = applications[idx];
+    service
+      .updateApplication(app.id, editData)
+      .then((response) => {
+        // Update local state with updated app
+        let copy = [...applications];
+        copy[idx] = response.data;
+        setApplications(copy);
+        setEditingIdx(-1);
+      })
+      .catch((error) => {
+        console.error("Error updating application:", error);
+      });
+  }
+
+  function handleDelete(idx) {
+    const app = applications[idx];
+    service
+      .deleteApplication(app.id)
+      .then(() => {
+        let copy = [...applications];
+        copy.splice(idx, 1);
+        setApplications(copy);
+        setEditingIdx(-1);
+      })
+      .catch((error) => {
+        console.error("Error deleting application:", error);
+      });
+  }
+
+  function handleCreateOpen() {
+    setCreating(true);
+    setCreateData({
+      applicant: "",
+      handler: "",
+      status: "Application Submitted",
+    });
+  }
+
+  function handleCreateChange(e) {
+    let copy = { ...createData };
+    copy[e.target.name] = e.target.value;
+    setCreateData(copy);
+  }
+
+  function handleCreateSave() {
+    // Generate a unique ID on frontend as backend does not create ID automatically
+    const newId = "SC" + Math.floor(100000 + Math.random() * 900000);
+    const newApp = { id: newId, ...createData };
+
+    service
+      .createApplication(newApp)
+      .then((response) => {
+        setApplications([response.data, ...applications]);
+        setCreating(false);
+      })
+      .catch((error) => {
+        console.error("Error creating application:", error);
+      });
+  }
+
+  return (
+    <div className="main-content">
+      <div>
+        <div className="app-title">Applications</div>
+        <div className="app-desc">Manage customer onboarding applications</div>
+      </div>
+
+      <div className="create-container">
+        <button className="btn btn-create" onClick={handleCreateOpen}>
+          + Create New
+        </button>
+      </div>
+
+      {applications.map((app, idx) => (
+        <div
+          className="app-card"
+          key={app.id}
+          style={{ outline: editingIdx === idx ? "2px solid #5ea9fa" : "" }}
+        >
+          {editingIdx === idx ? (
+            <div className="edit-form">
+              <div className="form-group">
+                <label className="form-label">Application ID</label>
+                <input className="form-control" value={editData.id} disabled />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={editData.status}
+                  onChange={handleEditChange}
+                >
+                  <option>Application Submitted</option>
+                  <option>Application Processing</option>
+                  <option>Credit Card Offer</option>
+                  <option>Credit Card Accepted</option>
+                  <option>Printed & Shipped</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={editData.applicant}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={editData.handler}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="edit-actions">
+                <button
+                  className="btn-save"
+                  onClick={() => handleEditSave(idx)}
+                >
+                  ✔ Save
+                </button>
+                <button
+                  className="btn-cancel"
+                  onClick={() => setEditingIdx(-1)}
+                >
+                  ✖ Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="app-header">
+                <div className="app-header-left">
+                  <span className="app-id">Application ID - {app.id}</span>
+                  <span
+                    className={`badge badge-status ${
+                      app.status === "Application Submitted"
+                        ? "badge-submitted"
+                        : app.status === "Application Processing"
+                        ? "badge-processing"
+                        : app.status === "Credit Card Offer"
+                        ? "badge-offer"
+                        : app.status === "Credit Card Accepted"
+                        ? "badge-accepted"
+                        : "badge-shipped"
+                    }`}
+                  >
+                    {app.status}
+                  </span>
+                </div>
+                <div className="app-header-right">
+                  <button
+                    className="app-action-btn app-action-btn-edit"
+                    onClick={() => handleEdit(idx)}
+                  >
+                    ✎ Edit
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-offer"
+                    onClick={() => navigate("/home")}
+                  >
+                    💼 Offer Page
+                  </button>
+                  <button
+                    className="app-action-btn app-action-btn-del"
+                    onClick={() => handleDelete(idx)}
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
+              </div>
+              <div className="ms-1" style={{ lineHeight: 1.8 }}>
+                <span className="info-label">Applicant:</span>{" "}
+                <span className="info-value">{app.applicant}</span>
+                <br />
+                <span className="info-label">Handled By:</span>{" "}
+                <span className="info-value">{app.handler}</span>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+
+      {creating && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-box">
+            <span className="modal-close" onClick={() => setCreating(false)}>
+              &times;
+            </span>
+            <div className="modal-title">Create New Application</div>
+            <form className="modal-form" onSubmit={(e) => e.preventDefault()}>
+              <div className="form-group">
+                <label className="form-label">Applicant</label>
+                <input
+                  className="form-control"
+                  name="applicant"
+                  value={createData.applicant}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Applicant Name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Handled By</label>
+                <input
+                  className="form-control"
+                  name="handler"
+                  value={createData.handler}
+                  onChange={handleCreateChange}
+                  placeholder="Enter Handler Name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-select"
+                  name="status"
+                  value={createData.status}
+                  onChange={handleCreateChange}
+                >
+                  <option>Application Submitted</option>
+                  <option>Application Processing</option>
+                  <option>Credit Card Offer</option>
+                  <option>Credit Card Accepted</option>
+                  <option>Printed & Shipped</option>
+                </select>
+              </div>
+              <div className="modal-actions">
+                <button
+                  type="submit"
+                  className="btn btn-create"
+                  onClick={handleCreateSave}
+                >
+                  Create
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setCreating(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
-
-/////
-
-
-
-Repository (repository/Xrepository.java)
-
-package com.scb.creditcardorigination.xfeature.repository;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import com.scb.creditcardorigination.xfeature.model.Xmodel;
-
-public interface Xrepository extends JpaRepository<Xmodel, String> {}
-
-
-
-//////////////////////
-
-
-Service (service/Xservice.java)
-
-
-package com.scb.creditcardorigination.xfeature.service;
-
-import org.springframework.stereotype.Service;
-import com.scb.creditcardorigination.xfeature.model.Xmodel;
-import com.scb.creditcardorigination.xfeature.repository.Xrepository;
-import java.util.List;
-import java.util.Optional;
-
-@Service
-public class Xservice {
-    private final Xrepository repo;
-    public Xservice(Xrepository repo) { this.repo = repo; }
-
-    public List<Xmodel> getAll() { return repo.findAll(); }
-    public Optional<Xmodel> getById(String id) { return repo.findById(id); }
-    public Xmodel create(Xmodel obj) { return repo.save(obj); }
-    public Xmodel update(String id, Xmodel obj) {
-        obj.setId(id);
-        return repo.save(obj);
-    }
-    public void delete(String id) { repo.deleteById(id); }
-}
-
-
-
-
-////////////
-
-
-Controller (controller/Xcontroller.java)
-
-package com.scb.creditcardorigination.xfeature.controller;
-
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.scb.creditcardorigination.xfeature.model.Xmodel;
-import com.scb.creditcardorigination.xfeature.service.Xservice;
-import java.util.List;
-import java.util.Optional;
-
-@CrossOrigin
-@RestController
-@RequestMapping("/applications")
-public class Xcontroller {
-
-    @Autowired
-    private Xservice service;
-
-    @GetMapping
-    public ResponseEntity<List<Xmodel>> getAll() {
-        return ResponseEntity.ok(service.getAll());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Xmodel> getById(@PathVariable String id) {
-        Optional<Xmodel> app = service.getById(id);
-        return app.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public ResponseEntity<Xmodel> create(@RequestBody Xmodel obj) {
-        return ResponseEntity.ok(service.create(obj));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Xmodel> update(@PathVariable String id, @RequestBody Xmodel obj) {
-        return ResponseEntity.ok(service.update(id, obj));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable String id) {
-        service.delete(id);
-        return ResponseEntity.ok("Deleted");
-    }
-}
-
-
-//////////////////////////
-
-
-
-Exception Handling (exceptionHandling/XexceptionHandling.java)
-
-
-package com.scb.creditcardorigination.xfeature.exceptionHandling;
-
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.http.ResponseEntity;
-
-@ControllerAdvice
-public class XexceptionHandling {
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleAnyException(Exception e) {
-        return ResponseEntity.status(500).body("Error: " + e.getMessage());
-    }
-}
-
-
-
-
-////////////////////////
-
-
-SQL Schema (schema.sql)
-
-
-CREATE TABLE xmodel (
-    id VARCHAR(20) PRIMARY KEY,
-    applicant VARCHAR(100),
-    handler VARCHAR(100),
-    status VARCHAR(50)
-);
-
-
-
+export default Onboarding;
