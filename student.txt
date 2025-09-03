@@ -2,75 +2,106 @@ package com.scb.creditcardorigination.xfeature.service;
 
 import com.scb.creditcardorigination.xfeature.model.Document;
 import com.scb.creditcardorigination.xfeature.repository.DocumentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class DocumentService {
 
-    private final String uploadDir = "uploads/";
+    private final DocumentRepository documentRepository;
 
-    @Autowired
-    private DocumentRepository documentRepository;
-
-    // Save document entity
-    public Document saveDocument(Document document) {
-        return documentRepository.save(document);
+    public DocumentService(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
     }
 
-    // Upload a file and update document path
-    public Document uploadFile(Long documentId, MultipartFile file, String type) throws IOException {
-        Optional<Document> optionalDoc = documentRepository.findById(documentId);
-        if (optionalDoc.isEmpty()) {
-            throw new RuntimeException("Document not found with ID: " + documentId);
-        }
-
-        Document document = optionalDoc.get();
-
-        // Create upload dir if not exists
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        // Save file
-        String filePath = uploadDir + documentId + "_" + type + "_" + file.getOriginalFilename();
-        Path path = Paths.get(filePath);
-        Files.write(path, file.getBytes());
-
-        // Set path based on type
-        switch (type.toLowerCase()) {
-            case "idproof":
-                document.setIdProofPath(filePath);
-                break;
-            case "addressproof":
-                document.setAddressProofPath(filePath);
-                break;
-            case "incomeproof":
-                document.setIncomeProofPath(filePath);
-                break;
-            default:
-                throw new RuntimeException("Invalid document type: " + type);
-        }
-
-        return documentRepository.save(document);
+    public List<Document> getAllDocuments() {
+        return documentRepository.findAll();
     }
 
-    // Fetch a document by ID
-    public Optional<Document> getDocument(Long id) {
+    public Optional<Document> getDocumentById(Long id) {
         return documentRepository.findById(id);
     }
 
-    // Delete document by ID
-    public void deleteDocument(Long id) {
-        documentRepository.deleteById(id);
+    public Document createDocument(Document document) {
+        return documentRepository.save(document);
+    }
+
+    public Optional<Document> updateDocument(Long id, Document updatedDocument) {
+        return documentRepository.findById(id).map(existing -> {
+            existing.setApplicationId(updatedDocument.getApplicationId());
+            existing.setIdProofPath(updatedDocument.getIdProofPath());
+            existing.setAddressProofPath(updatedDocument.getAddressProofPath());
+            existing.setIncomeProofPath(updatedDocument.getIncomeProofPath());
+            return documentRepository.save(existing);
+        });
+    }
+
+    public boolean deleteDocument(Long id) {
+        return documentRepository.findById(id).map(doc -> {
+            documentRepository.delete(doc);
+            return true;
+        }).orElse(false);
+    }
+}
+
+
+//////////////
+
+
+package com.scb.creditcardorigination.xfeature.controller;
+
+import com.scb.creditcardorigination.xfeature.model.Document;
+import com.scb.creditcardorigination.xfeature.service.DocumentService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/documents")
+public class DocumentController {
+
+    private final DocumentService documentService;
+
+    public DocumentController(DocumentService documentService) {
+        this.documentService = documentService;
+    }
+
+    // GET all documents
+    @GetMapping
+    public List<Document> getAllDocuments() {
+        return documentService.getAllDocuments();
+    }
+
+    // GET by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Document> getDocumentById(@PathVariable Long id) {
+        return documentService.getDocumentById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // POST create
+    @PostMapping
+    public Document createDocument(@RequestBody Document document) {
+        return documentService.createDocument(document);
+    }
+
+    // PUT update
+    @PutMapping("/{id}")
+    public ResponseEntity<Document> updateDocument(@PathVariable Long id, @RequestBody Document document) {
+        return documentService.updateDocument(id, document)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+        return documentService.deleteDocument(id)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 }
