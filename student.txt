@@ -1,7 +1,2 @@
-CREATE TABLE documents (
-    id SERIAL PRIMARY KEY,
-    application_id INT,
-    document_name VARCHAR(255),
-    document_type VARCHAR(255),
-    file_url VARCHAR(500)
-);
+INSERT INTO documents (application_id, document_name, document_type, file_url)
+VALUES (123, 'ID Proof', 'Passport', '/uploads/idproof123.jpg');
