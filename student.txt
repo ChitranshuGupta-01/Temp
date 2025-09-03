@@ -7,7 +7,6 @@ const getAllDocuments = () => axios.get(BASE_URL);
 const getDocumentById = (id) => axios.get(`${BASE_URL}/${id}`);
 
 const createDocument = (docData, file) => {
-  // Use FormData to send JSON + File together in multipart/form-data
   const formData = new FormData();
   formData.append("file", file);
   formData.append(
@@ -16,9 +15,7 @@ const createDocument = (docData, file) => {
   );
 
   return axios.post(BASE_URL, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+    headers: { "Content-Type": "multipart/form-data" },
   });
 };
 
@@ -35,7 +32,26 @@ export default {
   deleteDocument,
 };
 
-///
+
+
+
+
+
+
+
+
+
+
+
+
+////////////
+
+
+
+
+
+
+
 
 
 import React, { useState, useEffect } from "react";
@@ -52,7 +68,6 @@ function DocumentManager() {
     applicationId: "",
     documentName: "",
     documentType: "",
-    fileUrl: "",
   });
   const [createFile, setCreateFile] = useState(null);
 
@@ -86,10 +101,12 @@ function DocumentManager() {
 
   const handleEditSave = (idx) => {
     const doc = documents[idx];
-    // If a new file was selected, upload it separately or enhance backend for update with file
-    // For now, update without file change
+    const updatedDoc = { ...editData };
+
+    // If file upload on edit is required, backend support needed
+    // For now, update metadata only
     documentService
-      .updateDocument(doc.id, editData)
+      .updateDocument(doc.id, updatedDoc)
       .then((res) => {
         const updatedDocs = [...documents];
         updatedDocs[idx] = res.data;
@@ -117,7 +134,6 @@ function DocumentManager() {
       applicationId: "",
       documentName: "",
       documentType: "",
-      fileUrl: "",
     });
     setCreateFile(null);
   };
@@ -171,29 +187,28 @@ function DocumentManager() {
                   <td>
                     <input
                       name="applicationId"
-                      value={editData.applicationId}
+                      value={editData.applicationId || ""}
                       onChange={handleEditChange}
                     />
                   </td>
                   <td>
                     <input
                       name="documentName"
-                      value={editData.documentName}
+                      value={editData.documentName || ""}
                       onChange={handleEditChange}
                     />
                   </td>
                   <td>
                     <input
                       name="documentType"
-                      value={editData.documentType}
+                      value={editData.documentType || ""}
                       onChange={handleEditChange}
                     />
                   </td>
                   <td>
                     <input
                       name="fileUrl"
-                      value={editData.fileUrl}
-                      onChange={handleEditChange}
+                      value={editData.fileUrl || ""}
                       readOnly
                     />
                     <input type="file" onChange={handleEditFileChange} />
@@ -223,6 +238,7 @@ function DocumentManager() {
           ))}
         </tbody>
       </table>
+
       {creating && (
         <div className="modal-backdrop">
           <div className="modal-box">
@@ -257,8 +273,12 @@ function DocumentManager() {
                 <input type="file" onChange={handleCreateFileChange} />
               </label>
               <div>
-                <button onClick={handleCreateSave}>Create</button>
-                <button onClick={() => setCreating(false)}>Cancel</button>
+                <button type="button" onClick={handleCreateSave}>
+                  Create
+                </button>
+                <button type="button" onClick={() => setCreating(false)}>
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
