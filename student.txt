@@ -1,5 +1,3 @@
-Document.java
-
 package com.scb.creditcardorigination.xfeature.model;
 
 import jakarta.persistence.*;
@@ -14,222 +12,56 @@ public class Document {
     private Integer applicationId;
     private String documentName;
     private String documentType;
-    private String fileUrl; // Will store URL like /uploads/filename.jpg
+    private String fileUrl;
+
+    // Constructors (optional)
+    public Document() {}
+
+    public Document(Integer applicationId, String documentName, String documentType, String fileUrl) {
+        this.applicationId = applicationId;
+        this.documentName = documentName;
+        this.documentType = documentType;
+        this.fileUrl = fileUrl;
+    }
 
     // Getters and Setters
-
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
-
-    public Integer getApplicationId() { return applicationId; }
-    public void setApplicationId(Integer applicationId) { this.applicationId = applicationId; }
-
-    public String getDocumentName() { return documentName; }
-    public void setDocumentName(String documentName) { this.documentName = documentName; }
-
-    public String getDocumentType() { return documentType; }
-    public void setDocumentType(String documentType) { this.documentType = documentType; }
-
-    public String getFileUrl() { return fileUrl; }
-    public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; }
-}
-
-
-//////////
-
-
-DocumentRepository.java
-
-package com.scb.creditcardorigination.xfeature.repository;
-
-import com.scb.creditcardorigination.xfeature.model.Document;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface DocumentRepository extends JpaRepository<Document, Integer> {}
-
-
-///////////////
-
-
- DocumentNotFoundException.java
-
-package com.scb.creditcardorigination.xfeature.exceptionHandling;
-
-public class DocumentNotFoundException extends RuntimeException {
-    public DocumentNotFoundException(String message) {
-        super(message);
-    }
-}
-
-
-//////////////
-
-
-FileStorageService.java
-
-package com.scb.creditcardorigination.xfeature.service;
-
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.*;
-
-@Service
-public class FileStorageService {
-
-    private final Path uploadDir = Paths.get("uploads");
-
-    public FileStorageService() {
-        try {
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Could not create upload folder!", e);
-        }
+    public Integer getId() {
+        return id;
     }
 
-    public String storeFile(MultipartFile file) {
-        String filename = StringUtils.cleanPath(file.getOriginalFilename());
-        Path targetLocation = uploadDir.resolve(filename);
-
-        try {
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-            // Return URL relative to your server base URL
-            return "/uploads/" + filename;
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store file " + filename, e);
-        }
-    }
-}
-
-
-//////////////
-
-DocumentService.java
-
-
-package com.scb.creditcardorigination.xfeature.service;
-
-import com.scb.creditcardorigination.xfeature.model.Document;
-import com.scb.creditcardorigination.xfeature.repository.DocumentRepository;
-import com.scb.creditcardorigination.xfeature.exceptionHandling.DocumentNotFoundException;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-@Service
-public class DocumentService {
-    @Autowired
-    private DocumentRepository repository;
-
-    public List<Document> getAllDocuments() {
-        return repository.findAll();
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public Document getDocumentById(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new DocumentNotFoundException("Document not found"));
+    public Integer getApplicationId() {
+        return applicationId;
     }
 
-    public Document createDocument(Document doc) {
-        return repository.save(doc);
+    public void setApplicationId(Integer applicationId) {
+        this.applicationId = applicationId;
     }
 
-    public Document updateDocument(Integer id, Document doc) {
-        Document existing = repository.findById(id).orElseThrow(() -> new DocumentNotFoundException("Document not found"));
-        existing.setApplicationId(doc.getApplicationId());
-        existing.setDocumentName(doc.getDocumentName());
-        existing.setDocumentType(doc.getDocumentType());
-        existing.setFileUrl(doc.getFileUrl());
-        return repository.save(existing);
+    public String getDocumentName() {
+        return documentName;
     }
 
-    public void deleteDocument(Integer id) {
-        repository.deleteById(id);
-    }
-}
-
-////////////
-
-DocumentController.java
-
-package com.scb.creditcardorigination.xfeature.controller;
-
-import com.scb.creditcardorigination.xfeature.model.Document;
-import com.scb.creditcardorigination.xfeature.service.DocumentService;
-import com.scb.creditcardorigination.xfeature.service.FileStorageService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/documents")
-public class DocumentController {
-
-    @Autowired
-    private DocumentService documentService;
-
-    @Autowired
-    private FileStorageService fileStorageService;
-
-    @GetMapping
-    public List<Document> getAllDocuments() {
-        return documentService.getAllDocuments();
+    public void setDocumentName(String documentName) {
+        this.documentName = documentName;
     }
 
-    @GetMapping("/{id}")
-    public Document getDocumentById(@PathVariable Integer id) {
-        return documentService.getDocumentById(id);
+    public String getDocumentType() {
+        return documentType;
     }
 
-    @PostMapping
-    public Document createDocument(@RequestPart("document") Document doc,
-                                   @RequestPart("file") MultipartFile file) {
-        // Store file and get accessible URL path
-        String filePath = fileStorageService.storeFile(file);
-        doc.setFileUrl(filePath);
-        return documentService.createDocument(doc);
+    public void setDocumentType(String documentType) {
+        this.documentType = documentType;
     }
 
-    @PutMapping("/{id}")
-    public Document updateDocument(@PathVariable Integer id,
-                                   @RequestBody Document doc) {
-        return documentService.updateDocument(id, doc);
+    public String getFileUrl() {
+        return fileUrl;
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDocument(@PathVariable Integer id) {
-        documentService.deleteDocument(id);
-        return ResponseEntity.ok().build();
-    }
-}
-
-
-///////////
-
-
-WebConfig.java
-
-package com.scb.creditcardorigination.xfeature.config;
-
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.*;
-
-@Configuration
-public class WebConfig implements WebMvcConfigurer {
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Serve files under /uploads/ via HTTP
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 }
