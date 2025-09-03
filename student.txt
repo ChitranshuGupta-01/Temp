@@ -1,17 +1,17 @@
-import axios from "axios";
+CREATE TABLE applications (
+    id SERIAL PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(15) NOT NULL,
+    credit_card_type VARCHAR(50),
+    profile_type VARCHAR(50)
+);
 
-const BASE_URL = "http://localhost:8080/documents";
-
-const documentService = {
-  getAllDocuments: () => axios.get(BASE_URL),
-
-  getDocumentById: (id) => axios.get(`${BASE_URL}/${id}`),
-
-  createDocument: (docData) => axios.post(BASE_URL, docData),
-
-  updateDocument: (id, docData) => axios.put(`${BASE_URL}/${id}`, docData),
-
-  deleteDocument: (id) => axios.delete(`${BASE_URL}/${id}`),
-};
-
-export default documentService;
+CREATE TABLE documents (
+    id SERIAL PRIMARY KEY,
+    application_id INT NOT NULL,
+    document_name VARCHAR(100),
+    document_type VARCHAR(50),
+    file_url VARCHAR(500),
+    CONSTRAINT fk_application FOREIGN KEY (application_id) 
+        REFERENCES applications(id) ON DELETE CASCADE
+);
