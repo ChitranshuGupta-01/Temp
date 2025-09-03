@@ -1,17 +1,25 @@
-WebMvcConfigurer
+import axios from "axios";
+const BASE_URL = "http://localhost:8080/documents";
 
+const getAllDocuments = () => axios.get(BASE_URL);
 
-package com.scb.creditcardorigination.xfeature.config;
+const createDocument = (docData, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("document", new Blob([JSON.stringify(docData)], { type: "application/json" }));
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.*;
+  return axios.post(BASE_URL, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
 
-@Configuration
-public class WebConfig implements WebMvcConfigurer {
+const updateDocument = (id, docData) => axios.put(`${BASE_URL}/${id}`, docData);
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
-    }
-}
+const deleteDocument = (id) => axios.delete(`${BASE_URL}/${id}`);
+
+export default {
+  getAllDocuments,
+  createDocument,
+  updateDocument,
+  deleteDocument,
+};
