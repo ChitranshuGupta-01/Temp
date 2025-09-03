@@ -3,31 +3,8 @@ import documentService from "./serviceDocuments"; // new service for documents
 import "./DocumentManager.css";
 
 function DocumentManager() {
-    const [documents, setDocuments] = useState([
-      {
-        id: 1,
-        applicationId: "SC101234",
-        documentName: "Passport Copy",
-        documentType: "Identity Proof",
-        fileUrl: "https://example.com/passport.pdf",
-      },
-      {
-        id: 2,
-        applicationId: "SC101235",
-        documentName: "Bank Statement",
-        documentType: "Financial Document",
-        fileUrl: "https://example.com/bank-statement.pdf",
-      },
-      {
-        id: 3,
-        applicationId: "SC101236",
-        documentName: "Utility Bill",
-        documentType: "Address Proof",
-        fileUrl: "https://example.com/utility-bill.pdf",
-      },
-    ]);
+  const [documents, setDocuments] = useState([]);
 
-  //const [documents, setDocuments] = useState([]);
   const [editingIdx, setEditingIdx] = useState(-1);
   const [editData, setEditData] = useState({});
   const [creating, setCreating] = useState(false);
@@ -35,7 +12,7 @@ function DocumentManager() {
     applicationId: "",
     documentName: "",
     documentType: "",
-    fileUrl: "",
+    file: null, // store file instead of path
   });
 
   useEffect(() => {
@@ -90,7 +67,7 @@ function DocumentManager() {
       applicationId: "",
       documentName: "",
       documentType: "",
-      fileUrl: "",
+      file: null,
     });
   };
 
@@ -99,9 +76,19 @@ function DocumentManager() {
     setCreateData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    setCreateData((prev) => ({ ...prev, file: e.target.files[0] }));
+  };
+
   const handleCreateSave = () => {
+    const formData = new FormData();
+    formData.append("applicationId", createData.applicationId);
+    formData.append("documentName", createData.documentName);
+    formData.append("documentType", createData.documentType);
+    formData.append("file", createData.file);
+
     documentService
-      .createDocument(createData)
+      .createDocument(formData)
       .then((res) => {
         setDocuments([res.data, ...documents]);
         setCreating(false);
@@ -123,7 +110,7 @@ function DocumentManager() {
             <th>Application ID</th>
             <th>Document Name</th>
             <th>Document Type</th>
-            <th>File URL</th>
+            <th>File</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -171,7 +158,11 @@ function DocumentManager() {
                   <td>{doc.documentName}</td>
                   <td>{doc.documentType}</td>
                   <td>
-                    <a href={doc.fileUrl} target="_blank" rel="noreferrer">
+                    <a
+                      href={`http://localhost:8080${doc.fileUrl}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       View
                     </a>
                   </td>
@@ -216,12 +207,8 @@ function DocumentManager() {
                 />
               </label>
               <label>
-                File URL:
-                <input
-                  name="fileUrl"
-                  value={createData.fileUrl}
-                  onChange={handleCreateChange}
-                />
+                Upload File:
+                <input type="file" onChange={handleFileChange} />
               </label>
               <div>
                 <button onClick={handleCreateSave}>Create</button>
