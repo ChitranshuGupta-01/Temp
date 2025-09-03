@@ -1,3 +1,13 @@
-spring.servlet.multipart.enabled=true
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
+@PostMapping
+public Document createDocument(@RequestParam Integer applicationId,
+                               @RequestParam String documentName,
+                               @RequestParam String documentType,
+                               @RequestPart("file") MultipartFile file) {
+    Document doc = new Document();
+    doc.setApplicationId(applicationId);
+    doc.setDocumentName(documentName);
+    doc.setDocumentType(documentType);
+    String filePath = fileStorageService.storeFile(file);
+    doc.setFileUrl(filePath);
+    return documentService.createDocument(doc);
+}
