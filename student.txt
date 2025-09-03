@@ -1,2 +1,3 @@
-INSERT INTO documents (application_id, document_name, document_type, file_url)
-VALUES (123, 'ID Proof', 'Passport', '/uploads/idproof123.jpg');
+spring.servlet.multipart.enabled=true
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
