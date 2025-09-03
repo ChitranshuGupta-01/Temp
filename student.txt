@@ -1,17 +1,200 @@
-CREATE TABLE applications (
-    id SERIAL PRIMARY KEY,
-    full_name VARCHAR(100) NOT NULL,
-    phone_number VARCHAR(15) NOT NULL,
-    credit_card_type VARCHAR(50),
-    profile_type VARCHAR(50)
-);
+Document.java
 
-CREATE TABLE documents (
-    id SERIAL PRIMARY KEY,
-    application_id INT NOT NULL,
-    document_name VARCHAR(100),
-    document_type VARCHAR(50),
-    file_url VARCHAR(500),
-    CONSTRAINT fk_application FOREIGN KEY (application_id) 
-        REFERENCES applications(id) ON DELETE CASCADE
-);
+package com.scb.creditcardorigination.xfeature.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "documents")
+public class Document {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "application_id")
+    private Long applicationId;
+
+    @Column(name = "document_name")
+    private String documentName;
+
+    @Column(name = "document_type")
+    private String documentType;
+
+    @Column(name = "file_url")
+    private String fileUrl;
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getApplicationId() { return applicationId; }
+    public void setApplicationId(Long applicationId) { this.applicationId = applicationId; }
+
+    public String getDocumentName() { return documentName; }
+    public void setDocumentName(String documentName) { this.documentName = documentName; }
+
+    public String getDocumentType() { return documentType; }
+    public void setDocumentType(String documentType) { this.documentType = documentType; }
+
+    public String getFileUrl() { return fileUrl; }
+    public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; }
+}
+///////////////////
+
+
+
+DocumentRepository.java
+
+
+package com.scb.creditcardorigination.xfeature.repository;
+
+import com.scb.creditcardorigination.xfeature.model.Document;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface DocumentRepository extends JpaRepository<Document, Long> {
+}
+
+
+/////////////
+
+
+DocumentService.java
+
+
+package com.scb.creditcardorigination.xfeature.service;
+
+import com.scb.creditcardorigination.xfeature.model.Document;
+import com.scb.creditcardorigination.xfeature.repository.DocumentRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class DocumentService {
+
+    private final DocumentRepository documentRepository;
+
+    public DocumentService(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
+
+    public List<Document> getAllDocuments() {
+        return documentRepository.findAll();
+    }
+
+    public Document getDocumentById(Long id) {
+        return documentRepository.findById(id).orElse(null);
+    }
+
+    public Document createDocument(Document doc) {
+        return documentRepository.save(doc);
+    }
+
+    public Document updateDocument(Long id, Document updatedDoc) {
+        return documentRepository.findById(id).map(doc -> {
+            doc.setApplicationId(updatedDoc.getApplicationId());
+            doc.setDocumentName(updatedDoc.getDocumentName());
+            doc.setDocumentType(updatedDoc.getDocumentType());
+            doc.setFileUrl(updatedDoc.getFileUrl());
+            return documentRepository.save(doc);
+        }).orElse(null);
+    }
+
+    public void deleteDocument(Long id) {
+        documentRepository.deleteById(id);
+    }
+}
+
+
+/////////////////
+
+
+
+DocumentController.java
+
+package com.scb.creditcardorigination.xfeature.controller;
+
+import com.scb.creditcardorigination.xfeature.model.Document;
+import com.scb.creditcardorigination.xfeature.service.DocumentService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/documents")
+@CrossOrigin(origins = "http://localhost:3000") // allow React frontend
+public class DocumentController {
+
+    private final DocumentService documentService;
+
+    public DocumentController(DocumentService documentService) {
+        this.documentService = documentService;
+    }
+
+    @GetMapping
+    public List<Document> getAllDocuments() {
+        return documentService.getAllDocuments();
+    }
+
+    @GetMapping("/{id}")
+    public Document getDocumentById(@PathVariable Long id) {
+        return documentService.getDocumentById(id);
+    }
+
+    @PostMapping
+    public Document createDocument(@RequestBody Document doc) {
+        return documentService.createDocument(doc);
+    }
+
+    @PutMapping("/{id}")
+    public Document updateDocument(@PathVariable Long id, @RequestBody Document doc) {
+        return documentService.updateDocument(id, doc);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteDocument(@PathVariable Long id) {
+        documentService.deleteDocument(id);
+    }
+}
+
+/////////////////////
+
+
+
+Exception Handling
+
+package com.scb.creditcardorigination.xfeature.exceptionHandling;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body("Error: " + e.getMessage());
+    }
+}
+
+
+/////////////
+
+
+INSERT INTO applications (full_name, phone_number, credit_card_type, profile_type)
+VALUES 
+('Chitranshu Gupta', '9876543210', 'Platinum', 'Salaried'),
+('Harsha Mehta', '9123456780', 'Gold', 'Self-Employed');
+
+
+//////////
+
+INSERT INTO documents (application_id, document_name, document_type, file_url)
+VALUES
+(1, 'ID Proof', 'Aadhar Card', '/uploads/id_proof_chitranshu.png'),
+(1, 'Address Proof', 'Electricity Bill', '/uploads/address_chitranshu.pdf'),
+(2, 'ID Proof', 'PAN Card', '/uploads/id_proof_harsha.png');
