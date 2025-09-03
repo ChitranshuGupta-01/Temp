@@ -1,103 +1,60 @@
-package com.scb.creditcardorigination.xfeature.controller;
+package com.scb.creditcardorigination.xfeature.model;
 
-import com.scb.creditcardorigination.xfeature.model.Document;
-import com.scb.creditcardorigination.xfeature.repository.DocumentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import jakarta.persistence.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+@Entity
+@Table(name = "documents")
+public class Document {
 
-@RestController
-@RequestMapping("/documents")
-public class DocumentController {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Autowired
-    private DocumentRepository documentRepository;
+    @Column(name = "id_proof_path")
+    private String idProofPath;
 
-    // ---------------- GET ALL ----------------
-    @GetMapping
-    public List<Document> getAllDocuments() {
-        return documentRepository.findAll();
+    @Column(name = "address_proof_path")
+    private String addressProofPath;
+
+    @Column(name = "income_proof_path")
+    private String incomeProofPath;
+
+    @Column(name = "application_id", unique = true)
+    private Long applicationId;
+
+    // --- Getters and Setters ---
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    // ---------------- GET BY ID ----------------
-    @GetMapping("/{id}")
-    public ResponseEntity<Document> getDocumentById(@PathVariable int id) {
-        Optional<Document> doc = documentRepository.findById(id);
-        return doc.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public String getIdProofPath() {
+        return idProofPath;
+    }
+    public void setIdProofPath(String idProofPath) {
+        this.idProofPath = idProofPath;
     }
 
-    // ---------------- CREATE (UPLOAD) ----------------
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadDocument(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("applicationId") int applicationId,
-            @RequestParam("documentType") String documentType
-    ) throws IOException {
-
-        // Upload directory
-        String uploadDir = "uploads/";
-
-        File directory = new File(uploadDir);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        // Save file to local uploads folder
-        String filePath = uploadDir + file.getOriginalFilename();
-        File dest = new File(filePath);
-        file.transferTo(dest);
-
-        // Save DB entry
-        Document doc = new Document();
-        doc.setApplicationId(applicationId);
-
-        switch (documentType.toLowerCase()) {
-            case "id":
-                doc.setIdProofPath("/" + filePath);
-                break;
-            case "address":
-                doc.setAddressProofPath("/" + filePath);
-                break;
-            case "income":
-                doc.setIncomeProofPath("/" + filePath);
-                break;
-            default:
-                return ResponseEntity.badRequest().body("Invalid documentType. Use id/address/income");
-        }
-
-        documentRepository.save(doc);
-
-        return ResponseEntity.ok("File uploaded successfully: /" + filePath);
+    public String getAddressProofPath() {
+        return addressProofPath;
+    }
+    public void setAddressProofPath(String addressProofPath) {
+        this.addressProofPath = addressProofPath;
     }
 
-    // ---------------- UPDATE ----------------
-    @PutMapping("/{id}")
-    public ResponseEntity<Document> updateDocument(@PathVariable int id, @RequestBody Document updatedDoc) {
-        return documentRepository.findById(id)
-                .map(doc -> {
-                    doc.setApplicationId(updatedDoc.getApplicationId());
-                    doc.setIdProofPath(updatedDoc.getIdProofPath());
-                    doc.setAddressProofPath(updatedDoc.getAddressProofPath());
-                    doc.setIncomeProofPath(updatedDoc.getIncomeProofPath());
-                    Document saved = documentRepository.save(doc);
-                    return ResponseEntity.ok(saved);
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public String getIncomeProofPath() {
+        return incomeProofPath;
+    }
+    public void setIncomeProofPath(String incomeProofPath) {
+        this.incomeProofPath = incomeProofPath;
     }
 
-    // ---------------- DELETE ----------------
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDocument(@PathVariable int id) {
-        if (!documentRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        documentRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public Long getApplicationId() {
+        return applicationId;
+    }
+    public void setApplicationId(Long applicationId) {
+        this.applicationId = applicationId;
     }
 }
