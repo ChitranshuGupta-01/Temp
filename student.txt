@@ -1,90 +1,64 @@
 import React, { useState, useEffect } from "react";
-import documentService from "./serviceDocuments";
-import "./DocumentManager.css";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import documentService from "./serviceDocuments"; // API service
+import "./DocumentManager.css";
 
 function DocumentManager() {
   const [documents, setDocuments] = useState([]);
   const [editingIdx, setEditingIdx] = useState(-1);
   const [editData, setEditData] = useState({});
+  const [creating, setCreating] = useState(false);
 
+  // ✅ Fetch documents
   useEffect(() => {
     fetchDocuments();
   }, []);
 
-  const fetchDocuments = () => {
-    documentService
-      .getAllDocuments()
-      .then((res) => setDocuments(res.data))
-      .catch((err) => console.error("Error fetching documents", err));
-  };
-
-  const handleEdit = (idx) => {
-    setEditingIdx(idx);
-    setEditData({ ...documents[idx] });
-  };
-
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleEditSave = (idx) => {
-    const doc = documents[idx];
-    documentService
-      .updateDocument(doc.id, editData)
-      .then((res) => {
-        const updatedDocs = [...documents];
-        updatedDocs[idx] = res.data;
-        setDocuments(updatedDocs);
-        setEditingIdx(-1);
-      })
-      .catch((err) => console.error("Error updating document:", err));
-  };
-
-  const handleDelete = (idx) => {
-    const doc = documents[idx];
-    documentService
-      .deleteDocument(doc.id)
-      .then(() => {
-        const updatedDocs = [...documents];
-        updatedDocs.splice(idx, 1);
-        setDocuments(updatedDocs);
-      })
-      .catch((err) => console.error("Error deleting document:", err));
-  };
-
-
-  const handleDownloadExcel = () => {
-    if (documents.length) {
-      alert("No data available to download!");
-      return;
+  const fetchDocuments = async () => {
+    try {
+      const res = await documentService.getAllDocuments();
+      console.log("Fetched Documents:", res.data); // 🔍 Debug
+      setDocuments(res.data);
+    } catch (err) {
+      console.error("Error fetching documents:", err);
     }
+  };
 
-    const worksheet = XLSX.utils.json_to_sheet(documents);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Documents");
+  // ✅ Handle Excel download
+  const handleDownloadExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(documents);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Documents");
+    XLSX.writeFile(wb, "documents.xlsx");
+  };
 
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
+  // ✅ Edit
+  const handleEdit = (doc) => {
+    setEditingIdx(doc.id);
+    setEditData({ ...doc });
+  };
 
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, "documents.xlsx");
+  // ✅ Delete
+  const handleDelete = async (id) => {
+    try {
+      await documentService.deleteDocument(id);
+      fetchDocuments();
+    } catch (err) {
+      console.error("Error deleting document:", err);
+    }
   };
 
   return (
     <div className="document-manager-container">
-      {/* Header row with heading on left and button on right */}
+      {/* Header with button */}
       <div className="document-manager-header">
         <h2>Document Manager</h2>
         <button className="btn-download" onClick={handleDownloadExcel}>
-            Download Excel
+          ⬇ Download Excel
         </button>
       </div>
 
+      {/* Table */}
       <table className="document-table">
         <thead>
           <tr>
@@ -96,65 +70,38 @@ function DocumentManager() {
           </tr>
         </thead>
         <tbody>
-          {documents.map((doc, idx) => (
-            <tr key={doc.id}>
-              {editingIdx === idx ? (
-                <>
-                  <td>
-                    <input
-                      name="applicationId"
-                      value={editData.applicationId}
-                      onChange={handleEditChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      name="documentName"
-                      value={editData.documentName}
-                      onChange={handleEditChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      name="documentType"
-                      value={editData.documentType}
-                      onChange={handleEditChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      name="fileUrl"
-                      value={editData.fileUrl}
-                      onChange={handleEditChange}
-                    />
-                  </td>
-                  <td>
-                    <button onClick={() => handleEditSave(idx)}>✔ Save</button>
-                    <button onClick={() => setEditingIdx(-1)}>✖ Cancel</button>
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td>{doc.applicationId}</td>
-                  <td>{doc.documentName}</td>
-                  <td>{doc.documentType}</td>
-                  <td>
+          {documents.length > 0 ? (
+            documents.map((doc) => (
+              <tr key={doc.id}>
+                <td>{doc.applicationId}</td>
+                <td>{doc.documentName}</td>
+                <td>{doc.documentType}</td>
+                <td>
+                  {doc.fileUrl ? (
                     <a
-                      href={`http://localhost:8080${doc.fileUrl}`}
+                      href={doc.fileUrl}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                     >
                       View
                     </a>
-                  </td>
-                  <td>
-                    <button onClick={() => handleEdit(idx)}>Edit</button>
-                    <button onClick={() => handleDelete(idx)}>Delete</button>
-                  </td>
-                </>
-              )}
+                  ) : (
+                    "No File"
+                  )}
+                </td>
+                <td>
+                  <button onClick={() => handleEdit(doc)}>Edit</button>
+                  <button onClick={() => handleDelete(doc.id)}>Delete</button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5" style={{ textAlign: "center" }}>
+                No data available
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
@@ -163,33 +110,15 @@ function DocumentManager() {
 
 export default DocumentManager;
 
+//////////////////////////////////////
 
 
-
-///////////////
-
-
-/* Container */
-.document-manager-container {
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  padding: 20px;
-  background-color: #f9fbfd; /* light white-blue background */
-  color: #002147; /* SC dark blue */
-}
-
-/* Header row with button aligned right */
+/* Header with button aligned right */
 .document-manager-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-}
-
-/* Heading */
-.document-manager-container h2 {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #006a4d; /* SC green */
 }
 
 /* Download button styled like edit (green) */
@@ -204,61 +133,5 @@ export default DocumentManager;
 }
 
 .btn-download:hover {
-  background-color: #004d34;
-}
-
-/* Table */
-.document-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 33, 71, 0.1);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.document-table th,
-.document-table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid #e6eef5;
-}
-
-.document-table th {
-  background-color: #002147; /* SC navy blue */
-  color: #fff;
-  font-weight: 600;
-}
-
-.document-table tr:nth-child(even) {
-  background-color: #f4f9fc;
-}
-
-.document-table tr:hover {
-  background-color: #e6f5f0; /* subtle SC green tint */
-}
-
-/* Action buttons */
-.document-table button {
-  padding: 6px 10px;
-  border-radius: 5px;
-  border: none;
-  margin-right: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.document-table button:hover {
-  opacity: 0.9;
-}
-
-.document-table button:first-of-type {
-  background-color: #006a4d; /* edit = green */
-  color: #fff;
-}
-
-.document-table button:last-of-type {
-  background-color: #d32f2f; /* delete = red */
-  color: #fff;
+  background-color: #004d34; /* darker green */
 }
