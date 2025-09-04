@@ -1,10 +1,4 @@
-<td>
-  <input
-    name="applicationId"
-    value={editData.applicationId}
-    onChange={handleEditChange}
-  />
-</td>
+<td>{doc.applicationId}</td>
 <td>
   <input
     name="documentName"
@@ -20,9 +14,11 @@
   />
 </td>
 <td>
-  <input
-    name="fileUrl"
-    value={editData.fileUrl}
-    onChange={handleEditChange}
-  />
+  <a
+    href={`http://localhost:8080${doc.fileUrl}`}
+    target="_blank"
+    rel="noreferrer"
+  >
+    View
+  </a>
 </td>
