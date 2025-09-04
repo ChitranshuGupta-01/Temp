@@ -1,14 +1,2 @@
-function handleDownloadExcel() {
-  if (applications.length === 0) {
-    alert("No applications available to download.");
-    return;
-  }
-
-  // Convert applications array to worksheet
-  const worksheet = XLSX.utils.json_to_sheet(applications);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Applications");
-
-  // Download as Excel
-  XLSX.writeFile(workbook, "applications.xlsx");
-}
+INSERT INTO your_documents (application_id, document_name, document_type, file_url)
+VALUES ('app123', 'resume.pdf', 'Resume', 'https://example.com/files/resume.pdf');
