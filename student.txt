@@ -1,117 +1,18 @@
-import React, { useState, useEffect } from "react";
-import * as XLSX from "xlsx";
-import documentService from "./serviceDocuments"; // API service
-import "./DocumentManager.css";
-
-function DocumentManager() {
-  const [documents, setDocuments] = useState([]);
-  const [editingIdx, setEditingIdx] = useState(-1);
-  const [editData, setEditData] = useState({});
-  const [creating, setCreating] = useState(false);
-
-  // ✅ Fetch documents
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  const fetchDocuments = async () => {
-    try {
-      const res = await documentService.getAllDocuments();
-      console.log("Fetched Documents:", res.data); // 🔍 Debug
-      setDocuments(res.data);
-    } catch (err) {
-      console.error("Error fetching documents:", err);
-    }
-  };
-
-  // ✅ Handle Excel download
-  const handleDownloadExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(documents);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Documents");
-    XLSX.writeFile(wb, "documents.xlsx");
-  };
-
-  // ✅ Edit
-  const handleEdit = (doc) => {
-    setEditingIdx(doc.id);
-    setEditData({ ...doc });
-  };
-
-  // ✅ Delete
-  const handleDelete = async (id) => {
-    try {
-      await documentService.deleteDocument(id);
-      fetchDocuments();
-    } catch (err) {
-      console.error("Error deleting document:", err);
-    }
-  };
-
-  return (
-    <div className="document-manager-container">
-      {/* Header with button */}
-      <div className="document-manager-header">
-        <h2>Document Manager</h2>
-        <button className="btn-download" onClick={handleDownloadExcel}>
-          ⬇ Download Excel
-        </button>
-      </div>
-
-      {/* Table */}
-      <table className="document-table">
-        <thead>
-          <tr>
-            <th>Application ID</th>
-            <th>Document Name</th>
-            <th>Document Type</th>
-            <th>File</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {documents.length > 0 ? (
-            documents.map((doc) => (
-              <tr key={doc.id}>
-                <td>{doc.applicationId}</td>
-                <td>{doc.documentName}</td>
-                <td>{doc.documentType}</td>
-                <td>
-                  {doc.fileUrl ? (
-                    <a
-                      href={doc.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View
-                    </a>
-                  ) : (
-                    "No File"
-                  )}
-                </td>
-                <td>
-                  <button onClick={() => handleEdit(doc)}>Edit</button>
-                  <button onClick={() => handleDelete(doc.id)}>Delete</button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" style={{ textAlign: "center" }}>
-                No data available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
+/* Container */
+.document-manager-container {
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  padding: 20px;
+  background-color: #f9fbfd; /* light white-blue background */
+  color: #002147; /* SC dark blue */
 }
 
-export default DocumentManager;
-
-//////////////////////////////////////
-
+/* Heading */
+.document-manager-container h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #006a4d; /* SC green */
+  margin-bottom: 20px;
+}
 
 /* Header with button aligned right */
 .document-manager-header {
@@ -119,6 +20,26 @@ export default DocumentManager;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-create {
+  background-color: #006a4d; /* SC green */
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.btn-create:hover {
+  background-color: #004d34;
 }
 
 /* Download button styled like edit (green) */
@@ -134,4 +55,127 @@ export default DocumentManager;
 
 .btn-download:hover {
   background-color: #004d34; /* darker green */
+}
+
+/* Table */
+.document-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 33, 71, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.document-table th,
+.document-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e6eef5;
+}
+
+.document-table th {
+  background-color: #002147; /* SC navy blue */
+  color: #fff;
+  font-weight: 600;
+}
+
+.document-table tr:nth-child(even) {
+  background-color: #f4f9fc;
+}
+
+.document-table tr:hover {
+  background-color: #e6f5f0; /* subtle SC green tint */
+}
+
+/* Action buttons */
+.document-table button {
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: none;
+  margin-right: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.document-table button:hover {
+  opacity: 0.9;
+}
+
+.document-table button:first-of-type {
+  background-color: #006a4d; /* edit = green */
+  color: #fff;
+}
+
+.document-table button:last-of-type {
+  background-color: #d32f2f; /* delete = red */
+  color: #fff;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 33, 71, 0.6); /* SC dark blue overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: #fff;
+  padding: 24px;
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0 6px 20px rgba(0, 33, 71, 0.2);
+}
+
+.modal-box h3 {
+  margin-bottom: 16px;
+  color: #006a4d; /* SC green */
+}
+
+.modal-box label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: #002147;
+}
+
+.modal-box input {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 4px;
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
+}
+
+.modal-box input:focus {
+  border-color: #006a4d;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 106, 77, 0.3);
+}
+
+.modal-box button {
+  margin-top: 12px;
+  margin-right: 10px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.modal-box button:first-of-type {
+  background-color: #006a4d;
+  color: #fff;
+}
+
+.modal-box button:last-of-type {
+  background-color: #9e9e9e;
+  color: #fff;
 }
