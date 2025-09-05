@@ -1,132 +1,18 @@
-import React, { useState, useEffect } from "react";
-import documentService from "./serviceDocuments"; // new service for documents
-import "./DocumentManager.css";
+INSERT INTO otherdocument (id_proof_path, address_proof_path, income_proof_path, application_id)
+VALUES (
+    'https://example.com/id_proof.pdf',
+    'https://example.com/address_proof.pdf',
+    'https://example.com/income_proof.pdf',
+    101
+);
 
-function DocumentManager() {
-  const [documents, setDocuments] = useState([]);
-  const [editingIdx, setEditingIdx] = useState(-1);
-  const [editData, setEditData] = useState({});
 
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  const fetchDocuments = () => {
-    documentService
-      .getAllDocuments()
-      .then((res) => setDocuments(res.data))
-      .catch((err) => console.error("Error fetching documents", err));
-  };
-
-  const handleEdit = (idx) => {
-    setEditingIdx(idx);
-    setEditData({ ...documents[idx] });
-  };
-
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleEditSave = (idx) => {
-    const doc = documents[idx];
-    documentService
-      .updateDocument(doc.id, editData)
-      .then((res) => {
-        const updatedDocs = [...documents];
-        updatedDocs[idx] = res.data;
-        setDocuments(updatedDocs);
-        setEditingIdx(-1);
-      })
-      .catch((err) => console.error("Error updating document:", err));
-  };
-
-  const handleDelete = (idx) => {
-    const doc = documents[idx];
-    documentService
-      .deleteDocument(doc.id)
-      .then(() => {
-        const updatedDocs = [...documents];
-        updatedDocs.splice(idx, 1);
-        setDocuments(updatedDocs);
-      })
-      .catch((err) => console.error("Error deleting document:", err));
-  };
-
-  return (
-    <div className="document-manager-container">
-      <h2>Document Manager</h2>
-
-      <table className="document-table">
-        <thead>
-          <tr>
-            <th>Application ID</th>
-            <th>Document Name</th>
-            <th>Document Type</th>
-            <th>File</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {documents.map((doc, idx) => (
-            <tr key={doc.id}>
-              {editingIdx === idx ? (
-                <>
-                  <td>{doc.applicationId}</td>
-                  <td>
-                    <input
-                      name="documentName"
-                      value={editData.documentName}
-                      onChange={handleEditChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      name="documentType"
-                      value={editData.documentType}
-                      onChange={handleEditChange}
-                    />
-                  </td>
-                  <td>
-                    <a
-                      href={`http://localhost:8080${doc.fileUrl}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View
-                    </a>
-                  </td>
-                  <td>
-                    <button onClick={() => handleEditSave(idx)}> Save</button>
-                    <button onClick={() => setEditingIdx(-1)}> Cancel</button>
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td>{doc.applicationId}</td>
-                  <td>{doc.documentName}</td>
-                  <td>{doc.documentType}</td>
-                  <td>
-                    <a
-                      href={`http://localhost:8080${doc.fileUrl}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View
-                    </a>
-                  </td>
-                  <td>
-                    <button onClick={() => handleEdit(idx)}>Edit</button>
-                    <button onClick={() => handleDelete(idx)}>Delete</button>
-                  </td>
-                </>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-export default DocumentManager;
+CREATE TABLE otherdocument (
+    id SERIAL PRIMARY KEY,
+    id_proof_path VARCHAR(500),
+    address_proof_path VARCHAR(500),
+    income_proof_path VARCHAR(500),
+    application_id INT UNIQUE,
+    CONSTRAINT fk_application FOREIGN KEY (application_id) 
+        REFERENCES applications(id) ON DELETE CASCADE
+);
