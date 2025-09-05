@@ -1,18 +1,33 @@
-INSERT INTO otherdocument (id_proof_path, address_proof_path, income_proof_path, application_id)
-VALUES (
-    'https://example.com/id_proof.pdf',
-    'https://example.com/address_proof.pdf',
-    'https://example.com/income_proof.pdf',
-    101
-);
+CREATE OR REPLACE FUNCTION insert_into_documents_from_otherdocument()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Insert ID Proof
+    IF NEW.id_proof_path IS NOT NULL THEN
+        INSERT INTO documents (application_id, document_name, document_type, file_url)
+        VALUES (NEW.application_id, 'ID Proof', 'ID', NEW.id_proof_path);
+    END IF;
+
+    -- Insert Address Proof
+    IF NEW.address_proof_path IS NOT NULL THEN
+        INSERT INTO documents (application_id, document_name, document_type, file_url)
+        VALUES (NEW.application_id, 'Address Proof', 'Address', NEW.address_proof_path);
+    END IF;
+
+    -- Insert Income Proof
+    IF NEW.income_proof_path IS NOT NULL THEN
+        INSERT INTO documents (application_id, document_name, document_type, file_url)
+        VALUES (NEW.application_id, 'Income Proof', 'Income', NEW.income_proof_path);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+//////////
 
 
-CREATE TABLE otherdocument (
-    id SERIAL PRIMARY KEY,
-    id_proof_path VARCHAR(500),
-    address_proof_path VARCHAR(500),
-    income_proof_path VARCHAR(500),
-    application_id INT UNIQUE,
-    CONSTRAINT fk_application FOREIGN KEY (application_id) 
-        REFERENCES applications(id) ON DELETE CASCADE
-);
+
+CREATE TRIGGER after_otherdocument_insert
+AFTER INSERT ON otherdocument
+FOR EACH ROW
+EXECUTE FUNCTION insert_into_documents_from_otherdocument();
