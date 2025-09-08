@@ -1,49 +1,66 @@
-package com.scb.creditcardorigination.document.model;
+package com.scb.creditcardorigination.applicationFormFeature.controller;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scb.creditcardorigination.applicationFormFeature.model.Application;
+import com.scb.creditcardorigination.applicationFormFeature.service.ApplicationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-@Entity
-@Table(name = "dmtable")
-public class Document {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+import java.io.IOException;
+import java.util.List;
 
-    @Column(name = "application_id")
-    private String applicationId;  // <-- maps to Application.applicationId (SCxxx)
+@RestController
+@RequestMapping("/api/applications")
+@CrossOrigin(origins = "http://localhost:3000")
+public class ApplicationController {
+    private final ApplicationService applicationService;
+    private final ObjectMapper objectMapper;
 
-    @Column(name = "document_name")
-    private String documentName;
-
-    @Column(name = "document_type")
-    private String documentType;
-
-    @Column(name = "file_url")
-    private String fileUrl;
-
-    // Constructors
-    public Document() {}
-
-    public Document(String applicationId, String documentName, String documentType, String fileUrl) {
-        this.applicationId = applicationId;
-        this.documentName = documentName;
-        this.documentType = documentType;
-        this.fileUrl = fileUrl;
+    public ApplicationController(ApplicationService applicationService, ObjectMapper objectMapper) {
+        this.applicationService = applicationService;
+        this.objectMapper = objectMapper;
     }
 
-    // Getters & Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    // ✅ POST mapping for creating new application
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<Application> createApplication(
+            @RequestPart("application") String applicationJson,
+            @RequestPart("idProof") MultipartFile idProof,
+            @RequestPart("addressProof") MultipartFile addressProof,
+            @RequestPart("incomeProof") MultipartFile incomeProof
+    ) throws IOException {
+        // Convert JSON string into Application object
+        Application app = objectMapper.readValue(applicationJson, Application.class);
 
-    public String getApplicationId() { return applicationId; }
-    public void setApplicationId(String applicationId) { this.applicationId = applicationId; }
+        // ⚡ DO NOT set applicationId from frontend
+        // It will be auto-generated inside ApplicationService.saveApplication
 
-    public String getDocumentName() { return documentName; }
-    public void setDocumentName(String documentName) { this.documentName = documentName; }
+        Application saved = applicationService.saveApplication(app, idProof, addressProof, incomeProof);
 
-    public String getDocumentType() { return documentType; }
-    public void setDocumentType(String documentType) { this.documentType = documentType; }
+        return ResponseEntity.ok(saved); // ✅ returns application with generated applicationId
+    }
 
-    public String getFileUrl() { return fileUrl; }
-    public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; }
+    // ✅ GET mapping for finding all applications
+    @GetMapping
+    public List<Application> getAll() {
+        return applicationService.getAll();
+    }
+
+    // ✅ GET mapping for finding application by numeric DB ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Application> getById(@PathVariable Long id) {
+        Application app = applicationService.getById(id);
+        return app != null ? ResponseEntity.ok(app) : ResponseEntity.notFound().build();
+    }
+
+    // ✅ Optional: Fetch by applicationId (SCxxxx)
+    @GetMapping("/byAppId/{applicationId}")
+    public ResponseEntity<Application> getByApplicationId(@PathVariable String applicationId) {
+        return applicationService.getAll().stream()
+                .filter(app -> applicationId.equals(app.getApplicationId()))
+                .findFirst()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
