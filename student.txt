@@ -1,11 +1,16 @@
-Description:
- 
-Parameter 0 of constructor in com.scb.creditcardorigination.applicationFormFeature.service.ApplicationService required a bean of type 'com.scb.creditcardorigination.applicationFormFeature.repository.ApplicationFormRepository' that could not be found.
- 
- 
-Action:
- 
-Consider defining a bean of type 'com.scb.creditcardorigination.applicationFormFeature.repository.ApplicationFormRepository' in your configuration.
- 
- 
-Process finished with exit code 1
+package com.scb.creditcardorigination; // your main package
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+
+@SpringBootApplication
+@EnableJpaRepositories(basePackages = "com.scb.creditcardorigination.applicationFormFeature.repository")
+@EntityScan(basePackages = "com.scb.creditcardorigination.applicationFormFeature.model")
+public class CreditCardOriginationApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(CreditCardOriginationApplication.class, args);
+    }
+}
