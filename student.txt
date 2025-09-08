@@ -1,9 +1,2 @@
-CREATE TABLE documents (
-    id SERIAL PRIMARY KEY,
-    id_proof_path VARCHAR(500),
-    address_proof_path VARCHAR(500),
-    income_proof_path VARCHAR(500),
-    application_id INT UNIQUE,
-    CONSTRAINT fk_application FOREIGN KEY (application_id) 
-        REFERENCES applications(id) ON DELETE CASCADE
-);
+INSERT INTO applications (full_name, phone_number, email, credit_card_type, profile_type)
+VALUES ('Ramesh Kumar', '9876543210', 'ramesh@example.com', 'Platinum', 'Salaried');
