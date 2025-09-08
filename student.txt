@@ -1,6 +1,130 @@
-CREATE TABLE applications (
-    id VARCHAR(20) PRIMARY KEY,
-    applicant VARCHAR(100),
-    handler VARCHAR(100),
-    status VARCHAR(50)
-);
+package com.scb.creditcardorigination.onboarding.controller;
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.scb.creditcardorigination.onboarding.model.onboardingApplication;
+import com.scb.creditcardorigination.onboarding.service.onboardingService;
+import java.util.List;
+import java.util.Optional;
+
+@CrossOrigin
+@RestController
+@RequestMapping("/applications")
+public class onboardingController {
+
+    @Autowired
+    private onboardingService service;
+
+    @GetMapping
+    public ResponseEntity<List<onboardingApplication>> getAll() {
+        return ResponseEntity.ok(service.getAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<onboardingApplication> getById(@PathVariable String id) {
+        Optional<onboardingApplication> app = service.getById(id);
+        return app.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<onboardingApplication> create(@RequestBody onboardingApplication obj) {
+        return ResponseEntity.ok(service.create(obj));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<onboardingApplication> update(@PathVariable String id, @RequestBody onboardingApplication obj) {
+        return ResponseEntity.ok(service.update(id, obj));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable String id) {
+        service.delete(id);
+        return ResponseEntity.ok("Deleted");
+    }
+}
+
+
+
+
+
+
+
+package com.scb.creditcardorigination.onboarding.exceptionHandling;
+
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.http.ResponseEntity;
+
+@ControllerAdvice
+public class onboardingException {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleAnyException(Exception e) {
+        return ResponseEntity.status(500).body("Error: " + e.getMessage());
+    }
+}
+
+
+
+
+
+
+
+package com.scb.creditcardorigination.onboarding.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
+public class onboardingApplication {
+    @Id
+    private String id;
+    private String applicant;
+    private String handler;
+    private String status;
+
+    // Getters and setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public String getApplicant() { return applicant; }
+    public void setApplicant(String applicant) { this.applicant = applicant; }
+    public String getHandler() { return handler; }
+    public void setHandler(String handler) { this.handler = handler; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+}
+
+
+
+package com.scb.creditcardorigination.onboarding.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.scb.creditcardorigination.onboarding.model.onboardingApplication;
+
+public interface onboardingRepository extends JpaRepository<onboardingApplication, String> {}
+
+
+
+package com.scb.creditcardorigination.onboarding.service;
+
+import org.springframework.stereotype.Service;
+import com.scb.creditcardorigination.onboarding.model.onboardingApplication;
+import com.scb.creditcardorigination.onboarding.repository.onboardingRepository;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class onboardingService {
+    private final onboardingRepository repo;
+    public onboardingService(onboardingRepository repo) { this.repo = repo; }
+
+    public List<onboardingApplication> getAll() { return repo.findAll(); }
+    public Optional<onboardingApplication> getById(String id) { return repo.findById(id); }
+    public onboardingApplication create(onboardingApplication obj) { return repo.save(obj); }
+    public onboardingApplication update(String id, onboardingApplication obj) {
+        obj.setId(id);
+        return repo.save(obj);
+    }
+    public void delete(String id) { repo.deleteById(id); }
+}
+
