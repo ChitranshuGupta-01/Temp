@@ -1,16 +1,13 @@
-package com.scb.creditcardorigination; // your main package
+.btn-cancel-modal {
+  background: #f44336;   /* red cancel button */
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-
-@SpringBootApplication
-@EnableJpaRepositories(basePackages = "com.scb.creditcardorigination.applicationFormFeature.repository")
-@EntityScan(basePackages = "com.scb.creditcardorigination.applicationFormFeature.model")
-public class CreditCardOriginationApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(CreditCardOriginationApplication.class, args);
-    }
+.btn-cancel-modal:hover {
+  background: #d32f2f;
 }
