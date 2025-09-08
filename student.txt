@@ -27,14 +27,13 @@ public class ApplicationService {
                                        MultipartFile idProof,
                                        MultipartFile addressProof,
                                        MultipartFile incomeProof) throws IOException {
-
         // Create upload directory if it doesn't exist
         Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // Create document entity and store file paths
+        // Create document entity and store file paths with /uploads/ prefix
         Document2 doc = new Document2();
         doc.setIdProofPath(storeFile(uploadPath, idProof));
         doc.setAddressProofPath(storeFile(uploadPath, addressProof));
@@ -55,7 +54,8 @@ public class ApplicationService {
         // Copy file to target location
         Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
 
-        return filename; // Return relative filename for database storage
+        // Return relative path with /uploads/ prefix for frontend consumption
+        return "/uploads/" + filename;
     }
 
     public List<Application> getAll() {
