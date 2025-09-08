@@ -1,59 +1,8 @@
-import React from "react";
-import { motion } from "framer-motion";
-
-export default function Guide() {
-  const steps = [
-    {
-      title: "Choose Your Card",
-      description:
-        "Explore a variety of credit cards designed for rewards, lifestyle, and travel benefits.",
-    },
-    {
-      title: "Apply Securely",
-      description:
-        "Fill in your application with bank-level security and real-time verification.",
-    },
-    {
-      title: "Get Approved Fast",
-      description:
-        "Receive instant approval updates and track your application status anytime.",
-    },
-    {
-      title: "Enjoy Benefits",
-      description:
-        "Start using your credit card to unlock exclusive Standard Chartered rewards and offers.",
-    },
-  ];
-
-  return (
-    <div className="bg-gray-50 py-12 px-6 lg:px-32">
-      <motion.h2
-        className="text-3xl lg:text-4xl font-bold text-center mb-10 text-[#0033A0]"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        Your Guide to Standard Chartered Credit Cards
-      </motion.h2>
-
-      <div className="space-y-8 max-w-3xl mx-auto">
-        {steps.map((step, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
-            className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#007047]"
-          >
-            <h3 className="text-xl font-semibold mb-2 text-[#0033A0]">
-              Step {index + 1}: {step.title}
-            </h3>
-            <p className="text-gray-700 text-base leading-relaxed">
-              {step.description}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
+CREATE TABLE customer_profiles (
+    id SERIAL PRIMARY KEY,
+    full_name VARCHAR(100),
+    phone_number VARCHAR(15),
+    email VARCHAR(255),
+    credit_card_type VARCHAR(50),
+    profile_type VARCHAR(50)
+);
