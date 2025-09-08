@@ -1,98 +1,49 @@
-package com.scb.creditcardorigination.applicationFormFeature.service;
+package com.scb.creditcardorigination.document.model;
 
-import com.scb.creditcardorigination.applicationFormFeature.model.Application;
-import com.scb.creditcardorigination.applicationFormFeature.model.Document2;
-import com.scb.creditcardorigination.applicationFormFeature.repository.ApplicationFormRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import jakarta.persistence.*;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.List;
-import java.util.Random;
+@Entity
+@Table(name = "dmtable")
+public class Document {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-@Service
-public class ApplicationService {
-    private final ApplicationFormRepository applicationRepository;
+    @Column(name = "application_id")
+    private String applicationId;  // <-- maps to Application.applicationId (SCxxx)
 
-    @Value("${app.upload.dir}")
-    private String uploadDir;
+    @Column(name = "document_name")
+    private String documentName;
 
-    public ApplicationService(ApplicationFormRepository applicationRepository) {
-        this.applicationRepository = applicationRepository;
+    @Column(name = "document_type")
+    private String documentType;
+
+    @Column(name = "file_url")
+    private String fileUrl;
+
+    // Constructors
+    public Document() {}
+
+    public Document(String applicationId, String documentName, String documentType, String fileUrl) {
+        this.applicationId = applicationId;
+        this.documentName = documentName;
+        this.documentType = documentType;
+        this.fileUrl = fileUrl;
     }
 
-    public Application saveApplication(Application application, MultipartFile idProof, MultipartFile addressProof, MultipartFile incomeProof) throws IOException {
-        // Generate ApplicationId if not already set
-        if (application.getApplicationId() == null || application.getApplicationId().isEmpty()) {
-            application.setApplicationId(generateApplicationId());
-        }
+    // Getters & Setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-        // Create upload directory if it doesn't exist
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
+    public String getApplicationId() { return applicationId; }
+    public void setApplicationId(String applicationId) { this.applicationId = applicationId; }
 
-        // Create document entity and store file paths
-        Document2 doc = new Document2();
-        doc.setIdProofPath(storeFile(uploadPath, idProof));
-        doc.setAddressProofPath(storeFile(uploadPath, addressProof));
-        doc.setIncomeProofPath(storeFile(uploadPath, incomeProof));
+    public String getDocumentName() { return documentName; }
+    public void setDocumentName(String documentName) { this.documentName = documentName; }
 
-        application.setDocuments(doc);
+    public String getDocumentType() { return documentType; }
+    public void setDocumentType(String documentType) { this.documentType = documentType; }
 
-        // Save and return application
-        return applicationRepository.save(application);
-    }
-
-    private String storeFile(Path uploadPath, MultipartFile file) throws IOException {
-        String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        Path target = uploadPath.resolve(filename);
-        Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-        return filename;
-    }
-
-    private String generateApplicationId() {
-        Random random = new Random();
-        int number = 100 + random.nextInt(9000); // SC100 - SC9999
-        return "SC" + number;
-    }
-
-    public List<Application> getAll() {
-        return applicationRepository.findAll();
-    }
-
-    public Application getById(Long id) {
-        return applicationRepository.findById(id).orElse(null);
-    }
-
-    public List<Application> getByEmail(String email) {
-        return applicationRepository.findByEmail(email);
-    }
-
-    public List<Application> getByCreditCardType(String creditCardType) {
-        return applicationRepository.findByCreditCardType(creditCardType);
-    }
-
-    public List<Application> getByProfileType(String profileType) {
-        return applicationRepository.findByProfileType(profileType);
-    }
-
-    public void deleteApplication(Long id) {
-        applicationRepository.deleteById(id);
-    }
-
-    public Application updateApplication(Long id, Application updatedApplication) {
-        return applicationRepository.findById(id)
-                .map(application -> {
-                    application.setFullName(updatedApplication.getFullName());
-                    application.setPhoneNumber(updatedApplication.getPhoneNumber());
-                    application.setEmail(updatedApplication.getEmail());
-                    application.setCreditCardType(updatedApplication.getCreditCardType());
-                    application.setProfileType(updatedApplication.getProfileType());
-                    return applicationRepository.save(application);
-                }).orElse(null);
-    }
+    public String getFileUrl() { return fileUrl; }
+    public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; }
 }
