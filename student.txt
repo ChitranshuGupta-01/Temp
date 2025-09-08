@@ -1,13 +1,14 @@
-.btn-cancel-modal {
-  background: #f44336;   /* red cancel button */
-  color: white;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 8px;
-  font-weight: 500;
+.btn-cancel { 
+  background: #f44336;   /* red background */
+  color: #fff;           /* white text */
+  border: none; 
+  padding: 8px 18px; 
+  border-radius: 8px; 
+  font-weight: 500; 
+  cursor: pointer;
   transition: background 0.2s;
 }
 
-.btn-cancel-modal:hover {
-  background: #d32f2f;
+.btn-cancel:hover { 
+  background: #d32f2f;   /* darker red on hover */
 }
