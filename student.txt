@@ -1,2 +1,7 @@
-INSERT INTO applications (full_name, phone_number, email, credit_card_type, profile_type)
-VALUES ('Ramesh Kumar', '9876543210', 'ramesh@example.com', 'Platinum', 'Salaried');
+INSERT INTO documents (id_proof_path, address_proof_path, income_proof_path, application_id)
+VALUES (
+    '/uploads/id_proof.png',
+    '/uploads/address_proof.png',
+    '/uploads/income_proof.png',
+    1
+);
