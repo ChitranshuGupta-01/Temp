@@ -1,9 +1,32 @@
-CREATE TABLE documents (
-    id SERIAL PRIMARY KEY,
-    id_proof_path VARCHAR(500),
-    address_proof_path VARCHAR(500),
-    income_proof_path VARCHAR(500),
-    application_id INT UNIQUE,
-    CONSTRAINT fk_application FOREIGN KEY (application_id) 
-        REFERENCES applications(id) ON DELETE CASCADE
-);
+CREATE OR REPLACE FUNCTION insert_into_dmtable_from_documents()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Insert ID Proof
+    IF NEW.id_proof_path IS NOT NULL THEN
+        INSERT INTO dmtable (application_id, document_name, document_type, file_url)
+        VALUES (NEW.application_id, 'ID Proof', 'ID', NEW.id_proof_path);
+    END IF;
+
+    -- Insert Address Proof
+    IF NEW.address_proof_path IS NOT NULL THEN
+        INSERT INTO dmtable (application_id, document_name, document_type, file_url)
+        VALUES (NEW.application_id, 'Address Proof', 'Address', NEW.address_proof_path);
+    END IF;
+
+    -- Insert Income Proof
+    IF NEW.income_proof_path IS NOT NULL THEN
+        INSERT INTO dmtable (application_id, document_name, document_type, file_url)
+        VALUES (NEW.application_id, 'Income Proof', 'Income', NEW.income_proof_path);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+CREATE TRIGGER after_documents_insert
+AFTER INSERT ON documents
+FOR EACH ROW
+EXECUTE FUNCTION insert_into_dmtable_from_documents();
