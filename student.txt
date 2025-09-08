@@ -1,6 +1,6 @@
-INSERT INTO applications (full_name, phone_number, email, credit_card_type, profile_type)
-VALUES ('Chitranshu Gupta', '9876543210', 'chitranshu.g@example.com', 'Platinum', 'Salaried');
-
-
-INSERT INTO documents (id_proof_path, address_proof_path, income_proof_path, application_id)
-VALUES ('/uploads/back.jpg', '/uploads/back.jpg', '/uploads/back.jpg', 1);
+CREATE TABLE applications (
+    id VARCHAR(20) PRIMARY KEY,
+    applicant VARCHAR(100),
+    handler VARCHAR(100),
+    status VARCHAR(50)
+);
