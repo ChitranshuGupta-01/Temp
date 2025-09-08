@@ -1,14 +1,15 @@
-.btn-cancel { 
-  background: #f44336;   /* red background */
-  color: #fff;           /* white text */
-  border: none; 
-  padding: 8px 18px; 
-  border-radius: 8px; 
-  font-weight: 500; 
+/* force override bootstrap button */
+.modal-actions .btn-cancel {
+  background: #f44336 !important;  /* red cancel */
+  color: #fff !important;
+  border: none !important;
+  padding: 8px 18px !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
   cursor: pointer;
   transition: background 0.2s;
 }
 
-.btn-cancel:hover { 
-  background: #d32f2f;   /* darker red on hover */
+.modal-actions .btn-cancel:hover {
+  background: #d32f2f !important;
 }
