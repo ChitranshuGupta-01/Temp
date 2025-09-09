@@ -1,53 +1,54 @@
-import React from "react";
-import { motion } from "framer-motion";
+Got it 👍. I’ll compress each user story into **2 clear and well-explained lines** while keeping the intent intact. Here’s the refined version:
 
-export default function Guide() {
-  const steps = [
-    {
-      title: "Choose Your Card",
-      description:
-        "Explore a variety of credit cards designed for rewards, lifestyle, and travel benefits.",
-    },
-    {
-      title: "Apply Securely",
-      description:
-        "Fill in your application with bank-level security and real-time verification.",
-    },
-    {
-      title: "Get Approved Fast",
-      description:
-        "Receive instant approval updates and track your application status anytime.",
-    },
-    {
-      title: "Enjoy Benefits",
-      description:
-        "Start using your credit card to unlock exclusive Standard Chartered rewards and offers.",
-    },
-  ];
+---
 
-  return (
-    <div className="bg-gradient-to-r from-blue-50 to-white py-20 px-8 lg:px-40">
-      <h2 className="text-4xl font-extrabold text-center mb-16 text-[#0033A0] drop-shadow-sm">
-        Your Guide to Standard Chartered Credit Cards
-      </h2>
+### 1. Login & View Applications
 
-      <div className="grid gap-12 max-w-5xl mx-auto sm:grid-cols-2">
-        {steps.map((step, index) => (
-          <motion.div
-            key={index}
-            className="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-[#007047] hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-2xl font-semibold mb-4 text-[#007047]">
-              {`${index + 1}. ${step.title}`}
-            </h3>
-            <p className="text-gray-700 leading-relaxed">{step.description}</p>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
+As a Sales User, I want to log in securely with my credentials and get an overview of all open credit card applications.
+The system should show key details like application ID, holder name, status, age, and sales handler, while notifying errors on failed login.
+
+---
+
+### 2. Submit & Edit Applications
+
+As a Sales User, I want to create and submit a new credit card application with all mandatory fields.
+I should also be able to edit any application that has already been submitted into the system.
+
+---
+
+### 3. Delete Applications
+
+As a Sales User, I want the ability to delete a customer’s credit card application form.
+This ensures removal of incorrect or unnecessary applications from the system.
+
+---
+
+### 4. Upload Documents & Retrieve Credit Score
+
+As a Sales User, I want to upload and retrieve customer identity, address, and income proof documents into the system.
+Once saved, the system should trigger credit bureau checks and fetch the customer’s credit score automatically.
+
+---
+
+### 5. Retrieve Initial Offer
+
+As a Sales User, I want to get an initial credit card offer for the customer.
+The system should fetch this offer automatically from the Credit Card Management System if the customer’s credit score is above 750.
+
+---
+
+### 6. Accept Offer & Process Application
+
+As a Sales User, I want to accept the credit card offer to confirm the credit limit.
+The system should notify transaction processing, send an email update to the customer, and trigger card printing and shipping.
+
+---
+
+### 7. Pull Excel Reports
+
+As a Sales User, I want to generate an Excel report of all CC application forms in the system.
+The report should include application ID, holder name, status, age, and sales handler for tracking purposes.
+
+---
+
+Do you also want me to make these **JIRA-style concise user stories with acceptance criteria** (Given/When/Then format), or just keep them in this simplified 2-line version?
