@@ -1,87 +1,110 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 
-const quickActions = [
-  {
-    icon: "fa-solid fa-clipboard-list",
-    title: "Apply Now",
-    description: "Quick and easy credit card application process",
-    buttonText: "Start Application",
-    iconClass: "quick-clipboard",
-  },
-  {
-    icon: "fa-solid fa-question",
-    title: "How to Apply",
-    description: "Step-by-step guide to credit card applications",
-    buttonText: "View Guide",
-    iconClass: "quick-question",
-  },
-  {
-    icon: "fa-solid fa-credit-card",
-    title: "Types of Credit Cards",
-    description: "Explore our complete range of credit cards",
-    buttonText: "Compare Cards",
-    iconClass: "quick-card",
-  },
-];
+export default function Guide() {
+  const steps = [
+    {
+      title: "Choose Your Card",
+      description:
+        "Explore a variety of credit cards designed for rewards, lifestyle, and travel benefits.",
+      icon: "fa-credit-card",
+    },
+    {
+      title: "Apply Securely",
+      description:
+        "Fill in your application with bank-level security and real-time verification.",
+      icon: "fa-lock",
+    },
+    {
+      title: "Get Approved Fast",
+      description:
+        "Receive instant approval updates and track your application status anytime.",
+      icon: "fa-bolt",
+    },
+    {
+      title: "Enjoy Benefits",
+      description:
+        "Start using your credit card to unlock exclusive Standard Chartered rewards and offers.",
+      icon: "fa-gift",
+    },
+  ];
 
-const QuickActions = ({ title, subtitle }) => {
   return (
-    <div className="container mt-5 mb-5">
-      <h3 className="mb-4 fw-semibold">{title}</h3>
-      <p className="mb-4 text-muted" style={{ marginTop: "-14px" }}>
-        {subtitle}
-      </p>
-      <div className="row g-1 quick-actions">
-        {quickActions.map((action, index) => (
-          <div key={index} className="col-8 col-sm-8 col-md-3">
-            <QuickActionCard
-              icon={action.icon}
-              title={action.title}
-              description={action.description}
-              buttonText={action.buttonText}
-              iconClass={action.iconClass}
-            />
+    <div className="bg-gradient-to-r from-blue-50 to-white py-16 px-8 lg:px-40">
+      <h2 className="text-4xl font-extrabold text-center mb-14 text-[#0033A0] drop-shadow-sm">
+        Your Guide to Standard Chartered Credit Cards
+      </h2>
+      <div className="grid gap-10 max-w-4xl mx-auto sm:grid-cols-2">
+        {steps.map((step, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-[#007047] hover:shadow-2xl transition-shadow duration-300"
+          >
+            <div className="flex items-center mb-4 text-[#007047]">
+              <i className={`fa-solid ${step.icon} fa-2x mr-4`}></i>
+              <h3 className="text-2xl font-semibold">{`${index + 1}. ${step.title}`}</h3>
+            </div>
+            <p className="text-gray-700 leading-relaxed">{step.description}</p>
           </div>
         ))}
       </div>
     </div>
   );
-};
+}
 
-export default QuickActions;
 
-const QuickActionCard = ({
-  icon,
-  title,
-  description,
-  buttonText,
-  iconClass,
-}) => {
-  const navigate = useNavigate();
+////////////
 
-  const handleClick = () => {
-    if (buttonText === "Compare Cards") {
-      navigate("/CreditCardComparison");
-    } else if (buttonText === "View Guide") {
-      navigate("/guide");
-    }
-    // You can add logic for other actions here (e.g., "Start Application")
-  };
+
+
+import React from "react";
+
+export default function Guide() {
+  const steps = [
+    {
+      title: "Choose Your Card",
+      description:
+        "Explore a variety of credit cards designed for rewards, lifestyle, and travel benefits.",
+      icon: "fa-credit-card",
+    },
+    {
+      title: "Apply Securely",
+      description:
+        "Fill in your application with bank-level security and real-time verification.",
+      icon: "fa-lock",
+    },
+    {
+      title: "Get Approved Fast",
+      description:
+        "Receive instant approval updates and track your application status anytime.",
+      icon: "fa-bolt",
+    },
+    {
+      title: "Enjoy Benefits",
+      description:
+        "Start using your credit card to unlock exclusive Standard Chartered rewards and offers.",
+      icon: "fa-gift",
+    },
+  ];
 
   return (
-    <div className="card h-100 p-3 text-center temp-class">
-      <div className={`quick-icon-bg ${iconClass}`}>
-        <i className={icon}></i>
+    <div className="bg-gradient-to-r from-blue-50 to-white py-16 px-8 lg:px-40">
+      <h2 className="text-4xl font-extrabold text-center mb-14 text-[#0033A0] drop-shadow-sm">
+        Your Guide to Standard Chartered Credit Cards
+      </h2>
+      <div className="grid gap-10 max-w-4xl mx-auto sm:grid-cols-2">
+        {steps.map((step, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-[#007047] hover:shadow-2xl transition-shadow duration-300"
+          >
+            <div className="flex items-center mb-4 text-[#007047]">
+              <i className={`fa-solid ${step.icon} fa-2x mr-4`}></i>
+              <h3 className="text-2xl font-semibold">{`${index + 1}. ${step.title}`}</h3>
+            </div>
+            <p className="text-gray-700 leading-relaxed">{step.description}</p>
+          </div>
+        ))}
       </div>
-      <h5 className="card-title">{title}</h5>
-      <p className="card-text">{description}</p>
-      <button
-        className="btn btn-outline-primary btn-sm"
-        onClick={handleClick}
-      >
-        {buttonText}
-      </button>
     </div>
   );
-};
+}
