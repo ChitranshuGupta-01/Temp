@@ -1,7 +1,17 @@
-Customers do not have a simple and transparent way to apply for a credit card and track its status.
+Challenges
 
-Customers face delays due to manual document submission and lack of instant updates.
+Understanding the complete credit card origination flow and implementing it as a system.
 
-Sales users lack a centralized system to manage and monitor all submitted credit card applications.
+Facing merge conflicts and version control issues while collaborating on Git.
 
-Sales users struggle with manual processes for document handling, offer generation, and customer communication.
+Learnings
+
+Gained hands-on experience in full-stack development and database management.
+
+Learned effective team collaboration, Git usage, and problem-solving under deadlines.
+
+Next Steps
+
+Add advanced features like real-time credit score integration and fraud detection.
+
+Improve system reliability with testing, automation, and better code practices.
