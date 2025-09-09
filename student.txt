@@ -1,13 +1,7 @@
-Information about credit cards is scattered across multiple sources.
-Hidden charges and unclear terms confuse users.
-Lack of effective comparison tools for rewards, interest rates, and fees.
-Decision-making becomes time-consuming and frustrating.
-Often leads to poor financial choices.
+Customers do not have a simple and transparent way to apply for a credit card and track its status.
 
+Customers face delays due to manual document submission and lack of instant updates.
 
-Proposed Solution:
-A single platform integrating multiple credit card offers.
-Provides easy and transparent side-by-side comparisons.
-Highlights rewards, interest rates, fees, and benefits clearly.
-Ensures a user-friendly interface for smooth navigation.
-Uses real-time backend data for accurate and updated information
+Sales users lack a centralized system to manage and monitor all submitted credit card applications.
+
+Sales users struggle with manual processes for document handling, offer generation, and customer communication.
