@@ -1,7 +1,32 @@
-INSERT INTO documents (id_proof_path, address_proof_path, income_proof_path, application_id)
-VALUES (
-    '/uploads/id_proof.png',
-    '/uploads/address_proof.png',
-    '/uploads/income_proof.png',
-    1
+CREATE TABLE documents (
+    id SERIAL PRIMARY KEY,                -- unique ID for each document row
+    id_proof_path VARCHAR(500),           -- path to uploaded ID proof file
+    address_proof_path VARCHAR(500),      -- path to uploaded address proof file
+    income_proof_path VARCHAR(500),       -- path to uploaded income proof file
+    application_id INT UNIQUE,            -- links to applications.id
+    CONSTRAINT fk_application FOREIGN KEY (application_id)
+        REFERENCES applications(id) ON DELETE CASCADE
+);
+
+
+
+//////////
+
+
+CREATE TABLE dmtable (
+    id SERIAL PRIMARY KEY,                -- unique ID for each row
+    application_id INT NOT NULL,          -- linked to applications.id
+    document_name VARCHAR(255),           -- e.g. "ID Proof", "Address Proof"
+    document_type VARCHAR(100),           -- e.g. "ID", "Address", "Income"
+    file_url VARCHAR(500)                 -- path to the uploaded file
+);
+
+//////////
+
+
+CREATE TABLE onboarding_applications (
+    id VARCHAR(20) PRIMARY KEY,         -- same id as in applications (casted to varchar)
+    applicant VARCHAR(100) NOT NULL,    -- applicant name (from full_name in applications)
+    handler VARCHAR(100),               -- assigned handler (user1, user2, user3)
+    status VARCHAR(50) DEFAULT 'Application Processing' -- default status
 );
