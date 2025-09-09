@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 
 export default function Guide() {
   const steps = [
@@ -24,25 +23,15 @@ export default function Guide() {
         "Start using your credit card to unlock exclusive Standard Chartered rewards and offers.",
     },
   ];
-
   return (
     <div className="bg-gray-50 py-12 px-6 lg:px-32">
-      <motion.h2
-        className="text-3xl lg:text-4xl font-bold text-center mb-10 text-[#0033A0]"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+      <h2 className="text-3xl lg:text-4xl font-bold text-center mb-10 text-[#0033A0]">
         Your Guide to Standard Chartered Credit Cards
-      </motion.h2>
-
+      </h2>
       <div className="space-y-8 max-w-3xl mx-auto">
         {steps.map((step, index) => (
-          <motion.div
+          <div
             key={index}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
             className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#007047]"
           >
             <h3 className="text-xl font-semibold mb-2 text-[#0033A0]">
@@ -51,7 +40,7 @@ export default function Guide() {
             <p className="text-gray-700 text-base leading-relaxed">
               {step.description}
             </p>
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>
