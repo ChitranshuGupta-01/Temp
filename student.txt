@@ -6,25 +6,21 @@ export default function Guide() {
       title: "Choose Your Card",
       description:
         "Explore a variety of credit cards designed for rewards, lifestyle, and travel benefits.",
-      icon: "fa-credit-card",
     },
     {
       title: "Apply Securely",
       description:
         "Fill in your application with bank-level security and real-time verification.",
-      icon: "fa-lock",
     },
     {
       title: "Get Approved Fast",
       description:
         "Receive instant approval updates and track your application status anytime.",
-      icon: "fa-bolt",
     },
     {
       title: "Enjoy Benefits",
       description:
         "Start using your credit card to unlock exclusive Standard Chartered rewards and offers.",
-      icon: "fa-gift",
     },
   ];
 
@@ -39,68 +35,9 @@ export default function Guide() {
             key={index}
             className="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-[#007047] hover:shadow-2xl transition-shadow duration-300"
           >
-            <div className="flex items-center mb-4 text-[#007047]">
-              <i className={`fa-solid ${step.icon} fa-2x mr-4`}></i>
-              <h3 className="text-2xl font-semibold">{`${index + 1}. ${step.title}`}</h3>
-            </div>
-            <p className="text-gray-700 leading-relaxed">{step.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-
-////////////
-
-
-
-import React from "react";
-
-export default function Guide() {
-  const steps = [
-    {
-      title: "Choose Your Card",
-      description:
-        "Explore a variety of credit cards designed for rewards, lifestyle, and travel benefits.",
-      icon: "fa-credit-card",
-    },
-    {
-      title: "Apply Securely",
-      description:
-        "Fill in your application with bank-level security and real-time verification.",
-      icon: "fa-lock",
-    },
-    {
-      title: "Get Approved Fast",
-      description:
-        "Receive instant approval updates and track your application status anytime.",
-      icon: "fa-bolt",
-    },
-    {
-      title: "Enjoy Benefits",
-      description:
-        "Start using your credit card to unlock exclusive Standard Chartered rewards and offers.",
-      icon: "fa-gift",
-    },
-  ];
-
-  return (
-    <div className="bg-gradient-to-r from-blue-50 to-white py-16 px-8 lg:px-40">
-      <h2 className="text-4xl font-extrabold text-center mb-14 text-[#0033A0] drop-shadow-sm">
-        Your Guide to Standard Chartered Credit Cards
-      </h2>
-      <div className="grid gap-10 max-w-4xl mx-auto sm:grid-cols-2">
-        {steps.map((step, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-[#007047] hover:shadow-2xl transition-shadow duration-300"
-          >
-            <div className="flex items-center mb-4 text-[#007047]">
-              <i className={`fa-solid ${step.icon} fa-2x mr-4`}></i>
-              <h3 className="text-2xl font-semibold">{`${index + 1}. ${step.title}`}</h3>
-            </div>
+            <h3 className="text-2xl font-semibold mb-4 text-[#007047]">
+              {`${index + 1}. ${step.title}`}
+            </h3>
             <p className="text-gray-700 leading-relaxed">{step.description}</p>
           </div>
         ))}
