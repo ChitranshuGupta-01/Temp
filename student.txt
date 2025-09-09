@@ -1,13 +1,5 @@
-Sales user logs in securely to view all open credit card applications with key details.
-
-Sales user submits new CC applications with mandatory fields and can edit existing ones.
-
-Sales user deletes customer CC applications when needed.
-
-Sales user uploads ID, address, and income proofs, and system auto-checks credit score.
-
-Sales user retrieves an initial CC offer if the customer’s credit score is above 750.
-
-Sales user accepts the offer, system processes application, emails customer, and ships card.
-
-Sales user generates Excel reports of CC applications with all key details.
+Information about credit cards is scattered across multiple sources.
+Hidden charges and unclear terms confuse users.
+Lack of effective comparison tools for rewards, interest rates, and fees.
+Decision-making becomes time-consuming and frustrating.
+Often leads to poor financial choices.
