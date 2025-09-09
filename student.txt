@@ -1,32 +1,59 @@
-CREATE TABLE documents (
-    id SERIAL PRIMARY KEY,                -- unique ID for each document row
-    id_proof_path VARCHAR(500),           -- path to uploaded ID proof file
-    address_proof_path VARCHAR(500),      -- path to uploaded address proof file
-    income_proof_path VARCHAR(500),       -- path to uploaded income proof file
-    application_id INT UNIQUE,            -- links to applications.id
-    CONSTRAINT fk_application FOREIGN KEY (application_id)
-        REFERENCES applications(id) ON DELETE CASCADE
-);
+import React from "react";
+import { motion } from "framer-motion";
 
+export default function Guide() {
+  const steps = [
+    {
+      title: "Choose Your Card",
+      description:
+        "Explore a variety of credit cards designed for rewards, lifestyle, and travel benefits.",
+    },
+    {
+      title: "Apply Securely",
+      description:
+        "Fill in your application with bank-level security and real-time verification.",
+    },
+    {
+      title: "Get Approved Fast",
+      description:
+        "Receive instant approval updates and track your application status anytime.",
+    },
+    {
+      title: "Enjoy Benefits",
+      description:
+        "Start using your credit card to unlock exclusive Standard Chartered rewards and offers.",
+    },
+  ];
 
+  return (
+    <div className="bg-gray-50 py-12 px-6 lg:px-32">
+      <motion.h2
+        className="text-3xl lg:text-4xl font-bold text-center mb-10 text-[#0033A0]"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        Your Guide to Standard Chartered Credit Cards
+      </motion.h2>
 
-//////////
-
-
-CREATE TABLE dmtable (
-    id SERIAL PRIMARY KEY,                -- unique ID for each row
-    application_id INT NOT NULL,          -- linked to applications.id
-    document_name VARCHAR(255),           -- e.g. "ID Proof", "Address Proof"
-    document_type VARCHAR(100),           -- e.g. "ID", "Address", "Income"
-    file_url VARCHAR(500)                 -- path to the uploaded file
-);
-
-//////////
-
-
-CREATE TABLE onboarding_applications (
-    id VARCHAR(20) PRIMARY KEY,         -- same id as in applications (casted to varchar)
-    applicant VARCHAR(100) NOT NULL,    -- applicant name (from full_name in applications)
-    handler VARCHAR(100),               -- assigned handler (user1, user2, user3)
-    status VARCHAR(50) DEFAULT 'Application Processing' -- default status
-);
+      <div className="space-y-8 max-w-3xl mx-auto">
+        {steps.map((step, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.2 }}
+            className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#007047]"
+          >
+            <h3 className="text-xl font-semibold mb-2 text-[#0033A0]">
+              Step {index + 1}: {step.title}
+            </h3>
+            <p className="text-gray-700 text-base leading-relaxed">
+              {step.description}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
