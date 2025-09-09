@@ -1,8 +1,6 @@
 // Quick Actions Component
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import CreditCardComparison from "./CreditCardComparison";
-
 
 const quickActions = [
   {
@@ -67,15 +65,13 @@ const QuickActionCard = ({
   // handle click navigation
   const handleClick = () => {
     if (buttonText === "Compare Cards") {
-      navigate("/CreditCardComparison"); // ✅ your route
+      navigate("/CreditCardComparison");
+    } else if (buttonText === "View Guide") {
+      navigate("/guide");
+    } else if (buttonText === "Start Application") {
+      navigate("/application");
     }
   };
-
-  // const handleClick = () => {
-  //   if (buttonText === "Compare Cards") {
-  //     navigate("/CreditCardComparison"); // ✅ your route
-  //   }
-  // };
 
   return (
     <div className="card h-100 p-3 text-center temp-class">
