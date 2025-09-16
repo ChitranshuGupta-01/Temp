@@ -1,3 +1,3 @@
-https://ieeexplore.ieee.org/abstract/document/10434693
+I am Chitranshu Gupta from Noida, Uttar Pradesh, and I recently completed my B.Tech in Computer Science from Vellore Institute of Technology, Chennai. I am currently working as a Technology Apprentice at Standard Chartered and am excited to learn and contribute meaningfully to the team. My hobbies include cricket, exploring new technologies, and reading current affairs.
 
-https://ieeexplore.ieee.org/abstract/document/11040918
+For my final year project, I worked on Wildlife Detection using YOLO v11, a novel effort that introduced SimAM, DySample, and Bounding Box-IoU techniques, and the work has been submitted for publication. I also have a strong interest in development, I have completed full-stack bootcamp during my training, where my team was recognized as the top team among 24 teams. I am looking forward to growing my skills further, learn from the team and adding value wherever I can.
