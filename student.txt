@@ -1,34 +1,131 @@
-Databricks is a cloud platform that combines data storage, processing, and AI tools in one place, making it easy for teams to collaborate on big data and analytics projects.
+Cybersecurity is the practice of protecting computer systems, networks, and data from unauthorized access, attacks, or damage. In simple terms, it’s about keeping your digital information and devices safe from hackers, viruses, and other online threats.
 
 
-🛠 For Data Engineering (cleaning and transforming data)
+Protection Areas –
 
-Delta Lake – Stores data reliably with versioning (like Git for data).
+Network Security: Protecting your Wi-Fi, servers, and communication channels.
 
-Databricks Workflows / Jobs – Automates data pipelines.
+Application Security: Making sure software and apps don’t have security holes.
 
-Auto Loader – Automatically loads new data from cloud storage.
+Information Security: Safeguarding data from theft or loss.
 
-Spark SQL – Lets you query and transform data using SQL.
+Cloud Security: Securing data stored online (e.g., Google Drive, AWS).
 
-🤖 For Data Science & Machine Learning (building models)
+Endpoint Security: Protecting devices like laptops, phones, and tablets.
 
-MLflow – Tracks experiments, trains, and deploys models.
+///////////////////////////////////////////////////////////////////////////////////////
+1. Phishing
 
-Databricks Machine Learning – Managed environment for training models.
+Fake emails or messages trick you into giving passwords or personal info.
 
-Feature Store – Central place to manage features used in ML models.
+Example: A fake bank email asks you to “verify” your account.
 
-📊 For Business Analytics (creating reports)
+2. Malware
 
-Databricks SQL – For running SQL queries and creating dashboards.
+Malicious software like viruses, worms, or ransomware infects your device.
 
-Partner integrations – Works with BI tools like Tableau, Power BI, or Looker for advanced reporting.
+Ransomware locks your files and demands payment to unlock them.
 
-“A data lakehouse is a single platform that stores all types of data like a data lake but also organizes and analyzes it like a data warehouse—saving time and cost.”
+3. Denial of Service (DoS) / Distributed DoS (DDoS)
+
+Attackers overload a website or server with traffic, making it crash or unavailable.
+
+4. Man-in-the-Middle (MitM)
+
+Attackers secretly intercept communication between two parties.
+
+Example: Someone on public Wi-Fi steals your login info.
+
+5. SQL Injection
+
+Hackers insert malicious code into a website’s database query to access or change data.
+
+6. Password Attacks
+
+Guessing or cracking passwords using brute force or stolen password lists.
+
+7. Zero-Day Exploits
+
+Attacks that exploit a software vulnerability before developers can fix it.
+
+8. Insider Threats
+
+Employees or trusted people misuse access to steal or damage data.
 
 
-“Unity Catalog is Databricks’ central system to organize data and manage permissions, ensuring everyone accesses the right data securely and consistently.”
+/////////////////////////////////////////////////////////////////////////////////////////
 
+🔴 1. Phishing Attacks
 
-MosaicML (now part of Databricks) is a platform that makes training and deploying large AI models faster, cheaper, and easier.
+Risk: Trick you into revealing passwords or sensitive data.
+Mitigation:
+
+Double-check sender addresses and URLs.
+
+Don’t click unknown links or attachments.
+
+Use email filters and enable multi-factor authentication (MFA).
+
+🔴 2. Malware & Ransomware
+
+Risk: Infects devices, steals data, or locks files for ransom.
+Mitigation:
+
+Install and update antivirus/anti-malware software.
+
+Keep your operating system and apps patched.
+
+Avoid downloading from untrusted sites.
+
+Maintain regular data backups offline or in secure cloud storage.
+
+🔴 3. Weak or Stolen Passwords
+
+Risk: Hackers gain unauthorized access.
+Mitigation:
+
+Use strong, unique passwords for each account.
+
+Enable MFA wherever possible.
+
+Use a password manager.
+
+🔴 4. Data Breaches
+
+Risk: Sensitive information (e.g., customer data) is leaked.
+Mitigation:
+
+Encrypt sensitive data in transit and at rest.
+
+Limit user access based on roles (least privilege).
+
+Monitor systems for suspicious activity.
+
+🔴 5. Denial of Service (DoS/DDoS)
+
+Risk: Overloads a website or service, making it unavailable.
+Mitigation:
+
+Use firewalls and DDoS protection services.
+
+Distribute network resources using content delivery networks (CDNs).
+
+🔴 6. Insider Threats
+
+Risk: Employees or trusted individuals misuse access.
+Mitigation:
+
+Train employees on security best practices.
+
+Implement strict access controls and activity monitoring.
+
+🔴 7. Zero-Day Exploits
+
+Risk: Hackers exploit unknown software vulnerabilities.
+Mitigation:
+
+Apply security patches quickly.
+
+Use intrusion detection and prevention systems.
+
+Perform regular vulnerability scans and penetration testing.
