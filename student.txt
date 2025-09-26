@@ -1,179 +1,7 @@
-"use client";
-
-import {
-  FileText,
-  AlertTriangle,
-} from "lucide-react";
-import ReactFlow, { Background, Controls } from "reactflow";
-import "reactflow/dist/style.css";
-
-export default function CaseDetailPage() {
-  // Relation diagram nodes
-  const nodes = [
-    {
-      id: "case",
-      data: { label: "Case\nCase ID: 2024-154\nStatus: Active\nDecision: Approve\nType: Investigation" },
-      position: { x: 100, y: 50 },
-      style: { background: "#fee2e2", padding: 10, borderRadius: 8, border: "1px solid #fca5a5" },
-    },
-    {
-      id: "profile",
-      data: { label: "Profile\nProfile ID: PROF-789\nName: John Doe\nGender: Male\nDOB: 1985-03-22" },
-      position: { x: 400, y: 50 },
-      style: { background: "#dbeafe", padding: 10, borderRadius: 8, border: "1px solid #93c5fd" },
-    },
-    {
-      id: "txn",
-      data: { label: "Transaction Detail\nTrans ID: TXN-456123\nType: Wire Transfer\nAmount: $15,000\nFrequency: Multiple" },
-      position: { x: 100, y: 250 },
-      style: { background: "#e0e7ff", padding: 10, borderRadius: 8, border: "1px solid #a5b4fc" },
-    },
-    {
-      id: "activity",
-      data: { label: "Last 5 Activity\n2024-01-15 - Login Attempt\n2024-01-15 - Transaction\n2024-01-13 - Profile Update" },
-      position: { x: 400, y: 250 },
-      style: { background: "#fbcfe8", padding: 10, borderRadius: 8, border: "1px solid #f9a8d4" },
-    },
-  ];
-
-  const edges = [
-    { id: "e1", source: "case", target: "profile", animated: true },
-    { id: "e2", source: "case", target: "txn", animated: true },
-    { id: "e3", source: "profile", target: "activity", animated: true },
-  ];
-
-  // Past events log
-  const events = [
-    {
-      id: "EVT-001",
-      type: "Login Attempt",
-      date: "2024-01-15 14:30:25",
-      profile: "John Doe",
-      ip: "192.168.1.100",
-      status: "Success",
-      severity: "Low",
-      desc: "Successful login from registered device",
-    },
-    {
-      id: "EVT-002",
-      type: "Failed Login",
-      date: "2024-01-15 09:15:42",
-      profile: "John Doe",
-      ip: "203.45.67.88",
-      status: "Failed",
-      severity: "High",
-      desc: "Multiple failed login attempts from unrecognized device",
-    },
-    {
-      id: "EVT-003",
-      type: "Transaction Alert",
-      date: "2024-01-14 16:45:12",
-      profile: "John Doe",
-      ip: "192.168.1.100",
-      status: "Flagged",
-      severity: "Medium",
-      desc: "High-value transaction exceeding daily limit",
-    },
-    {
-      id: "EVT-004",
-      type: "Profile Update",
-      date: "2024-01-14 11:20:31",
-      profile: "John Doe",
-      ip: "192.168.1.100",
-      status: "Success",
-      severity: "Low",
-      desc: "Contact information updated successfully",
-    },
-    {
-      id: "EVT-005",
-      type: "Beneficiary Added",
-      date: "2024-01-13 13:55:16",
-      profile: "John Doe",
-      ip: "192.168.1.100",
-      status: "Success",
-      severity: "Low",
-      desc: "New beneficiary ABC Corp added to account",
-    },
-  ];
-
-  return (
-    <div className="p-6 space-y-6">
-      {/* Case Header */}
-      <div className="bg-white rounded-2xl shadow p-6 border">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold flex items-center gap-2">
-              <FileText className="w-6 h-6 text-orange-500" />
-              Case #54532134
-            </h1>
-            <p className="text-gray-500 text-sm">
-              High Value Transaction Investigation
-            </p>
-          </div>
-          <span className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm">
-            High Priority
-          </span>
-        </div>
-
-        {/* Case Details */}
-        <div className="mt-4 text-sm text-gray-700 space-y-2">
-          <p>
-            Investigation of suspicious wire transfers exceeding{" "}
-            <span className="font-semibold">$15,000</span> from account{" "}
-            <span className="font-mono">****5678</span> to multiple
-            beneficiaries. Pattern suggests potential money laundering
-            activity.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-gray-600">
-            <p>
-              <span className="font-semibold">Assignee:</span> John Smith
-            </p>
-            <p>
-              <span className="font-semibold">Profile:</span> John Doe (PROF-789)
-            </p>
-            <p>
-              <span className="font-semibold">Created:</span> 2024-01-10
-            </p>
-            <p>
-              <span className="font-semibold">Updated:</span> 2024-01-15
-            </p>
-          </div>
-        </div>
-
-        {/* Case Score */}
-        <div className="mt-4 flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-red-500" />
-          <span className="text-lg font-bold text-red-600">85</span>
-          <span className="text-gray-500 text-sm">/100 Risk</span>
-        </div>
-
-        {/* Actions */}
-        <div className="mt-4 flex gap-3">
-          <button className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
-            Add Note
-          </button>
-          <button className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
-            Update Status
-          </button>
-          <button className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
-            Generate Report
-          </button>
-        </div>
-      </div>
-
-      {/* Case Relation Diagram */}
-      <div className="bg-white rounded-2xl shadow p-6 border h-[400px]">
-        <h2 className="text-lg font-semibold mb-4">Case Relation Diagram</h2>
-        <ReactFlow nodes={nodes} edges={edges} fitView>
-          <Background />
-          <Controls />
-        </ReactFlow>
-      </div>
-
       {/* Events Log */}
       <div className="bg-white rounded-2xl shadow p-6 border">
         <h2 className="text-lg font-semibold mb-4">Past Events Log</h2>
-        <table className="w-full text-sm border">
+        <table className="w-full text-sm border rounded-lg overflow-hidden">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 text-left">Event ID</th>
@@ -187,36 +15,49 @@ export default function CaseDetailPage() {
             </tr>
           </thead>
           <tbody>
-            {events.map((e) => (
-              <tr key={e.id} className="border-t">
+            {events.map((e, i) => (
+              <tr
+                key={e.id}
+                className={`border-t ${
+                  i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                }`}
+              >
                 <td className="p-2">{e.id}</td>
                 <td className="p-2">{e.type}</td>
                 <td className="p-2">{e.date}</td>
                 <td className="p-2">{e.profile}</td>
                 <td className="p-2">{e.ip}</td>
-                <td className="p-2">{e.status}</td>
-                <td className="p-2">{e.severity}</td>
+                {/* Status with color */}
+                <td className="p-2">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      e.status === "Success"
+                        ? "bg-green-100 text-green-700"
+                        : e.status === "Failed"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {e.status}
+                  </span>
+                </td>
+                {/* Severity with color */}
+                <td className="p-2">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      e.severity === "Low"
+                        ? "bg-green-100 text-green-700"
+                        : e.severity === "High"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {e.severity}
+                  </span>
+                </td>
                 <td className="p-2">{e.desc}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      {/* Related Transactions */}
-      <div className="bg-white rounded-2xl shadow p-6 border">
-        <h2 className="text-lg font-semibold mb-4">Related Transactions</h2>
-        <p className="text-gray-500 text-sm">
-          All transactions made to the same account: ****5678
-        </p>
-        <div className="mt-2">
-          <input
-            type="text"
-            placeholder="Search transactions, amounts, beneficiaries..."
-            className="w-full border rounded-lg p-2 text-sm"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
