@@ -1,8 +1,101 @@
 "use client";
 
-import { FileText, AlertTriangle, User, Calendar, RefreshCcw } from "lucide-react";
+import {
+  FileText,
+  AlertTriangle,
+} from "lucide-react";
+import ReactFlow, { Background, Controls } from "reactflow";
+import "reactflow/dist/style.css";
 
 export default function CaseDetailPage() {
+  // Relation diagram nodes
+  const nodes = [
+    {
+      id: "case",
+      data: { label: "Case\nCase ID: 2024-154\nStatus: Active\nDecision: Approve\nType: Investigation" },
+      position: { x: 100, y: 50 },
+      style: { background: "#fee2e2", padding: 10, borderRadius: 8, border: "1px solid #fca5a5" },
+    },
+    {
+      id: "profile",
+      data: { label: "Profile\nProfile ID: PROF-789\nName: John Doe\nGender: Male\nDOB: 1985-03-22" },
+      position: { x: 400, y: 50 },
+      style: { background: "#dbeafe", padding: 10, borderRadius: 8, border: "1px solid #93c5fd" },
+    },
+    {
+      id: "txn",
+      data: { label: "Transaction Detail\nTrans ID: TXN-456123\nType: Wire Transfer\nAmount: $15,000\nFrequency: Multiple" },
+      position: { x: 100, y: 250 },
+      style: { background: "#e0e7ff", padding: 10, borderRadius: 8, border: "1px solid #a5b4fc" },
+    },
+    {
+      id: "activity",
+      data: { label: "Last 5 Activity\n2024-01-15 - Login Attempt\n2024-01-15 - Transaction\n2024-01-13 - Profile Update" },
+      position: { x: 400, y: 250 },
+      style: { background: "#fbcfe8", padding: 10, borderRadius: 8, border: "1px solid #f9a8d4" },
+    },
+  ];
+
+  const edges = [
+    { id: "e1", source: "case", target: "profile", animated: true },
+    { id: "e2", source: "case", target: "txn", animated: true },
+    { id: "e3", source: "profile", target: "activity", animated: true },
+  ];
+
+  // Past events log
+  const events = [
+    {
+      id: "EVT-001",
+      type: "Login Attempt",
+      date: "2024-01-15 14:30:25",
+      profile: "John Doe",
+      ip: "192.168.1.100",
+      status: "Success",
+      severity: "Low",
+      desc: "Successful login from registered device",
+    },
+    {
+      id: "EVT-002",
+      type: "Failed Login",
+      date: "2024-01-15 09:15:42",
+      profile: "John Doe",
+      ip: "203.45.67.88",
+      status: "Failed",
+      severity: "High",
+      desc: "Multiple failed login attempts from unrecognized device",
+    },
+    {
+      id: "EVT-003",
+      type: "Transaction Alert",
+      date: "2024-01-14 16:45:12",
+      profile: "John Doe",
+      ip: "192.168.1.100",
+      status: "Flagged",
+      severity: "Medium",
+      desc: "High-value transaction exceeding daily limit",
+    },
+    {
+      id: "EVT-004",
+      type: "Profile Update",
+      date: "2024-01-14 11:20:31",
+      profile: "John Doe",
+      ip: "192.168.1.100",
+      status: "Success",
+      severity: "Low",
+      desc: "Contact information updated successfully",
+    },
+    {
+      id: "EVT-005",
+      type: "Beneficiary Added",
+      date: "2024-01-13 13:55:16",
+      profile: "John Doe",
+      ip: "192.168.1.100",
+      status: "Success",
+      severity: "Low",
+      desc: "New beneficiary ABC Corp added to account",
+    },
+  ];
+
   return (
     <div className="p-6 space-y-6">
       {/* Case Header */}
@@ -31,7 +124,7 @@ export default function CaseDetailPage() {
             beneficiaries. Pattern suggests potential money laundering
             activity.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-gray-600">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-gray-600">
             <p>
               <span className="font-semibold">Assignee:</span> John Smith
             </p>
@@ -69,46 +162,12 @@ export default function CaseDetailPage() {
       </div>
 
       {/* Case Relation Diagram */}
-      <div className="bg-white rounded-2xl shadow p-6 border">
+      <div className="bg-white rounded-2xl shadow p-6 border h-[400px]">
         <h2 className="text-lg font-semibold mb-4">Case Relation Diagram</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Case Info */}
-          <div className="bg-red-50 border rounded-lg p-4">
-            <h3 className="font-semibold">Case</h3>
-            <p>Case ID: 2024-154</p>
-            <p>Status: Active</p>
-            <p>Decision: Approve</p>
-            <p>Type: Investigation</p>
-          </div>
-
-          {/* Profile Info */}
-          <div className="bg-blue-50 border rounded-lg p-4">
-            <h3 className="font-semibold">Profile</h3>
-            <p>Profile ID: PROF-789</p>
-            <p>Name: John Doe</p>
-            <p>Gender: Male</p>
-            <p>DOB: 1985-03-22</p>
-          </div>
-
-          {/* Transaction */}
-          <div className="bg-indigo-50 border rounded-lg p-4">
-            <h3 className="font-semibold">Transaction Detail</h3>
-            <p>Trans ID: TXN-456123</p>
-            <p>Type: Wire Transfer</p>
-            <p>Amount: $15,000</p>
-            <p>Frequency: Multiple</p>
-          </div>
-
-          {/* Activity */}
-          <div className="bg-pink-50 border rounded-lg p-4">
-            <h3 className="font-semibold">Last 5 Activity</h3>
-            <ul className="text-sm">
-              <li>2024-01-15 - Login Attempt</li>
-              <li>2024-01-15 - Transaction</li>
-              <li>2024-01-13 - Profile Update</li>
-            </ul>
-          </div>
-        </div>
+        <ReactFlow nodes={nodes} edges={edges} fitView>
+          <Background />
+          <Controls />
+        </ReactFlow>
       </div>
 
       {/* Events Log */}
@@ -128,38 +187,7 @@ export default function CaseDetailPage() {
             </tr>
           </thead>
           <tbody>
-            {[
-              {
-                id: "EVT-001",
-                type: "Login Attempt",
-                date: "2024-01-15 14:30:25",
-                profile: "John Doe",
-                ip: "192.168.1.100",
-                status: "Success",
-                severity: "Low",
-                desc: "Successful login from registered device",
-              },
-              {
-                id: "EVT-002",
-                type: "Failed Login",
-                date: "2024-01-15 09:15:42",
-                profile: "John Doe",
-                ip: "203.45.67.88",
-                status: "Failed",
-                severity: "High",
-                desc: "Multiple failed login attempts",
-              },
-              {
-                id: "EVT-003",
-                type: "Transaction Alert",
-                date: "2024-01-14 16:45:12",
-                profile: "John Doe",
-                ip: "192.168.1.100",
-                status: "Flagged",
-                severity: "Medium",
-                desc: "High-value transaction exceeding daily limit",
-              },
-            ].map((e) => (
+            {events.map((e) => (
               <tr key={e.id} className="border-t">
                 <td className="p-2">{e.id}</td>
                 <td className="p-2">{e.type}</td>
@@ -173,6 +201,21 @@ export default function CaseDetailPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Related Transactions */}
+      <div className="bg-white rounded-2xl shadow p-6 border">
+        <h2 className="text-lg font-semibold mb-4">Related Transactions</h2>
+        <p className="text-gray-500 text-sm">
+          All transactions made to the same account: ****5678
+        </p>
+        <div className="mt-2">
+          <input
+            type="text"
+            placeholder="Search transactions, amounts, beneficiaries..."
+            className="w-full border rounded-lg p-2 text-sm"
+          />
+        </div>
       </div>
     </div>
   );
