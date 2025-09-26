@@ -1,1 +1,403 @@
-that analysis error issue is resolved but i think i need one more file AnalysisPage, after clicking Analyze button that will route me to that page only then I will be able to see next page
+"use client";
+
+import React from "react";
+import {
+  User,
+  Calendar,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  ChevronRight,
+  Download,
+  AlertTriangle,
+  PlusCircle,
+  Archive,
+  Activity,
+  File,
+  Users,
+} from "lucide-react";
+
+const CaseDetailPage: React.FC = () => {
+  // Dummy data
+  const caseData = {
+    id: "54532134",
+    title: "High Value Transaction Investigation",
+    description:
+      "Investigation of suspicious wire transfers exceeding $15,000 from account ****5678 to multiple beneficiaries. Pattern suggests potential money laundering activity.",
+    assignee: "John Smith",
+    created: "2024-01-10",
+    updated: "2024-01-15",
+    profile: {
+      id: "PROF-789",
+      name: "John Doe",
+      mmn: "Smith",
+      gender: "Male",
+      dob: "1985-03-22",
+    },
+    status: "Active",
+    decision: "Approved",
+    type: "Investigation",
+    riskScore: 85,
+  };
+
+  const transactionDetails = [
+    {
+      id: "TXN-456123",
+      type: "Wire Transfer",
+      amount: "$15,000.00",
+      frequency: 1,
+    },
+  ];
+
+  const beneficiaryDetails = [
+    {
+      name: "ABC Corp",
+      relation: "Beneficiary",
+      country: "USA",
+      accountNumber: "****5678",
+    },
+  ];
+
+  const lastActivities = [
+    {
+      eventId: "EVT-015",
+      date: "2024-01-15",
+      type: "Login Attempt",
+    },
+    {
+      eventId: "EVT-014",
+      date: "2024-01-14",
+      type: "Transaction Alert",
+    },
+    {
+      eventId: "EVT-013",
+      date: "2024-01-13",
+      type: "Profile Update",
+    },
+  ];
+
+  const pastEvents = [
+    {
+      eventId: "EVT-001",
+      eventType: "Login Attempt",
+      dateTime: "2024-01-15 14:30:25",
+      profile: "John Doe",
+      ipAddress: "192.168.1.100",
+      status: "Success",
+      severity: "Low",
+      description: "Successful login from registered device",
+    },
+    {
+      eventId: "EVT-002",
+      eventType: "Failed Login",
+      dateTime: "2024-01-15 09:15:42",
+      profile: "John Doe",
+      ipAddress: "203.45.67.89",
+      status: "Failed",
+      severity: "High",
+      description: "Multiple failed login attempts from Ukraine",
+    },
+    {
+      eventId: "EVT-003",
+      eventType: "Transaction Alert",
+      dateTime: "2024-01-14 16:45:12",
+      profile: "John Doe",
+      ipAddress: "192.168.1.100",
+      status: "Flagged",
+      severity: "Medium",
+      description: "High-value transaction exceeding daily limit",
+    },
+    {
+      eventId: "EVT-004",
+      eventType: "Profile Update",
+      dateTime: "2024-01-14 11:20:33",
+      profile: "John Doe",
+      ipAddress: "192.168.1.100",
+      status: "Success",
+      severity: "Low",
+      description: "Contact information updated successfully",
+    },
+    {
+      eventId: "EVT-005",
+      eventType: "Beneficiary Added",
+      dateTime: "2024-01-13 18:55:06",
+      profile: "John Doe",
+      ipAddress: "192.168.1.100",
+      status: "Success",
+      severity: "Low",
+      description: "New beneficiary ABC Corp added to account",
+    },
+  ];
+
+  const relatedTransactions = [
+    {
+      id: "TXN-456123",
+      amount: "$15,000.00",
+      beneficiary: "ABC Corp",
+      timestamp: "2024-01-14 10:22:32",
+    },
+    {
+      id: "TXN-456124",
+      amount: "$8,000.00",
+      beneficiary: "XYZ Enterprises",
+      timestamp: "2024-01-13 16:02:10",
+    },
+  ];
+
+  return (
+    <div className="p-8 bg-gray-50 min-h-screen max-w-7xl mx-auto space-y-12 font-sans">
+      {/* Case Details Header */}
+      <section className="bg-white rounded-xl shadow p-8 border border-gray-300">
+        <h2 className="text-2xl font-bold text-gray-800 mb-3">
+          Case #{caseData.id}
+        </h2>
+        <p className="text-gray-600 mb-5">{caseData.title}</p>
+        <p className="text-gray-700 mb-6">{caseData.description}</p>
+        <div className="flex flex-wrap gap-6 text-gray-700 mb-4">
+          <div className="flex items-center gap-2">
+            <User className="w-5 h-5 text-gray-500" />
+            <span>Assignee: {caseData.assignee}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-gray-500" />
+            <span>Created: {caseData.created}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-gray-500" />
+            <span>Updated: {caseData.updated}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-8">
+          <div>
+            <span className="font-semibold text-gray-700">Profile: </span>
+            <span>
+              {caseData.profile.name} ({caseData.profile.id})
+            </span>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Status: </span>
+            <span>{caseData.status}</span>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Decision: </span>
+            <span>{caseData.decision}</span>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Type: </span>
+            <span>{caseData.type}</span>
+          </div>
+        </div>
+        <div className="mt-4">
+          <span className="font-semibold">Risk Score: </span>
+          <span className="inline-block relative text-yellow-600 font-bold">
+            {caseData.riskScore} / 100
+            <AlertTriangle className="inline-block w-5 h-5 ml-2 text-yellow-600" />
+          </span>
+        </div>
+      </section>
+
+      {/* Relation Diagram (Simplified text boxes) */}
+      <section className="bg-white rounded-xl shadow p-8 border border-gray-300 space-y-6">
+        <h3 className="font-semibold text-lg text-gray-700 mb-6">
+          Case Relation Diagram
+        </h3>
+        <div className="grid grid-cols-4 gap-6 text-gray-900 text-sm">
+          <div className="bg-blue-600 text-white rounded-lg p-4 shadow">
+            <h4 className="font-bold mb-1">Case</h4>
+            <p>
+              <b>Case ID:</b> CASE-2024-134
+            </p>
+            <p>
+              <b>Date:</b> 2024-01-15
+            </p>
+            <p>
+              <b>Status:</b> Active
+            </p>
+            <p>
+              <b>Decision:</b> Approved
+            </p>
+            <p>
+              <b>Type:</b> Investigation
+            </p>
+          </div>
+          <div className="bg-sky-400 text-white rounded-lg p-4 shadow">
+            <h4 className="font-bold mb-1 flex items-center gap-2">
+              Profile <User className="w-4 h-4" />
+            </h4>
+            <p>
+              <b>Profile ID:</b> PROF-789
+            </p>
+            <p>
+              <b>Name:</b> John Doe
+            </p>
+            <p>
+              <b>MMN:</b> Smith
+            </p>
+            <p>
+              <b>Gender:</b> Male
+            </p>
+            <p>
+              <b>DOB:</b> 1985-03-22
+            </p>
+            <p>
+              <b>Case ID:</b> CASE-2024-134
+            </p>
+          </div>
+          <div className="bg-yellow-400 rounded-lg p-4 shadow text-gray-900">
+            <h4 className="font-bold mb-1">Beneficiary Detail</h4>
+            <p>
+              <b>Name:</b> ABC Corp
+            </p>
+            <p>
+              <b>Relation:</b> Beneficiary
+            </p>
+            <p>
+              <b>Country:</b> USA
+            </p>
+            <p>
+              <b>Account No:</b> ****5678
+            </p>
+          </div>
+          <div className="bg-red-500 rounded-lg p-4 shadow text-white">
+            <h4 className="font-bold mb-1">Transaction Detail</h4>
+            <p>
+              <b>Trans ID:</b> TXN-456123
+            </p>
+            <p>
+              <b>Type:</b> Wire Transfer
+            </p>
+            <p>
+              <b>Amount:</b> $15,000
+            </p>
+            <p>
+              <b>Frequency:</b> 1
+            </p>
+          </div>
+        </div>
+        {/* Last 5 Activity */}
+        <div className="bg-red-700 rounded-lg p-4 mt-6 text-white">
+          <h4 className="font-semibold text-lg mb-4">Last 5 Activity</h4>
+          <table className="table-auto w-full text-sm">
+            <thead>
+              <tr>
+                <th className="border-b border-red-300 pb-1 text-left">
+                  Event ID
+                </th>
+                <th className="border-b border-red-300 pb-1 text-left">Date</th>
+                <th className="border-b border-red-300 pb-1 text-left">Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lastActivities.map((act) => (
+                <tr key={act.eventId}>
+                  <td className="border-b border-red-600 py-1">
+                    {act.eventId}
+                  </td>
+                  <td className="border-b border-red-600 py-1">{act.date}</td>
+                  <td className="border-b border-red-600 py-1">{act.type}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Past Events Log */}
+      <section className="bg-white rounded-xl shadow p-8 border border-gray-300">
+        <h3 className="font-semibold text-lg mb-6 text-gray-700">
+          Past Events Log
+        </h3>
+        <div className="overflow-x-auto max-h-96">
+          <table className="min-w-full border-collapse border border-gray-300 text-sm text-gray-600">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border border-gray-300 p-2">Event ID</th>
+                <th className="border border-gray-300 p-2">Event Type</th>
+                <th className="border border-gray-300 p-2">Date & Time</th>
+                <th className="border border-gray-300 p-2">Profile</th>
+                <th className="border border-gray-300 p-2">IP Address</th>
+                <th className="border border-gray-300 p-2">Status</th>
+                <th className="border border-gray-300 p-2">Severity</th>
+                <th className="border border-gray-300 p-2">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pastEvents.map((evt) => (
+                <tr key={evt.eventId} className="hover:bg-gray-50">
+                  <td className="border border-gray-300 p-2 text-blue-600 underline cursor-pointer">
+                    {evt.eventId}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {evt.eventType}
+                  </td>
+                  <td className="border border-gray-300 p-2">{evt.dateTime}</td>
+                  <td className="border border-gray-300 p-2">{evt.profile}</td>
+                  <td className="border border-gray-300 p-2">
+                    {evt.ipAddress}
+                  </td>
+                  <td
+                    className={`border border-gray-300 p-2 font-semibold ${
+                      evt.status === "Success"
+                        ? "text-green-600"
+                        : evt.status === "Failed"
+                        ? "text-red-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
+                    {evt.status}
+                  </td>
+                  <td className="border border-gray-300 p-2">{evt.severity}</td>
+                  <td className="border border-gray-300 p-2">
+                    {evt.description}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Related Transactions */}
+      <section className="bg-white rounded-xl shadow p-8 border border-gray-300">
+        <h3 className="font-semibold text-lg mb-6 text-gray-700">
+          Related Transactions
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-gray-700">
+            <thead>
+              <tr>
+                <th className="text-left p-2 border border-gray-300">
+                  Transaction ID
+                </th>
+                <th className="text-left p-2 border border-gray-300">Amount</th>
+                <th className="text-left p-2 border border-gray-300">
+                  Beneficiary
+                </th>
+                <th className="text-left p-2 border border-gray-300">
+                  Timestamp
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {relatedTransactions.map((txn) => (
+                <tr key={txn.id} className="hover:bg-gray-100 cursor-pointer">
+                  <td className="border border-gray-300 p-2">{txn.id}</td>
+                  <td className="border border-gray-300 p-2">{txn.amount}</td>
+                  <td className="border border-gray-300 p-2">
+                    {txn.beneficiary}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {txn.timestamp}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default CaseDetailPage;
