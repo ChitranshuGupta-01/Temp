@@ -1,140 +1,179 @@
-import { User, File } from "lucide-react";
-import React from "react";
+"use client";
 
-const CaseRelationDiagram: React.FC = () => {
-  // box positions for lines (as % relative to container)
-  const positions = {
-    case: { top: 20, left: 10 },
-    profile: { top: 20, left: 40 },
-    trans: { top: 60, left: 10 },
-    beneficiary: { top: 60, left: 40 },
-    activity: { top: 60, left: 70 },
-  };
-  // SVG connectors, calculated manually for your reference layout
-  const lines = [
-    // case > profile
-    { x1: 160, y1: 80, x2: 480, y2: 80 },
-    // case > transaction
-    { x1: 160, y1: 80, x2: 160, y2: 250 },
-    // profile > beneficiary
-    { x1: 480, y1: 80, x2: 480, y2: 250 },
-    // case -> activity
-    { x1: 160, y1: 80, x2: 800, y2: 250 },
-  ];
+import { FileText, AlertTriangle, User, Calendar, RefreshCcw } from "lucide-react";
 
-  // color palette
-  const boxStyles = {
-    case: "bg-blue-200 border-blue-400",
-    profile: "bg-cyan-200 border-cyan-400",
-    trans: "bg-blue-100 border-blue-300",
-    beneficiary: "bg-yellow-200 border-yellow-400",
-    activity: "bg-red-200 border-red-400",
-  };
-
+export default function CaseDetailPage() {
   return (
-    <div className="relative w-full h-[350px]">
-      {/* SVG Connections */}
-      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        {lines.map((ln, idx) => (
-          <line
-            key={idx}
-            x1={ln.x1}
-            y1={ln.y1}
-            x2={ln.x2}
-            y2={ln.y2}
-            stroke="#888"
-            strokeWidth="2"
-            strokeDasharray="6,4"
-          />
-        ))}
-      </svg>
-      {/* Boxes */}
-      <div className="absolute" style={{ top: "20px", left: "40px" }}>
-        <div className={`rounded-lg border shadow px-6 py-4 ${boxStyles.case}`}>
-          <div className="font-bold text-blue-800 mb-2">Case</div>
-          <div className="text-sm">
-            <div>Case ID: CASE-2024-134</div>
-            <div>Date: 2024-01-15</div>
-            <div>Status: Active</div>
-            <div>Decision: Approved</div>
-            <div>Type: Investigation</div>
+    <div className="p-6 space-y-6">
+      {/* Case Header */}
+      <div className="bg-white rounded-2xl shadow p-6 border">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold flex items-center gap-2">
+              <FileText className="w-6 h-6 text-orange-500" />
+              Case #54532134
+            </h1>
+            <p className="text-gray-500 text-sm">
+              High Value Transaction Investigation
+            </p>
+          </div>
+          <span className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm">
+            High Priority
+          </span>
+        </div>
+
+        {/* Case Details */}
+        <div className="mt-4 text-sm text-gray-700 space-y-2">
+          <p>
+            Investigation of suspicious wire transfers exceeding{" "}
+            <span className="font-semibold">$15,000</span> from account{" "}
+            <span className="font-mono">****5678</span> to multiple
+            beneficiaries. Pattern suggests potential money laundering
+            activity.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-gray-600">
+            <p>
+              <span className="font-semibold">Assignee:</span> John Smith
+            </p>
+            <p>
+              <span className="font-semibold">Profile:</span> John Doe (PROF-789)
+            </p>
+            <p>
+              <span className="font-semibold">Created:</span> 2024-01-10
+            </p>
+            <p>
+              <span className="font-semibold">Updated:</span> 2024-01-15
+            </p>
+          </div>
+        </div>
+
+        {/* Case Score */}
+        <div className="mt-4 flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 text-red-500" />
+          <span className="text-lg font-bold text-red-600">85</span>
+          <span className="text-gray-500 text-sm">/100 Risk</span>
+        </div>
+
+        {/* Actions */}
+        <div className="mt-4 flex gap-3">
+          <button className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
+            Add Note
+          </button>
+          <button className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
+            Update Status
+          </button>
+          <button className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
+            Generate Report
+          </button>
+        </div>
+      </div>
+
+      {/* Case Relation Diagram */}
+      <div className="bg-white rounded-2xl shadow p-6 border">
+        <h2 className="text-lg font-semibold mb-4">Case Relation Diagram</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Case Info */}
+          <div className="bg-red-50 border rounded-lg p-4">
+            <h3 className="font-semibold">Case</h3>
+            <p>Case ID: 2024-154</p>
+            <p>Status: Active</p>
+            <p>Decision: Approve</p>
+            <p>Type: Investigation</p>
+          </div>
+
+          {/* Profile Info */}
+          <div className="bg-blue-50 border rounded-lg p-4">
+            <h3 className="font-semibold">Profile</h3>
+            <p>Profile ID: PROF-789</p>
+            <p>Name: John Doe</p>
+            <p>Gender: Male</p>
+            <p>DOB: 1985-03-22</p>
+          </div>
+
+          {/* Transaction */}
+          <div className="bg-indigo-50 border rounded-lg p-4">
+            <h3 className="font-semibold">Transaction Detail</h3>
+            <p>Trans ID: TXN-456123</p>
+            <p>Type: Wire Transfer</p>
+            <p>Amount: $15,000</p>
+            <p>Frequency: Multiple</p>
+          </div>
+
+          {/* Activity */}
+          <div className="bg-pink-50 border rounded-lg p-4">
+            <h3 className="font-semibold">Last 5 Activity</h3>
+            <ul className="text-sm">
+              <li>2024-01-15 - Login Attempt</li>
+              <li>2024-01-15 - Transaction</li>
+              <li>2024-01-13 - Profile Update</li>
+            </ul>
           </div>
         </div>
       </div>
-      <div className="absolute" style={{ top: "20px", left: "360px" }}>
-        <div className={`rounded-lg border shadow px-6 py-4 ${boxStyles.profile}`}>
-          <div className="font-bold text-cyan-800 flex items-center gap-1 mb-2">
-            Profile <User className="w-4 h-4" />
-          </div>
-          <div className="text-sm">
-            <div>Profile ID: PROF-789</div>
-            <div>Name: John Doe</div>
-            <div>MMN: Smith</div>
-            <div>Gender: Male</div>
-            <div>DOB: 1985-03-22</div>
-            <div>Case ID: CASE-2024-134</div>
-          </div>
-        </div>
-      </div>
-      <div className="absolute" style={{ top: "250px", left: "40px" }}>
-        <div className={`rounded-lg border shadow px-6 py-4 ${boxStyles.trans}`}>
-          <div className="font-bold text-blue-700 flex items-center gap-1 mb-2">
-            Transaction Detail <File className="w-4 h-4" />
-          </div>
-          <div className="text-sm">
-            <div>Trans ID: TXN-456123</div>
-            <div>Type: Wire Transfer</div>
-            <div>Amount: $15,000</div>
-            <div>Frequency: 1</div>
-          </div>
-        </div>
-      </div>
-      <div className="absolute" style={{ top: "250px", left: "360px" }}>
-        <div
-          className={`rounded-lg border shadow px-6 py-4 ${boxStyles.beneficiary}`}
-        >
-          <div className="font-bold text-yellow-900 mb-2">Beneficiary Detail</div>
-          <div className="text-sm">
-            <div>Name: ABC Corp</div>
-            <div>Relation: Beneficiary</div>
-            <div>Country: USA</div>
-            <div>Account No: ****5678</div>
-          </div>
-        </div>
-      </div>
-      <div className="absolute" style={{ top: "250px", left: "680px" }}>
-        <div className={`rounded-lg border shadow px-6 py-4 ${boxStyles.activity}`}>
-          <div className="font-bold text-red-700 mb-2">Last 5 Activity</div>
-          <table className="text-xs">
-            <thead>
-              <tr>
-                <th className="pr-3">Event ID</th>
-                <th className="pr-3">Date</th>
-                <th>Type</th>
+
+      {/* Events Log */}
+      <div className="bg-white rounded-2xl shadow p-6 border">
+        <h2 className="text-lg font-semibold mb-4">Past Events Log</h2>
+        <table className="w-full text-sm border">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 text-left">Event ID</th>
+              <th className="p-2 text-left">Event Type</th>
+              <th className="p-2 text-left">Date & Time</th>
+              <th className="p-2 text-left">Profile</th>
+              <th className="p-2 text-left">IP Address</th>
+              <th className="p-2 text-left">Status</th>
+              <th className="p-2 text-left">Severity</th>
+              <th className="p-2 text-left">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              {
+                id: "EVT-001",
+                type: "Login Attempt",
+                date: "2024-01-15 14:30:25",
+                profile: "John Doe",
+                ip: "192.168.1.100",
+                status: "Success",
+                severity: "Low",
+                desc: "Successful login from registered device",
+              },
+              {
+                id: "EVT-002",
+                type: "Failed Login",
+                date: "2024-01-15 09:15:42",
+                profile: "John Doe",
+                ip: "203.45.67.88",
+                status: "Failed",
+                severity: "High",
+                desc: "Multiple failed login attempts",
+              },
+              {
+                id: "EVT-003",
+                type: "Transaction Alert",
+                date: "2024-01-14 16:45:12",
+                profile: "John Doe",
+                ip: "192.168.1.100",
+                status: "Flagged",
+                severity: "Medium",
+                desc: "High-value transaction exceeding daily limit",
+              },
+            ].map((e) => (
+              <tr key={e.id} className="border-t">
+                <td className="p-2">{e.id}</td>
+                <td className="p-2">{e.type}</td>
+                <td className="p-2">{e.date}</td>
+                <td className="p-2">{e.profile}</td>
+                <td className="p-2">{e.ip}</td>
+                <td className="p-2">{e.status}</td>
+                <td className="p-2">{e.severity}</td>
+                <td className="p-2">{e.desc}</td>
               </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="pr-3">EVT-015</td>
-                <td className="pr-3">2024-01-15</td>
-                <td>Login Attempt</td>
-              </tr>
-              <tr>
-                <td className="pr-3">EVT-014</td>
-                <td className="pr-3">2024-01-14</td>
-                <td>Transaction Alert</td>
-              </tr>
-              <tr>
-                <td className="pr-3">EVT-013</td>
-                <td className="pr-3">2024-01-13</td>
-                <td>Profile Update</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
-};
-
-export default CaseRelationDiagram;
+}
