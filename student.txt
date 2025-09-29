@@ -7,9 +7,9 @@ import {
   Search,
   Filter,
   Download,
-  Settings,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 import ReactFlow, { Background, Controls } from "reactflow";
 import "reactflow/dist/style.css";
@@ -26,13 +26,23 @@ type EventItem = {
 };
 
 export default function CaseDetailPage() {
-  // --- Relation diagram nodes & edges ---
+  // --- Case state ---
+  const [caseStatus, setCaseStatus] = useState("Active");
+  const [notes, setNotes] = useState<string[]>([]);
+  const [riskScore, setRiskScore] = useState(85);
+
+  // --- Modals ---
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [newNote, setNewNote] = useState("");
+  const [newStatus, setNewStatus] = useState(caseStatus);
+
+  // --- Relation Diagram ---
   const nodes = [
     {
       id: "case",
       data: {
-        label:
-          "Case\nCase ID: CASE-2024-154\nDate: 2024-01-15\nStatus: Active\nDecision: Approve\nType: Investigation",
+        label: `Case\nCase ID: CASE-2024-154\nDate: 2024-01-15\nStatus: ${caseStatus}\nDecision: Approve\nType: Investigation`,
       },
       position: { x: 100, y: 30 },
       style: {
@@ -40,14 +50,13 @@ export default function CaseDetailPage() {
         padding: 12,
         borderRadius: 10,
         border: "1px solid #fca5a5",
-        width: 240,
+        width: 260,
       },
     },
     {
       id: "profile",
       data: {
-        label:
-          "Profile\nProfile ID: PROF-789\nName: John Doe\nMMN: Smith\nGender: Male\nDOB: 1985-03-22",
+        label: "Profile\nProfile ID: PROF-789\nName: John Doe\nDOB: 1985-03-22",
       },
       position: { x: 420, y: 30 },
       style: {
@@ -62,7 +71,7 @@ export default function CaseDetailPage() {
       id: "txn",
       data: {
         label:
-          "Transaction Detail\nTrans ID: TXN-456123\nType: Wire Transfer\nAmount: $15,000.00\nFrequency: Multiple",
+          "Transaction\nTrans ID: TXN-456123\nType: Wire Transfer\nAmount: $15,000\nFrequency: Multiple",
       },
       position: { x: 100, y: 230 },
       style: {
@@ -76,8 +85,7 @@ export default function CaseDetailPage() {
     {
       id: "activity",
       data: {
-        label:
-          "Last 5 Activity\nEVT-001 Login Attempt\nEVT-003 Transaction Alert\nEVT-004 Profile Update",
+        label: "Activity\nEVT-001 Login Attempt\nEVT-003 Transaction Alert",
       },
       position: { x: 420, y: 230 },
       style: {
@@ -96,7 +104,7 @@ export default function CaseDetailPage() {
     { id: "e3", source: "profile", target: "activity", animated: true },
   ];
 
-  // --- Events data (dummy) ---
+  // --- Dummy events ---
   const events: EventItem[] = [
     {
       id: "EVT-001",
@@ -106,7 +114,7 @@ export default function CaseDetailPage() {
       ip: "192.168.1.100",
       status: "Success",
       severity: "Low",
-      desc: "Successful login from registered device",
+      desc: "Successful login",
     },
     {
       id: "EVT-002",
@@ -116,7 +124,7 @@ export default function CaseDetailPage() {
       ip: "203.45.67.88",
       status: "Failed",
       severity: "High",
-      desc: "Multiple failed login attempts from unknown device",
+      desc: "Multiple failed login attempts",
     },
     {
       id: "EVT-003",
@@ -128,72 +136,20 @@ export default function CaseDetailPage() {
       severity: "Medium",
       desc: "High-value transaction exceeding daily limit",
     },
-    {
-      id: "EVT-004",
-      type: "Profile Update",
-      date: "2024-01-14 11:20:31",
-      profile: "John Doe",
-      ip: "192.168.1.100",
-      status: "Success",
-      severity: "Low",
-      desc: "Contact information updated successfully",
-    },
-    {
-      id: "EVT-005",
-      type: "Beneficiary Added",
-      date: "2024-01-13 13:55:16",
-      profile: "John Doe",
-      ip: "192.168.1.100",
-      status: "Success",
-      severity: "Low",
-      desc: "New beneficiary ABC Corp added to account",
-    },
-    {
-      id: "EVT-006",
-      type: "Login Attempt",
-      date: "2024-01-12 08:22:10",
-      profile: "John Doe",
-      ip: "192.168.1.101",
-      status: "Success",
-      severity: "Low",
-      desc: "Successful login from registered device",
-    },
-    {
-      id: "EVT-007",
-      type: "Password Change",
-      date: "2024-01-12 09:30:00",
-      profile: "John Doe",
-      ip: "192.168.1.102",
-      status: "Success",
-      severity: "Low",
-      desc: "Password changed via settings",
-    },
-    {
-      id: "EVT-008",
-      type: "Failed Login",
-      date: "2024-01-11 10:12:34",
-      profile: "John Doe",
-      ip: "45.67.89.12",
-      status: "Failed",
-      severity: "High",
-      desc: "Multiple failed attempts",
-    },
   ];
 
-  // --- UI state ---
+  // --- Table state ---
   const [searchTerm, setSearchTerm] = useState("");
   const [eventTypeFilter, setEventTypeFilter] = useState("All Event Types");
   const [pageSize, setPageSize] = useState<number>(5);
   const [page, setPage] = useState<number>(1);
 
-  // unique event types
   const eventTypes = useMemo(() => {
     const s = new Set<string>();
     events.forEach((e) => s.add(e.type));
     return ["All Event Types", ...Array.from(s)];
   }, [events]);
 
-  // filtered events
   const filtered = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     return events.filter((e) => {
@@ -212,7 +168,6 @@ export default function CaseDetailPage() {
     });
   }, [events, searchTerm, eventTypeFilter]);
 
-  // pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(Math.max(1, page), totalPages);
   const startIndex = (currentPage - 1) * pageSize;
@@ -222,28 +177,20 @@ export default function CaseDetailPage() {
     setPage(Math.min(Math.max(1, next), totalPages));
   }
 
-  function handleDownload() {
+  // --- Downloads ---
+  function handleDownloadCSV() {
     const headers = [
       "Event ID",
       "Event Type",
       "Date & Time",
       "Profile",
-      "IP Address",
+      "IP",
       "Status",
       "Severity",
       "Description",
     ];
     const rows = filtered.map((r) =>
-      [
-        r.id,
-        r.type,
-        r.date,
-        r.profile,
-        r.ip,
-        r.status,
-        r.severity,
-        `"${r.desc.replace(/"/g, '""')}"`,
-      ].join(",")
+      [r.id, r.type, r.date, r.profile, r.ip, r.status, r.severity, `"${r.desc}"`].join(",")
     );
     const csv = [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -255,69 +202,94 @@ export default function CaseDetailPage() {
     URL.revokeObjectURL(url);
   }
 
+  function handleGenerateReport() {
+    const header = `CASE REPORT
+====================
+Case ID: CASE-2024-154
+Status: ${caseStatus}
+Risk Score: ${riskScore}
+Notes: ${notes.length > 0 ? notes.join("; ") : "None"}
+Total Events: ${events.length}
+
+EVENT DETAILS
+====================`;
+
+    const eventLines = events
+      .map(
+        (e) =>
+          `Event: ${e.id}
+  Type: ${e.type}
+  Date: ${e.date}
+  Profile: ${e.profile}
+  IP: ${e.ip}
+  Status: ${e.status}
+  Severity: ${e.severity}
+  Description: ${e.desc}
+--------------------`
+      )
+      .join("\n");
+
+    const report = `${header}\n${eventLines}`;
+    const blob = new Blob([report], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "case_report.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="p-6 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
       {/* ===== Case Header ===== */}
-      <div className="bg-white rounded-2xl shadow-lg border overflow-hidden">
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 px-6 py-4 border-b">
-          <h1 className="text-xl font-bold text-gray-800 flex items-center gap-3">
-            <FileText className="w-6 h-6 text-orange-600" />
-            Case #54532134
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            High Value Transaction Investigation
-          </p>
+      <div className="bg-white rounded-2xl shadow-lg border p-6">
+        <h1 className="text-xl font-bold flex items-center gap-2 text-gray-800">
+          <FileText className="w-6 h-6 text-orange-600" />
+          Case #54532134
+        </h1>
+        <p className="text-gray-500 text-sm">High Value Transaction Investigation</p>
+
+        <div className="mt-3 text-sm text-gray-700">
+          <p>Status: <b>{caseStatus}</b></p>
+          <p>Risk Score: <b>{riskScore}/100</b></p>
+          {notes.length > 0 && (
+            <div className="mt-2">
+              <b>Notes:</b>
+              <ul className="list-disc ml-6 text-gray-600">
+                {notes.map((n, i) => (
+                  <li key={i}>{n}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
-        <div className="p-6 space-y-4">
-          <p className="text-gray-700">
-            Investigation of suspicious wire transfers exceeding{" "}
-            <span className="font-semibold text-gray-900">$15,000</span> from
-            account <span className="font-mono">****5678</span> to multiple
-            beneficiaries.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-600">
-            <p>
-              <span className="font-semibold">Assignee:</span> John Smith
-            </p>
-            <p>
-              <span className="font-semibold">Profile:</span> John Doe
-              (PROF-789)
-            </p>
-            <p>
-              <span className="font-semibold">Created:</span> 2024-01-10
-            </p>
-            <p>
-              <span className="font-semibold">Updated:</span> 2024-01-15
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
-            <span className="text-2xl font-bold text-red-600">85</span>
-            <span className="text-gray-500 text-sm">/100 Risk</span>
-          </div>
-
-          <div className="flex gap-3">
-            {["Add Note", "Update Status", "Generate Report"].map((label) => (
-              <button
-                key={label}
-                className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-gray-50 to-gray-100 border rounded-lg hover:from-indigo-50 hover:to-indigo-100 transition-all shadow-sm"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+        <div className="mt-4 flex gap-3">
+          <button
+            onClick={() => setShowNoteModal(true)}
+            className="px-4 py-2 text-sm bg-indigo-50 border rounded hover:bg-indigo-100"
+          >
+            Add Note
+          </button>
+          <button
+            onClick={() => setShowStatusModal(true)}
+            className="px-4 py-2 text-sm bg-indigo-50 border rounded hover:bg-indigo-100"
+          >
+            Update Status
+          </button>
+          <button
+            onClick={handleGenerateReport}
+            className="px-4 py-2 text-sm bg-indigo-50 border rounded hover:bg-indigo-100"
+          >
+            Generate Report
+          </button>
         </div>
       </div>
 
       {/* ===== Relation Diagram ===== */}
       <div className="bg-white rounded-2xl shadow-lg border p-6">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">
-          Case Relation Diagram
-        </h2>
-        <div className="h-[330px] rounded-md border bg-gradient-to-br from-gray-50 to-gray-100">
+        <h2 className="text-lg font-semibold mb-4">Case Relation Diagram</h2>
+        <div className="h-[330px] border rounded">
           <ReactFlow nodes={nodes} edges={edges} fitView>
             <Background />
             <Controls />
@@ -327,59 +299,41 @@ export default function CaseDetailPage() {
 
       {/* ===== Past Events Log ===== */}
       <div className="bg-white rounded-2xl shadow-lg border p-6">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800">
-              Past Events Log
-            </h2>
-            <p className="text-sm text-gray-500">
-              Recent activity and security events for Profile: John Doe
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleDownload}
-              className="px-3 py-2 rounded-md bg-gray-50 border hover:bg-gray-100 text-sm"
-            >
-              Download
-            </button>
-            <button className="px-3 py-2 rounded-md bg-gray-50 border hover:bg-gray-100 text-sm">
-              Settings
-            </button>
-          </div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Past Events Log</h2>
+          <button
+            onClick={handleDownloadCSV}
+            className="px-3 py-2 rounded-md bg-gray-50 border hover:bg-gray-100 text-sm flex items-center"
+          >
+            <Download className="w-4 h-4 mr-1" /> CSV
+          </button>
         </div>
 
-        {/* search + filter */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
-          <div className="w-full md:max-w-xl">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setPage(1);
-                }}
-                placeholder="Search events, status, IP addresses..."
-                className="w-full pl-10 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
-              />
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search events..."
+              className="w-full pl-10 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 shadow-sm"
+            />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex gap-2">
             <select
               value={eventTypeFilter}
               onChange={(e) => {
                 setEventTypeFilter(e.target.value);
                 setPage(1);
               }}
-              className="border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
+              className="border rounded-lg py-2 px-3 text-sm"
             >
               {eventTypes.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
+                <option key={t} value={t}>{t}</option>
               ))}
             </select>
             <select
@@ -388,7 +342,7 @@ export default function CaseDetailPage() {
                 setPageSize(Number(e.target.value));
                 setPage(1);
               }}
-              className="border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
+              className="border rounded-lg py-2 px-3 text-sm"
             >
               <option value={5}>5 per page</option>
               <option value={10}>10 per page</option>
@@ -397,113 +351,69 @@ export default function CaseDetailPage() {
           </div>
         </div>
 
-        {/* table */}
         <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full text-sm border-collapse">
-            <thead className="bg-gradient-to-r from-indigo-50 to-indigo-100 text-gray-700 text-left">
+          <table className="w-full text-sm">
+            <thead className="bg-indigo-50">
               <tr>
-                <th className="p-3">Event ID</th>
-                <th className="p-3">Event Type</th>
-                <th className="p-3">Date & Time</th>
-                <th className="p-3">Profile</th>
-                <th className="p-3">IP Address</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Severity</th>
-                <th className="p-3">Description</th>
+                <th className="p-2">Event ID</th>
+                <th className="p-2">Event Type</th>
+                <th className="p-2">Date</th>
+                <th className="p-2">Profile</th>
+                <th className="p-2">IP</th>
+                <th className="p-2">Status</th>
+                <th className="p-2">Severity</th>
+                <th className="p-2">Description</th>
               </tr>
             </thead>
             <tbody>
-              {visible.map((e, i) => (
-                <tr
-                  key={e.id}
-                  className={`hover:bg-indigo-50 transition-colors ${
-                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  }`}
-                >
-                  <td className="p-3 font-medium text-indigo-700">{e.id}</td>
-                  <td className="p-3">{e.type}</td>
-                  <td className="p-3 text-gray-600">{e.date}</td>
-                  <td className="p-3">{e.profile}</td>
-                  <td className="p-3 font-mono text-gray-700">{e.ip}</td>
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        e.status === "Success"
-                          ? "bg-green-100 text-green-700"
-                          : e.status === "Failed"
-                          ? "bg-red-100 text-red-700"
-                          : e.status === "Flagged"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {e.status}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        e.severity === "Low"
-                          ? "bg-green-100 text-green-700"
-                          : e.severity === "High"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {e.severity}
-                    </span>
-                  </td>
-                  <td className="p-3 text-gray-700">{e.desc}</td>
+              {visible.map((e) => (
+                <tr key={e.id} className="even:bg-gray-50">
+                  <td className="p-2 font-medium text-indigo-700">{e.id}</td>
+                  <td className="p-2">{e.type}</td>
+                  <td className="p-2">{e.date}</td>
+                  <td className="p-2">{e.profile}</td>
+                  <td className="p-2 font-mono">{e.ip}</td>
+                  <td className="p-2">{e.status}</td>
+                  <td className="p-2">{e.severity}</td>
+                  <td className="p-2">{e.desc}</td>
                 </tr>
               ))}
-
-              {visible.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="p-4 text-center text-gray-500">
-                    No events found.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
 
-        {/* pagination */}
-        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+        {/* Pagination */}
+        <div className="mt-3 flex justify-between text-sm text-gray-600">
           <span>
-            Showing{" "}
-            <b>{filtered.length === 0 ? 0 : startIndex + 1}</b> to{" "}
-            <b>{Math.min(startIndex + pageSize, filtered.length)}</b> of{" "}
-            <b>{filtered.length}</b> events
+            Showing {filtered.length === 0 ? 0 : startIndex + 1} to{" "}
+            {Math.min(startIndex + pageSize, filtered.length)} of{" "}
+            {filtered.length} events
           </span>
           <div className="flex gap-1">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage <= 1}
-              className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
+              className="px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-50"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            {Array.from({ length: totalPages }).map((_, idx) => {
-              const pnum = idx + 1;
-              return (
-                <button
-                  key={pnum}
-                  onClick={() => handlePageChange(pnum)}
-                  className={`px-3 py-1 rounded-md ${
-                    pnum === currentPage
-                      ? "bg-indigo-600 text-white"
-                      : "hover:bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {pnum}
-                </button>
-              );
-            })}
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => handlePageChange(i + 1)}
+                className={`px-3 py-1 rounded ${
+                  i + 1 === currentPage
+                    ? "bg-indigo-600 text-white"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
+              className="px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-50"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -513,18 +423,79 @@ export default function CaseDetailPage() {
 
       {/* ===== Related Transactions ===== */}
       <div className="bg-white rounded-2xl shadow-lg border p-6">
-        <h2 className="text-lg font-semibold mb-2 text-gray-800">
-          Related Transactions
-        </h2>
-        <p className="text-sm text-gray-500 mb-3">
-          All transactions made to the same account: ****5678
-        </p>
+        <h2 className="text-lg font-semibold mb-2">Related Transactions</h2>
         <input
           type="text"
-          placeholder="Search transactions, amounts, beneficiaries..."
-          className="w-full border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
+          placeholder="Search transactions..."
+          className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-300"
         />
       </div>
+
+      {/* ===== Add Note Modal ===== */}
+      {showNoteModal && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-96">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold">Add Note</h3>
+              <button onClick={() => setShowNoteModal(false)}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <textarea
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              className="w-full border rounded p-2 mb-3"
+              rows={4}
+              placeholder="Write your note..."
+            />
+            <button
+              onClick={() => {
+                if (newNote.trim()) {
+                  setNotes((prev) => [...prev, newNote.trim()]);
+                  setNewNote("");
+                  setShowNoteModal(false);
+                }
+              }}
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            >
+              Save Note
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ===== Update Status Modal ===== */}
+      {showStatusModal && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-80">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold">Update Status</h3>
+              <button onClick={() => setShowStatusModal(false)}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <select
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+              className="w-full border rounded p-2 mb-3"
+            >
+              <option>Active</option>
+              <option>Closed</option>
+              <option>On Hold</option>
+              <option>Pending Review</option>
+            </select>
+            <button
+              onClick={() => {
+                setCaseStatus(newStatus);
+                setShowStatusModal(false);
+              }}
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
