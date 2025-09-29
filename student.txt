@@ -1,11 +1,1120 @@
-"use client";
+import React, { useState, useEffect } from 'react';
+//import { useParams, useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
+import { 
+  Search, 
+  ArrowLeft, 
+  Calendar, 
+  Filter, 
+  User, 
+  CreditCard, 
+  Building, 
+  MapPin, 
+  Phone, 
+  Mail,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  TrendingUp,
+  Shield,
+  Eye,
+  FileText,
+  Activity,
+  Wallet,
+  PiggyBank,
+  Users,
+  Smartphone,
+  Home,
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  UserCheck,
+  UserX,
+  Key,
+  Fingerprint,
+  Lock,
+  Unlock,
+  LogIn,
+  LogOut,
+  RefreshCw,
+  XCircle,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Settings,
+  Bell,
+  ShieldAlert,
+  ShieldCheck,
+  Zap,
+  Download,
+  Upload,
+  Globe,
+  Wifi,
+  WifiOff,
+  Network
+} from 'lucide-react';
 
-import React from "react";
-import CaseDetailPage from "../components/CaseDetailPage"
-import SearchPage from "@/components/SearchPage";
-import AnalysisPage from "@/components/AnalysisPage";
-
-
-export default function Page(){
-  return <CaseDetailPage/>;
+interface AccountData {
+  type: string;
+  account: string;
+  balance: string;
+  limit: string;
 }
+
+interface CardData {
+  type: string;
+  number: string;
+  status: string;
+  limit: string;
+}
+
+interface HoldingData {
+  type: string;
+  product: string;
+  value: string;
+  maturity: string;
+}
+
+interface BeneficiaryData {
+  name: string;
+  account: string;
+  bank: string;
+  lastUsed: string;
+}
+
+interface CasaData {
+  label: string;
+  value: string | number;
+}
+
+interface ContactHistoryItem {
+  value: string;
+  dateChanged: string;
+  status: 'Current' | 'Previous';
+  verificationStatus?: 'Verified' | 'Pending' | 'Failed';
+}
+
+interface TimelineEvent {
+  id: string;
+  date: string;
+  time: string;
+  type: 'event' | 'case' | 'payment' | 'transaction';
+  subType: string;
+  icon: React.ReactNode;
+  description: string;
+  details: string;
+  status: 'success' | 'failed' | 'pending' | 'warning';
+  amount?: string;
+}
+
+function AnalysisPage({type,value}: {type?: string; value?: string}) {
+  
+  const router = useRouter();
+  const [activeContactTab, setActiveContactTab] = useState('Profile');
+  const [activeFinancialTab, setActiveFinancialTab] = useState('Accounts');
+  const [timelineFilter, setTimelineFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedDate, setSelectedDate] = useState('2025-05-19');
+  const [selectedEventItem, setSelectedEventItem] = useState<any>(null);
+  const [selectedPaymentItem, setSelectedPaymentItem] = useState<any>(null);
+  const [selectedCaseItem, setSelectedCaseItem] = useState<any>(null);
+  const itemsPerPage = 11; // Changed from 18 to 11
+
+  // Mock data based on the image
+  const profileData = {
+    name: 'Adam Giber',
+    mmn: 'Samuel',
+    gender: 'Male',
+    dob: '13-08-88',
+    acctLogin: '2542114965',
+    custRelID: '04-5444567890',
+    acOpenDate: '12-03-1988',
+    vip: 'Yes',
+    segment: 'Priority cust'
+  };
+
+  const mobileHistory: ContactHistoryItem[] = [
+    { value: '+65 9876 5432', dateChanged: '15-05-2025', status: 'Current', verificationStatus: 'Verified' },
+    { value: '+65 8765 4321', dateChanged: '10-03-2025', status: 'Previous', verificationStatus: 'Verified' },
+    { value: '+65 7654 3210', dateChanged: '22-12-2024', status: 'Previous', verificationStatus: 'Verified' },
+    { value: '+65 6543 2109', dateChanged: '05-08-2024', status: 'Previous', verificationStatus: 'Failed' }
+  ];
+
+  const emailHistory: ContactHistoryItem[] = [
+    { value: 'adam.giber@email.com', dateChanged: '20-04-2025', status: 'Current', verificationStatus: 'Verified' },
+    { value: 'a.giber@oldmail.com', dateChanged: '15-01-2025', status: 'Previous', verificationStatus: 'Verified' },
+    { value: 'adamgiber@company.com', dateChanged: '30-09-2024', status: 'Previous', verificationStatus: 'Verified' },
+    { value: 'adam123@tempmail.com', dateChanged: '12-06-2024', status: 'Previous', verificationStatus: 'Pending' }
+  ];
+
+  const addressHistory: ContactHistoryItem[] = [
+    { 
+      value: '123 Marina Bay Street, #15-01, Singapore 018956', 
+      dateChanged: '01-06-2025', 
+      status: 'Current', 
+      verificationStatus: 'Verified' 
+    },
+    { 
+      value: '456 Orchard Road, #08-12, Singapore 238883', 
+      dateChanged: '15-02-2025', 
+      status: 'Previous', 
+      verificationStatus: 'Verified' 
+    },
+    { 
+      value: '789 Raffles Place, #20-05, Singapore 048619', 
+      dateChanged: '10-11-2024', 
+      status: 'Previous', 
+      verificationStatus: 'Verified' 
+    },
+    { 
+      value: '321 Sentosa Cove, #05-08, Singapore 098234', 
+      dateChanged: '25-07-2024', 
+      status: 'Previous', 
+      verificationStatus: 'Pending' 
+    }
+  ];
+
+  const accountsData: AccountData[] = [
+    { type: 'Savings', account: '123456789', balance: '$56000', limit: '$2000' },
+    { type: 'Savings', account: '544456789', balance: '$2000', limit: '$1000' },
+    { type: 'Current', account: '544456789', balance: '$15000', limit: '$3000' }
+  ];
+
+  const cardsData: CardData[] = [
+    { type: 'Credit Card', number: '**** 1234', status: 'Active', limit: '$10000' },
+    { type: 'Debit Card', number: '**** 5678', status: 'Active', limit: '$5000' },
+    { type: 'Credit Card', number: '**** 9012', status: 'Blocked', limit: '$15000' }
+  ];
+
+  const holdingsData: HoldingData[] = [
+    { type: 'Fixed Deposit', product: 'FD-001', value: '$25000', maturity: '12-12-2025' },
+    { type: 'Investment', product: 'MF-002', value: '$15000', maturity: 'Open' },
+    { type: 'Bond', product: 'BD-003', value: '$50000', maturity: '06-06-2026' }
+  ];
+
+  const beneficiariesData: BeneficiaryData[] = [
+    { name: 'John Smith', account: '987654321', bank: 'Standard Chartered', lastUsed: '15-05-2025' },
+    { name: 'Sarah Johnson', account: '456789123', bank: 'HSBC', lastUsed: '10-05-2025' },
+    { name: 'Mike Wilson', account: '789123456', bank: 'Citibank', lastUsed: '08-05-2025' }
+  ];
+
+  const casaData: CasaData[] = [
+    { label: 'Largest CASA amount statement', value: '2542114965' },
+    { label: 'Largest Payment in LCY', value: '$5000' },
+    { label: 'Cross Border Trans Frequency', value: 3 },
+    { label: 'Frequent online Usage', value: 'Yes' },
+    { label: 'Largest crossborder FX', value: '$1000' },
+    { label: 'Frequent traveller', value: 'Yes' },
+    { label: 'Cross Border Trans $', value: '$3000' }
+  ];
+
+  const beneficiaryStatsData: CasaData[] = [
+    { label: 'No of beneficiary', value: 6 },
+    { label: 'Current beneficiary added', value: '04-5444567890' },
+    { label: 'Vol of incoming payment $', value: '$8000' },
+    { label: 'Vol of incoming payment #', value: 5 },
+    { label: '% of current to o/s balance', value: '54%' },
+    { label: 'Last payment date', value: '12-05-2025' },
+    { label: 'Last payment amount', value: '$3000' }
+  ];
+
+  // Generate comprehensive timeline events (65+ events)
+  const generateTimelineEvents = (): TimelineEvent[] => {
+    const events: TimelineEvent[] = [];
+    const baseDate = '2025-05-19';
+    
+    // Generate 65+ events with varied types and times
+    const eventTypes = [
+      // Login Events
+      { type: 'event' as const, subType: 'login_success', icon: <LogIn className="w-4 h-4" />, description: 'Login Success', details: 'Mobile app login from Singapore', status: 'success' as const },
+      { type: 'event' as const, subType: 'login_failed', icon: <UserX className="w-4 h-4" />, description: 'Login Failed', details: 'Invalid password attempt', status: 'failed' as const },
+      { type: 'event' as const, subType: 'fingerprint_success', icon: <Fingerprint className="w-4 h-4" />, description: 'Fingerprint Success', details: 'Biometric authentication successful', status: 'success' as const },
+      { type: 'event' as const, subType: 'fingerprint_failed', icon: <XCircle className="w-4 h-4" />, description: 'Fingerprint Failed', details: 'Biometric authentication failed', status: 'failed' as const },
+      { type: 'event' as const, subType: 'otp_failed', icon: <ShieldAlert className="w-4 h-4" />, description: 'OTP Verification Failed', details: 'Invalid OTP entered', status: 'failed' as const },
+      
+      // Payment Events
+      { type: 'payment' as const, subType: 'credit', icon: <ArrowDownLeft className="w-4 h-4" />, description: 'Credit Payment', details: 'Salary credit received', status: 'success' as const, amount: '+$5,000' },
+      { type: 'payment' as const, subType: 'debit', icon: <ArrowUpRight className="w-4 h-4" />, description: 'Debit Payment', details: 'Online purchase payment', status: 'success' as const, amount: '-$250' },
+      { type: 'payment' as const, subType: 'failed', icon: <XCircle className="w-4 h-4" />, description: 'Payment Failed', details: 'Insufficient funds', status: 'failed' as const, amount: '-$1,200' },
+      { type: 'payment' as const, subType: 'bill_payment', icon: <FileText className="w-4 h-4" />, description: 'Bill Payment', details: 'Utility bill payment', status: 'success' as const, amount: '-$150' },
+      { type: 'payment' as const, subType: 'recurring', icon: <RefreshCw className="w-4 h-4" />, description: 'Recurring Payment', details: 'Monthly subscription payment', status: 'success' as const, amount: '-$99' },
+      
+      // Transaction Events
+      { type: 'transaction' as const, subType: 'transfer', icon: <DollarSign className="w-4 h-4" />, description: 'Fund Transfer', details: 'Transfer to John Smith', status: 'success' as const, amount: '-$500' },
+      { type: 'transaction' as const, subType: 'withdrawal', icon: <TrendingDown className="w-4 h-4" />, description: 'ATM Withdrawal', details: 'Cash withdrawal at Marina Bay', status: 'success' as const, amount: '-$200' },
+      { type: 'transaction' as const, subType: 'deposit', icon: <TrendingUp className="w-4 h-4" />, description: 'Cash Deposit', details: 'Branch deposit at Orchard Road', status: 'success' as const, amount: '+$1,000' },
+      { type: 'transaction' as const, subType: 'forex', icon: <RefreshCw className="w-4 h-4" />, description: 'Currency Exchange', details: 'USD to SGD conversion', status: 'success' as const, amount: '$2,500' },
+      
+      // Case Events
+      { type: 'case' as const, subType: 'fraud_alert', icon: <AlertTriangle className="w-4 h-4" />, description: 'Fraud Alert', details: 'Suspicious transaction detected', status: 'warning' as const },
+      { type: 'case' as const, subType: 'case_opened', icon: <FileText className="w-4 h-4" />, description: 'Case Opened', details: 'Investigation case #FR2025001', status: 'pending' as const },
+      { type: 'case' as const, subType: 'case_resolved', icon: <CheckCircle className="w-4 h-4" />, description: 'Case Resolved', details: 'False positive - case closed', status: 'success' as const },
+      { type: 'case' as const, subType: 'compliance_check', icon: <Shield className="w-4 h-4" />, description: 'Compliance Check', details: 'AML screening completed', status: 'success' as const },
+      
+      // Security Events
+      { type: 'event' as const, subType: 'password_changed', icon: <Key className="w-4 h-4" />, description: 'Password Changed', details: 'User updated login password', status: 'success' as const },
+      { type: 'event' as const, subType: 'account_locked', icon: <Lock className="w-4 h-4" />, description: 'Account Locked', details: 'Multiple failed login attempts', status: 'warning' as const },
+      { type: 'event' as const, subType: 'account_unlocked', icon: <Unlock className="w-4 h-4" />, description: 'Account Unlocked', details: 'Account restored by admin', status: 'success' as const },
+      
+      // Device Events
+      { type: 'event' as const, subType: 'new_device', icon: <Smartphone className="w-4 h-4" />, description: 'New Device Login', details: 'Login from iPhone 15 Pro', status: 'warning' as const },
+      { type: 'event' as const, subType: 'device_verified', icon: <ShieldCheck className="w-4 h-4" />, description: 'Device Verified', details: 'Device added to trusted list', status: 'success' as const },
+      
+      // Network Events
+      { type: 'event' as const, subType: 'vpn_detected', icon: <Globe className="w-4 h-4" />, description: 'VPN Detected', details: 'Login through VPN connection', status: 'warning' as const },
+      { type: 'event' as const, subType: 'location_change', icon: <MapPin className="w-4 h-4" />, description: 'Location Change', details: 'Login from different country', status: 'warning' as const },
+      
+      // System Events
+      { type: 'event' as const, subType: 'session_timeout', icon: <Clock className="w-4 h-4" />, description: 'Session Timeout', details: 'User session expired', status: 'pending' as const },
+      { type: 'event' as const, subType: 'profile_updated', icon: <Settings className="w-4 h-4" />, description: 'Profile Updated', details: 'Contact information changed', status: 'success' as const },
+      { type: 'event' as const, subType: 'email_verified', icon: <Mail className="w-4 h-4" />, description: 'Email Verified', details: 'New email address confirmed', status: 'success' as const },
+      { type: 'event' as const, subType: 'logout', icon: <LogOut className="w-4 h-4" />, description: 'User Logout', details: 'Session ended normally', status: 'success' as const },
+      { type: 'event' as const, subType: 'notification_sent', icon: <Bell className="w-4 h-4" />, description: 'Notification Sent', details: 'Transaction alert sent to mobile', status: 'success' as const }
+    ];
+
+    // Generate 65+ events by repeating and varying the base events
+    for (let i = 0; i < 70; i++) {
+      const eventTemplate = eventTypes[i % eventTypes.length];
+      const hour = 23 - Math.floor(i / 3); // Distribute across the day
+      const minute = (i * 7) % 60; // Vary minutes
+      const second = (i * 13) % 60; // Vary seconds
+      
+      events.push({
+        id: `event-${i + 1}`,
+        date: baseDate,
+        time: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`,
+        type: eventTemplate.type,
+        subType: `${eventTemplate.subType}_${i + 1}`,
+        icon: eventTemplate.icon,
+        description: `${eventTemplate.description} #${i + 1}`,
+        details: `${eventTemplate.details} - Instance ${i + 1}`,
+        status: eventTemplate.status,
+        amount: eventTemplate.amount ? `${eventTemplate.amount.replace(/\d+/, (Math.floor(Math.random() * 5000) + 100).toString())}` : undefined
+      });
+    }
+
+    return events.sort((a, b) => b.time.localeCompare(a.time));
+  };
+
+  const allTimelineEvents = generateTimelineEvents();
+
+  // Filter events based on selected filter and date
+  const getFilteredEvents = () => {
+    let filtered = allTimelineEvents.filter(event => event.date === selectedDate);
+    
+    if (timelineFilter !== 'All') {
+      filtered = filtered.filter(event => {
+        switch (timelineFilter) {
+          case 'Events':
+            return event.type === 'event';
+          case 'Case':
+            return event.type === 'case';
+          case 'Payments':
+            return event.type === 'payment' || event.type === 'transaction';
+          default:
+            return true;
+        }
+      });
+    }
+    
+    return filtered.sort((a, b) => b.time.localeCompare(a.time));
+  };
+
+  const filteredEvents = getFilteredEvents();
+  const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentEvents = filteredEvents.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [timelineFilter, selectedDate]);
+
+  const handleTimelineItemClick = (event: TimelineEvent) => {
+    switch (event.type) {
+      case 'event':
+        setSelectedEventItem(event);
+        break;
+      case 'payment':
+      case 'transaction':
+        setSelectedPaymentItem(event);
+        break;
+      case 'case':
+        setSelectedCaseItem(event);
+        break;
+    }
+  };
+
+  const getEventIcon = (event: TimelineEvent) => {
+    return event.icon;
+  };
+
+  const getEventColor = (event: TimelineEvent) => {
+    switch (event.status) {
+      case 'success':
+        return 'text-green-400 border-green-400';
+      case 'failed':
+        return 'text-red-400 border-red-400';
+      case 'warning':
+        return 'text-orange-400 border-orange-400';
+      case 'pending':
+        return 'text-blue-400 border-blue-400';
+      default:
+        return 'text-gray-400 border-gray-400';
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <span className="px-2 py-1 bg-green-900/30 text-green-400 rounded-full text-xs font-medium">Success</span>;
+      case 'failed':
+        return <span className="px-2 py-1 bg-red-900/30 text-red-400 rounded-full text-xs font-medium">Failed</span>;
+      case 'warning':
+        return <span className="px-2 py-1 bg-orange-900/30 text-orange-400 rounded-full text-xs font-medium">Warning</span>;
+      case 'pending':
+        return <span className="px-2 py-1 bg-blue-900/30 text-blue-400 rounded-full text-xs font-medium">Pending</span>;
+      default:
+        return null;
+    }
+  };
+
+  const getVerificationBadge = (status?: string) => {
+    switch (status) {
+      case 'Verified':
+        return <span className="px-2 py-1 bg-green-900/30 text-green-400 rounded-full text-xs font-medium">Verified</span>;
+      case 'Pending':
+        return <span className="px-2 py-1 bg-yellow-900/30 text-yellow-400 rounded-full text-xs font-medium">Pending</span>;
+      case 'Failed':
+        return <span className="px-2 py-1 bg-red-900/30 text-red-400 rounded-full text-xs font-medium">Failed</span>;
+      default:
+        return null;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'event':
+        return 'border text-blue-400';
+      case 'payment':
+      case 'transaction':
+        return 'border text-green-400';
+      case 'case':
+        return 'border text-red-400';
+      default:
+        return 'border text-gray-400';
+    }
+  };
+
+  const renderContactContent = () => {
+    switch (activeContactTab) {
+      case 'Profile':
+        return (
+          <div className="space-y-3">
+            {Object.entries(profileData).map(([key, value]) => (
+              <div key={key} className="flex justify-between items-center py-2 border-b  last:border-b-0">
+                <span className="text-gray-300 capitalize text-sm">
+                  {key.replace(/([A-Z])/g, ' $1').trim()}
+                </span>
+                <span className=" font-medium text-sm">{value}</span>
+              </div>
+            ))}
+          </div>
+        );
+      
+      case 'Mobile':
+        return (
+          <div className="space-y-3">
+            {mobileHistory.map((item, index) => (
+              <div key={index} className="bg-white/5 rounded-lg p-3 border ">
+                <div className="flex justify-between items-start mb-2">
+                  <span className=" font-medium text-sm">{item.value}</span>
+                  <div className="flex items-center gap-2">
+                    {getVerificationBadge(item.verificationStatus)}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      item.status === 'Current' 
+                        ? 'bg-blue-900/30 text-blue-400' 
+                        : 'bg-gray-900/30 text-gray-400'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-gray-400 text-xs">Changed: {item.dateChanged}</div>
+              </div>
+            ))}
+          </div>
+        );
+      
+      case 'Email':
+        return (
+          <div className="space-y-3">
+            {emailHistory.map((item, index) => (
+              <div key={index} className="bg-white/5 rounded-lg p-3 border ">
+                <div className="flex justify-between items-start mb-2">
+                  <span className=" font-medium text-sm break-all">{item.value}</span>
+                  <div className="flex items-center gap-2 ml-2">
+                    {getVerificationBadge(item.verificationStatus)}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      item.status === 'Current' 
+                        ? 'bg-blue-900/30 text-blue-400' 
+                        : 'bg-gray-900/30 text-gray-400'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-gray-400 text-xs">Changed: {item.dateChanged}</div>
+              </div>
+            ))}
+          </div>
+        );
+      
+      case 'Address':
+        return (
+          <div className="space-y-3">
+            {addressHistory.map((item, index) => (
+              <div key={index} className="bg-white/5 rounded-lg p-3 border ">
+                <div className="flex justify-between items-start mb-2">
+                  <span className=" font-medium text-sm leading-relaxed">{item.value}</span>
+                  <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                    {getVerificationBadge(item.verificationStatus)}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      item.status === 'Current' 
+                        ? 'bg-blue-900/30 text-blue-400' 
+                        : 'bg-gray-900/30 text-gray-400'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-gray-400 text-xs">Changed: {item.dateChanged}</div>
+              </div>
+            ))}
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  const renderFinancialContent = () => {
+    switch (activeFinancialTab) {
+      case 'Accounts':
+        return (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-800/50">
+                <tr>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Type</th>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Account</th>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Balance</th>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Limit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {accountsData.map((account, index) => (
+                  <tr key={index} className="border-b  hover:bg-white/5">
+                    <td className="px-4 py-3 text-gray-300 text-sm">{account.type}</td>
+                    <td className="px-4 py-3  text-sm">{account.account}</td>
+                    <td className="px-4 py-3 text-green-400 font-medium text-sm">{account.balance}</td>
+                    <td className="px-4 py-3 text-blue-400 text-sm">{account.limit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      
+      case 'Cards':
+        return (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-800/50">
+                <tr>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Type</th>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Number</th>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Status</th>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Limit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cardsData.map((card, index) => (
+                  <tr key={index} className="border-b  hover:bg-white/5">
+                    <td className="px-4 py-3 text-gray-300 text-sm">{card.type}</td>
+                    <td className="px-4 py-3  text-sm">{card.number}</td>
+                    <td className="px-4 py-3 text-sm">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        card.status === 'Active' 
+                          ? 'bg-green-900/30 text-green-400' 
+                          : 'bg-red-900/30 text-red-400'
+                      }`}>
+                        {card.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-blue-400 text-sm">{card.limit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      
+      case 'Holdings':
+        return (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-800/50">
+                <tr>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Type</th>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Product</th>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Value</th>
+                  <th className="px-4 py-3 text-left  font-semibold text-sm">Maturity</th>
+                </tr>
+              </thead>
+              <tbody>
+                {holdingsData.map((holding, index) => (
+                  <tr key={index} className="border-b  hover:bg-white/5">
+                    <td className="px-4 py-3 text-gray-300 text-sm">{holding.type}</td>
+                    <td className="px-4 py-3  text-sm">{holding.product}</td>
+                    <td className="px-4 py-3 text-green-400 font-medium text-sm">{holding.value}</td>
+                    <td className="px-4 py-3 text-blue-400 text-sm">{holding.maturity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      
+      case 'Beneficiaries':
+        return (
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-800/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left  font-semibold text-sm">Name</th>
+                    <th className="px-4 py-3 text-left  font-semibold text-sm">Account</th>
+                    <th className="px-4 py-3 text-left  font-semibold text-sm">Bank</th>
+                    <th className="px-4 py-3 text-left  font-semibold text-sm">Last Used</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {beneficiariesData.map((beneficiary, index) => (
+                    <tr key={index} className="border-b  hover:bg-white/5">
+                      <td className="px-4 py-3  text-sm">{beneficiary.name}</td>
+                      <td className="px-4 py-3 text-gray-300 text-sm">{beneficiary.account}</td>
+                      <td className="px-4 py-3 text-blue-400 text-sm">{beneficiary.bank}</td>
+                      <td className="px-4 py-3 text-green-400 text-sm">{beneficiary.lastUsed}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  const handleGraphClick = (e: React.FormEvent, caseId: string) => {
+    e.preventDefault();
+    // if (searchValue.trim()) {
+      router.push(`/case/${caseId}`);
+    // }
+  };
+
+  return (
+    <div className="min-h-screen">
+      <style>{`
+        :root {
+          --sc-blue: #0066CC;
+          --sc-blue-dark: #004499;
+          --sc-blue-light: #3385D6;
+          --sc-green: #00A651;
+          --sc-green-dark: #008A44;
+          --sc-green-light: #33B86A;
+        }
+        
+        .sc-gradient {
+          background: linear-gradient(135deg, var(--sc-blue) 0%, var(--sc-green) 100%);
+        }
+      `}</style>
+
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-xl border-b  sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push('/')}
+                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 " />
+              </button>
+              <div className="flex items-center gap-3">
+                <Search className="w-8 h-8 text-green-400" />
+                <h1 className="text-2xl font-bold ">Fraud Lens Analysis</h1>
+              </div>
+            </div>
+            
+            {/* Search Bar */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center bg-stone-200 rounded-lg px-4 py-2 min-w-[300px]">
+                <Search className="w-4 h-4 text-gray-400 mr-2" />
+                <input
+                  type="text"
+                  placeholder={`${type?.toUpperCase()}: ${value}`}
+                  className="bg-transparent  placeholder-gray-400 focus:outline-none flex-1"
+                  defaultValue={value}
+                />
+                <select className="bg-transparent  focus:outline-none ml-2">
+                  <option value="CaseID">CaseID</option>
+                </select>
+              </div>
+              <button className="px-6 py-2 sc-gradient  rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                Search
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Left Section - Contact Information with Tabs */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl border  overflow-hidden">
+            {/* Contact Tabs */}
+            <div className="bg-blue-600">
+              <div className="flex">
+                {[
+                  { key: 'Profile', icon: <User className="w-4 h-4" /> },
+                  { key: 'Mobile', icon: <Smartphone className="w-4 h-4" /> },
+                  { key: 'Email', icon: <Mail className="w-4 h-4" /> },
+                  { key: 'Address', icon: <Home className="w-4 h-4" /> }
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveContactTab(tab.key)}
+                    className={`flex items-center gap-2 px-4 py-3 font-medium transition-all flex-1 justify-center ${
+                      activeContactTab === tab.key
+                        ? ' bg-blue-700 border-b-2 border-white'
+                        : 'text-blue-100 hover: hover:bg-blue-700/50'
+                    }`}
+                  >
+                    {tab.icon}
+                    <span className="text-sm">{tab.key}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Contact Content */}
+            <div className="p-6">
+              {renderContactContent()}
+            </div>
+          </div>
+
+          {/* Right Section - Financial Data with Tabs */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl border  overflow-hidden">
+            {/* Financial Tabs */}
+            <div className="bg-green-600">
+              <div className="flex">
+                {[
+                  { key: 'Accounts', icon: <Wallet className="w-4 h-4" /> },
+                  { key: 'Cards', icon: <CreditCard className="w-4 h-4" /> },
+                  { key: 'Holdings', icon: <PiggyBank className="w-4 h-4" /> },
+                  { key: 'Beneficiaries', icon: <Users className="w-4 h-4" /> }
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveFinancialTab(tab.key)}
+                    className={`flex items-center gap-2 px-3 py-3 font-medium transition-all flex-1 justify-center ${
+                      activeFinancialTab === tab.key
+                        ? ' bg-green-700 border-b-2 border-white'
+                        : 'text-green-100 hover: hover:bg-green-700/50'
+                    }`}
+                  >
+                    {tab.icon}
+                    <span className="text-xs">{tab.key}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Financial Content */}
+            <div className="p-6">
+              {renderFinancialContent()}
+            </div>
+          </div>
+        </div>
+
+        {/* Unified CASA Profile and Beneficiary Statistics Section */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-xl border  overflow-hidden mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+            {/* Left Side - CASA Profile */}
+            <div className="border-r  lg:border-r border-b lg:border-b-0">
+              <div className="bg-blue-600 px-6 py-4">
+                <h2 className=" font-semibold flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  CASA Profile
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  {casaData.map((item, index) => (
+                    <div key={index} className="bg-white/5 rounded-lg p-4 border  hover:bg-white/10 transition-colors">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 text-sm leading-relaxed">{item.label}</span>
+                        <span className=" font-semibold text-sm ml-4">{item.value}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Beneficiary Statistics */}
+            <div>
+              <div className="bg-green-600 px-6 py-4">
+                <h2 className=" font-semibold flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Beneficiary Statistics
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  {beneficiaryStatsData.map((item, index) => (
+                    <div key={index} className="bg-white/5 rounded-lg p-4 border  hover:bg-white/10 transition-colors">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 text-sm leading-relaxed">{item.label}</span>
+                        <span className=" font-semibold text-sm ml-4">{item.value}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced Activity Timeline Section - Reduced Height */}
+        <div className="backdrop-blur-xl rounded-xl border overflow-hidden mb-4">
+          <div className="bg-purple-600 px-6 py-4">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <h2 className=" font-semibold flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Activity Timeline
+              </h2>
+              
+              {/* Controls */}
+              <div className="flex items-center gap-4 flex-wrap">
+                {/* Filter Buttons */}
+                <div className="flex items-center gap-2">
+                  {['All', 'Events', 'Case', 'Payments'].map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => setTimelineFilter(filter)}
+                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                        timelineFilter === filter
+                          ? 'bg-white text-purple-600'
+                          : ' hover:bg-white/20'
+                      }`}
+                    >
+                      {filter}
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Date Picker */}
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 " />
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="bg-white/20  text-xs rounded px-2 py-1 border-0 focus:outline-none focus:bg-white/30"
+                  />
+                </div>
+                
+                {/* Results Count */}
+                <div className=" text-xs">
+                  {filteredEvents.length} items
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Timeline Content - Reduced Height */}
+          <div className="p-6" style={{ minHeight: '280px' }}>
+            {currentEvents.length > 0 ? (
+              <>
+                {/* Horizontal Timeline */}
+                <div className="relative">
+                  {/* Timeline Line */}
+                  {/* <div className="absolute top-14 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 opacity-60"></div> */}
+                  
+                  {/* Timeline Items */}
+                  <div className="flex justify-between items-start relative">
+                    {currentEvents.map((event, index) => {
+                      const isEven = index % 2 === 0;
+                      return (
+                        <div key={event.id} className="flex flex-col items-center relative" style={{ width: `${100 / 11}%` }}>
+                          {/* Type Badge - Alternating Position */}
+                          <div className={`mb-2 ${isEven ? 'order-1' : 'order-3'}`}>
+                            <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(event.type)}`}>
+                              {event.type.toUpperCase()}
+                            </span>
+                          </div>
+                          
+                          {/* Timeline Circle - Larger and Centered */}
+                          <div className="order-2 relative z-10">
+                            <button
+                              onClick={() => handleTimelineItemClick(event)}
+                              className={`w-8 h-8 rounded-full flex items-center justify-center ${getEventColor(event)} border-2 transition-all duration-200 hover:scale-125 cursor-pointer shadow-lg`}
+                              title={`${event.description} - ${event.details}`}
+                            >
+                              <div className="w-4 h-4 flex items-center justify-center">
+                                {React.cloneElement(getEventIcon(event) as React.ReactElement, {
+                                  className: "w-4 h-4"
+                                })}
+                              </div>
+                            </button>
+                          </div>
+                          
+                          {/* Timestamp - Alternating Position */}
+                          <div className={`mt-2 text-center ${isEven ? 'order-3' : 'order-1'}`}>
+                            <div className=" text-xs font-medium">
+                              {event.date}
+                            </div>
+                            <div className="text-gray-300 text-xs">
+                              {event.time}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between pt-6 mt-6 border-t ">
+                    <div className="text-gray-400 text-sm">
+                      Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredEvents.length)} of {filteredEvents.length} items
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1}
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4 " />
+                      </button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                          let page;
+                          if (totalPages <= 7) {
+                            page = i + 1;
+                          } else if (currentPage <= 4) {
+                            page = i + 1;
+                          } else if (currentPage >= totalPages - 3) {
+                            page = totalPages - 6 + i;
+                          } else {
+                            page = currentPage - 3 + i;
+                          }
+                          
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentPage(page)}
+                              className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                                currentPage === page
+                                  ? 'bg-purple-600 '
+                                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      
+                      <button
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        disabled={currentPage === totalPages}
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4 " />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className=" text-lg font-medium mb-2">No Activities Found</h3>
+                <p className="text-gray-400">No activities match your current filter criteria for {selectedDate}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Action Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Events */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl border  overflow-hidden">
+            <div className="bg-blue-600 px-4 py-3 flex items-center justify-between flex-wrap gap-4">
+              <h3 className=" font-semibold text-sm flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                </svg>Events
+              </h3>
+              <div className=" flex items-center gap-4 flex-wrap" onClick={(e) => handleGraphClick(e, "123e")}>
+                {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                </svg> */}
+                <Network className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="p-4 space-y-3">
+              {selectedEventItem ? (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Event Type</span>
+                    <span className=" text-sm font-medium">{selectedEventItem.subType}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Event Time</span>
+                    <span className=" text-sm">{selectedEventItem.date} {selectedEventItem.time}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Description</span>
+                    <span className=" text-sm">{selectedEventItem.description}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Status</span>
+                    {getStatusBadge(selectedEventItem.status)}
+                  </div>
+                  <div className="pt-2 border-t ">
+                    <p className="text-gray-300 text-xs">{selectedEventItem.details}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-gray-400 text-sm">Click on an event in the timeline to view details</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Payment */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl border  overflow-hidden">
+            <div className="bg-green-600 px-4 py-3">
+              <h3 className=" font-semibold text-sm flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+              </svg>Payment
+              </h3>
+            </div>
+            <div className="p-4 space-y-3">
+              {selectedPaymentItem ? (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Type</span>
+                    <span className=" text-sm font-medium">{selectedPaymentItem.subType}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Transaction Time</span>
+                    <span className=" text-sm">{selectedPaymentItem.date} {selectedPaymentItem.time}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Amount</span>
+                    <span className={`text-sm font-medium ${
+                      selectedPaymentItem.amount?.startsWith('+') ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {selectedPaymentItem.amount || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Status</span>
+                    {getStatusBadge(selectedPaymentItem.status)}
+                  </div>
+                  <div className="pt-2 border-t ">
+                    <p className="text-gray-300 text-xs">{selectedPaymentItem.details}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-gray-400 text-sm">Click on a payment in the timeline to view details</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Case */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl border  overflow-hidden">
+            <div className="bg-orange-600 px-4 py-3 flex items-center justify-between flex-wrap gap-4">
+              <h3 className=" font-semibold text-sm flex items-center gap-2"><svg className="w-6 h-6 text-gray-800 dark:" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 3v4a1 1 0 0 1-1 1H5m8 7.5 2.5 2.5M19 4v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1Zm-5 9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
+              </svg>Case</h3>
+              <div className=" flex items-center gap-4 flex-wrap" onClick={(e) => handleGraphClick(e, "123e")}>
+                {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                </svg> */}
+                <Network className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="p-4 space-y-3">
+              {selectedCaseItem ? (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Case ID</span>
+                    <span className=" text-sm font-medium">{selectedCaseItem.id}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Case Time</span>
+                    <span className=" text-sm">{selectedCaseItem.date} {selectedCaseItem.time}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Case Status</span>
+                    {getStatusBadge(selectedCaseItem.status)}
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm">Case Type</span>
+                    <span className=" text-sm">{selectedCaseItem.subType}</span>
+                  </div>
+                  <div className="pt-2 border-t ">
+                    <p className="text-gray-300 text-xs">{selectedCaseItem.details}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-gray-400 text-sm">Click on a case in the timeline to view details</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Notes Section */}
+            <div className="p-4 pt-0">
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <h4 className="text-yellow-800 font-semibold text-sm mb-2">Notes</h4>
+                <div className="h-16 bg-yellow-50 rounded border-2 border-dashed border-yellow-300"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+export default AnalysisPage;
