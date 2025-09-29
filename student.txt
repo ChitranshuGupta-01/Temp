@@ -7,6 +7,7 @@ import {
   Search,
   Filter,
   Download,
+  Settings,
   ChevronLeft,
   ChevronRight,
   X,
@@ -26,84 +27,20 @@ type EventItem = {
 };
 
 export default function CaseDetailPage() {
-  // --- Case state ---
-  const [caseStatus, setCaseStatus] = useState("Active");
+  // existing states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [eventTypeFilter, setEventTypeFilter] = useState("All Event Types");
+  const [pageSize, setPageSize] = useState<number>(5);
+  const [page, setPage] = useState<number>(1);
+
+  // NEW states
   const [notes, setNotes] = useState<string[]>([]);
-  const [riskScore] = useState(85);
-
-  // --- Modal state ---
   const [showNoteModal, setShowNoteModal] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
   const [newNote, setNewNote] = useState("");
-  const [newStatus, setNewStatus] = useState(caseStatus);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [caseStatus, setCaseStatus] = useState("Active");
 
-  // --- Relation diagram ---
-  const nodes = [
-    {
-      id: "case",
-      data: {
-        label: `Case\nCase ID: CASE-2024-154\nDate: 2024-01-15\nStatus: ${caseStatus}\nDecision: Approve\nType: Investigation`,
-      },
-      position: { x: 100, y: 30 },
-      style: {
-        background: "#fee2e2",
-        padding: 12,
-        borderRadius: 10,
-        border: "1px solid #fca5a5",
-        width: 260,
-      },
-    },
-    {
-      id: "profile",
-      data: {
-        label: "Profile\nProfile ID: PROF-789\nName: John Doe\nDOB: 1985-03-22",
-      },
-      position: { x: 420, y: 30 },
-      style: {
-        background: "#dbeafe",
-        padding: 12,
-        borderRadius: 10,
-        border: "1px solid #93c5fd",
-        width: 220,
-      },
-    },
-    {
-      id: "txn",
-      data: {
-        label:
-          "Transaction\nTrans ID: TXN-456123\nType: Wire Transfer\nAmount: $15,000\nFrequency: Multiple",
-      },
-      position: { x: 100, y: 230 },
-      style: {
-        background: "#eef2ff",
-        padding: 12,
-        borderRadius: 10,
-        border: "1px solid #c7d2fe",
-        width: 260,
-      },
-    },
-    {
-      id: "activity",
-      data: {
-        label: "Activity\nEVT-001 Login Attempt\nEVT-003 Transaction Alert",
-      },
-      position: { x: 420, y: 230 },
-      style: {
-        background: "#fff1f2",
-        padding: 12,
-        borderRadius: 10,
-        border: "1px solid #fbcfe8",
-        width: 260,
-      },
-    },
-  ];
-  const edges = [
-    { id: "e1", source: "case", target: "profile", animated: true },
-    { id: "e2", source: "case", target: "txn", animated: true },
-    { id: "e3", source: "profile", target: "activity", animated: true },
-  ];
-
-  // --- Dummy events ---
+  // --- Dummy events (shortened for clarity, keep your full list) ---
   const events: EventItem[] = [
     {
       id: "EVT-001",
@@ -115,40 +52,16 @@ export default function CaseDetailPage() {
       severity: "Low",
       desc: "Successful login from registered device",
     },
-    {
-      id: "EVT-002",
-      type: "Failed Login",
-      date: "2024-01-15 09:15:42",
-      profile: "John Doe",
-      ip: "203.45.67.88",
-      status: "Failed",
-      severity: "High",
-      desc: "Multiple failed login attempts",
-    },
-    {
-      id: "EVT-003",
-      type: "Transaction Alert",
-      date: "2024-01-14 16:45:12",
-      profile: "John Doe",
-      ip: "192.168.1.100",
-      status: "Flagged",
-      severity: "Medium",
-      desc: "High-value transaction exceeding daily limit",
-    },
   ];
 
-  // --- Table state ---
-  const [searchTerm, setSearchTerm] = useState("");
-  const [eventTypeFilter, setEventTypeFilter] = useState("All Event Types");
-  const [pageSize, setPageSize] = useState<number>(5);
-  const [page, setPage] = useState<number>(1);
-
+  // event types
   const eventTypes = useMemo(() => {
     const s = new Set<string>();
     events.forEach((e) => s.add(e.type));
     return ["All Event Types", ...Array.from(s)];
   }, [events]);
 
+  // filtered events
   const filtered = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     return events.filter((e) => {
@@ -176,20 +89,28 @@ export default function CaseDetailPage() {
     setPage(Math.min(Math.max(1, next), totalPages));
   }
 
-  // --- Downloads ---
   function handleDownloadCSV() {
     const headers = [
       "Event ID",
       "Event Type",
       "Date & Time",
       "Profile",
-      "IP",
+      "IP Address",
       "Status",
       "Severity",
       "Description",
     ];
     const rows = filtered.map((r) =>
-      [r.id, r.type, r.date, r.profile, r.ip, r.status, r.severity, `"${r.desc}"`].join(",")
+      [
+        r.id,
+        r.type,
+        r.date,
+        r.profile,
+        r.ip,
+        r.status,
+        r.severity,
+        `"${r.desc.replace(/"/g, '""')}"`,
+      ].join(",")
     );
     const csv = [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -201,39 +122,22 @@ export default function CaseDetailPage() {
     URL.revokeObjectURL(url);
   }
 
+  // Generate report (simple text)
   function handleGenerateReport() {
-    const header = `CASE REPORT
-====================
+    const report = `
+Case Report
+-----------
 Case ID: CASE-2024-154
 Status: ${caseStatus}
-Risk Score: ${riskScore}
-Notes: ${notes.length > 0 ? notes.join("; ") : "None"}
-Total Events: ${events.length}
-
-EVENT DETAILS
-====================`;
-
-    const eventLines = events
-      .map(
-        (e) =>
-          `Event: ${e.id}
-  Type: ${e.type}
-  Date: ${e.date}
-  Profile: ${e.profile}
-  IP: ${e.ip}
-  Status: ${e.status}
-  Severity: ${e.severity}
-  Description: ${e.desc}
---------------------`
-      )
-      .join("\n");
-
-    const report = `${header}\n${eventLines}`;
+Notes:
+${notes.length ? notes.map((n, i) => `${i + 1}. ${n}`).join("\n") : "No notes yet."}
+Events: ${events.length}
+`;
     const blob = new Blob([report], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "case_report.txt";
+    a.download = "case-report.txt";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -243,293 +147,129 @@ EVENT DETAILS
       {/* ===== Case Header ===== */}
       <div className="bg-white rounded-2xl shadow-lg border overflow-hidden">
         <div className="bg-gradient-to-r from-orange-50 to-red-50 px-6 py-4 border-b">
-          <h1 className="text-xl font-bold flex items-center gap-2 text-gray-800">
+          <h1 className="text-xl font-bold text-gray-800 flex items-center gap-3">
             <FileText className="w-6 h-6 text-orange-600" />
             Case #54532134
           </h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-sm mt-1">
             High Value Transaction Investigation
           </p>
         </div>
 
-        <div className="p-6 text-sm text-gray-700 space-y-2">
-          <p>Status: <b>{caseStatus}</b></p>
-          <p>Risk Score: <b>{riskScore}/100</b></p>
+        <div className="p-6 space-y-4">
+          <p className="text-gray-700">
+            Case Status:{" "}
+            <span className="font-semibold text-indigo-700">{caseStatus}</span>
+          </p>
+
           {notes.length > 0 && (
-            <div>
-              <b>Notes:</b>
-              <ul className="list-disc ml-6 text-gray-600">
-                {notes.map((n, i) => (
-                  <li key={i}>{n}</li>
-                ))}
-              </ul>
+            <div className="bg-gray-50 p-3 rounded-lg border text-sm space-y-1">
+              <h3 className="font-semibold">Notes:</h3>
+              {notes.map((n, i) => (
+                <p key={i} className="text-gray-700">
+                  {i + 1}. {n}
+                </p>
+              ))}
             </div>
           )}
-        </div>
 
-        <div className="px-6 pb-6 flex gap-3">
-          <button
-            onClick={() => setShowNoteModal(true)}
-            className="px-4 py-2 text-sm bg-gradient-to-r from-indigo-50 to-indigo-100 border rounded hover:from-indigo-100 hover:to-indigo-200 transition-all shadow-sm"
-          >
-            Add Note
-          </button>
-          <button
-            onClick={() => setShowStatusModal(true)}
-            className="px-4 py-2 text-sm bg-gradient-to-r from-indigo-50 to-indigo-100 border rounded hover:from-indigo-100 hover:to-indigo-200 transition-all shadow-sm"
-          >
-            Update Status
-          </button>
-          <button
-            onClick={handleGenerateReport}
-            className="px-4 py-2 text-sm bg-gradient-to-r from-indigo-50 to-indigo-100 border rounded hover:from-indigo-100 hover:to-indigo-200 transition-all shadow-sm"
-          >
-            Generate Report
-          </button>
-        </div>
-      </div>
-
-      {/* ===== Relation Diagram ===== */}
-      <div className="bg-white rounded-2xl shadow-lg border p-6">
-        <h2 className="text-lg font-semibold mb-4">Case Relation Diagram</h2>
-        <div className="h-[330px] border rounded bg-gradient-to-br from-gray-50 to-gray-100">
-          <ReactFlow nodes={nodes} edges={edges} fitView>
-            <Background />
-            <Controls />
-          </ReactFlow>
-        </div>
-      </div>
-
-      {/* ===== Past Events Log ===== */}
-      <div className="bg-white rounded-2xl shadow-lg border p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">Past Events Log</h2>
-          <button
-            onClick={handleDownloadCSV}
-            className="px-3 py-2 rounded-md bg-gray-50 border hover:bg-gray-100 text-sm flex items-center"
-          >
-            <Download className="w-4 h-4 mr-1" /> CSV
-          </button>
-        </div>
-
-        {/* Search + filters */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Search events..."
-              className="w-full pl-10 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <div className="flex items-center gap-2 text-sm">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <select
-                value={eventTypeFilter}
-                onChange={(e) => {
-                  setEventTypeFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-              >
-                {eventTypes.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1);
-              }}
-              className="border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            >
-              <option value={5}>5 per page</option>
-              <option value={10}>10 per page</option>
-              <option value={25}>25 per page</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full text-sm">
-            <thead className="bg-gradient-to-r from-indigo-50 to-indigo-100 text-gray-700">
-              <tr>
-                <th className="p-2">Event ID</th>
-                <th className="p-2">Event Type</th>
-                <th className="p-2">Date</th>
-                <th className="p-2">Profile</th>
-                <th className="p-2">IP</th>
-                <th className="p-2">Status</th>
-                <th className="p-2">Severity</th>
-                <th className="p-2">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((e, i) => (
-                <tr
-                  key={e.id}
-                  className={`hover:bg-indigo-50 transition-colors ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
-                >
-                  <td className="p-2 font-medium text-indigo-700">{e.id}</td>
-                  <td className="p-2">{e.type}</td>
-                  <td className="p-2 text-gray-600">{e.date}</td>
-                  <td className="p-2">{e.profile}</td>
-                  <td className="p-2 font-mono text-gray-700">{e.ip}</td>
-                  <td className="p-2">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        e.status === "Success"
-                          ? "bg-green-100 text-green-700"
-                          : e.status === "Failed"
-                          ? "bg-red-100 text-red-700"
-                          : e.status === "Flagged"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {e.status}
-                    </span>
-                  </td>
-                  <td className="p-2">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        e.severity === "Low"
-                          ? "bg-green-100 text-green-700"
-                          : e.severity === "High"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {e.severity}
-                    </span>
-                  </td>
-                  <td className="p-2 text-gray-700">{e.desc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-          <span>
-            Showing {filtered.length === 0 ? 0 : startIndex + 1} to{" "}
-            {Math.min(startIndex + pageSize, filtered.length)} of{" "}
-            {filtered.length} events
-          </span>
-          <div className="flex gap-1">
+          <div className="flex gap-3">
             <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage <= 1}
-              className="px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-50"
+              onClick={() => setShowNoteModal(true)}
+              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-gray-50 to-gray-100 border rounded-lg hover:from-indigo-50 hover:to-indigo-100 transition-all shadow-sm"
             >
-              <ChevronLeft className="w-4 h-4" />
+              Add Note
             </button>
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => handlePageChange(i + 1)}
-                className={`px-3 py-1 rounded ${
-                  i + 1 === currentPage
-                    ? "bg-indigo-600 text-white"
-                    : "hover:bg-gray-100 text-gray-700"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
             <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
-              className="px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-50"
+              onClick={() => setShowStatusModal(true)}
+              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-gray-50 to-gray-100 border rounded-lg hover:from-indigo-50 hover:to-indigo-100 transition-all shadow-sm"
             >
-              <ChevronRight className="w-4 h-4" />
+              Update Status
+            </button>
+            <button
+              onClick={handleGenerateReport}
+              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-gray-50 to-gray-100 border rounded-lg hover:from-indigo-50 hover:to-indigo-100 transition-all shadow-sm"
+            >
+              Generate Report
             </button>
           </div>
         </div>
       </div>
 
-      {/* ===== Related Transactions ===== */}
-      <div className="bg-white rounded-2xl shadow-lg border p-6">
-        <h2 className="text-lg font-semibold mb-2">Related Transactions</h2>
-        <input
-          type="text"
-          placeholder="Search transactions..."
-          className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-300 shadow-sm"
-        />
-      </div>
-
-      {/* ===== Add Note Modal ===== */}
+      {/* ===== Note Modal ===== */}
       {showNoteModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-96">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold">Add Note</h3>
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Add Note</h2>
               <button onClick={() => setShowNoteModal(false)}>
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
             <textarea
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
-              className="w-full border rounded p-2 mb-3"
+              className="w-full border rounded-lg p-2 text-sm"
               rows={4}
-              placeholder="Write your note..."
+              placeholder="Write your note here..."
             />
-            <button
-              onClick={() => {
-                if (newNote.trim()) {
-                  setNotes((prev) => [...prev, newNote.trim()]);
-                  setNewNote("");
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setShowNoteModal(false)}
+                className="px-3 py-2 text-sm border rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (newNote.trim()) {
+                    setNotes((prev) => [...prev, newNote.trim()]);
+                    setNewNote("");
+                  }
                   setShowNoteModal(false);
-                }
-              }}
-              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-            >
-              Save Note
-            </button>
+                }}
+                className="px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg"
+              >
+                Save Note
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ===== Update Status Modal ===== */}
+      {/* ===== Status Modal ===== */}
       {showStatusModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-80">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold">Update Status</h3>
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Update Case Status</h2>
               <button onClick={() => setShowStatusModal(false)}>
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
             <select
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
-              className="w-full border rounded p-2 mb-3"
+              value={caseStatus}
+              onChange={(e) => setCaseStatus(e.target.value)}
+              className="w-full border rounded-lg p-2 text-sm"
             >
-              <option>Active</option>
-              <option>Closed</option>
-              <option>On Hold</option>
-              <option>Pending Review</option>
+              <option value="Active">Active</option>
+              <option value="Under Review">Under Review</option>
+              <option value="Closed">Closed</option>
             </select>
-            <button
-              onClick={() => {
-                setCaseStatus(newStatus);
-                setShowStatusModal(false);
-              }}
-              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-            >
-              Update
-            </button>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setShowStatusModal(false)}
+                className="px-3 py-2 text-sm border rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setShowStatusModal(false)}
+                className="px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg"
+              >
+                Update
+              </button>
+            </div>
           </div>
         </div>
       )}
