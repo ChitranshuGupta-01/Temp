@@ -1,16 +1,391 @@
-import CasePage from "@/components/CasePage";
-import AnalysisPage from "@/components/AnalysisPage";
+"use client"
 
-interface Props {
-  params: Promise<{ type: string; id: string }>;
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, ChevronDown, Shield } from 'lucide-react';
+//import { useNavigate } from 'react-router-dom';
+import{useRouter} from 'next/navigation';
+
+type SearchType = 'caseId' | 'relationshipId' | 'EBID' | 'accountNumber';
+
+interface SearchOption {
+  value: SearchType;
+  label: string;
+  placeholder: string;
 }
 
-export default async function AnalysisWrapper({ params }: Props) {
-  const { type, id } = await params; // ✅ await params
+const searchOptions: SearchOption[] = [
+  { value: 'caseId', label: 'Case ID', placeholder: 'Enter FinCrime Case ID...' },
+  { value: 'relationshipId', label: 'Relationship ID', placeholder: 'Enter relationship ID...' },
+  { value: 'EBID', label: 'EBID', placeholder: 'Enter EBID...' },
+  { value: 'accountNumber', label: 'Account Number', placeholder: 'Enter account number...' },
+];
 
-  if (type === "caseId") {
-    return <CasePage />;
-  }
+function SearchPage() {
+  //const navigate = useNavigate();
+  const router = useRouter();
+  const [selectedType, setSelectedType] = useState<SearchType>('caseId');
+  const [searchValue, setSearchValue] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  return <AnalysisPage type={type} id={id} />;
+  const selectedOption = searchOptions.find(option => option.value === selectedType)!;
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(()=>{setMounted(true);},[]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchValue.trim()) {
+      router.push(`/analysis/${selectedType}/${encodeURIComponent(searchValue.trim())}`);
+    }
+  };
+
+  const handleDropdownSelect = (option: SearchOption) => {
+    setSelectedType(option.value);
+    setIsDropdownOpen(false);
+    setSearchValue('');
+    // Focus back to input after selection
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  return (
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Dynamic Animated Background */}
+      <div className="fixed inset-0 -z-10">
+        {/* Base gradient background */}
+        <div className="absolute inset-0 bg-gray-100"></div>
+        
+        {/* Animated grid pattern */}
+        {/* <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `
+              linear-gradient(rgba(0, 102, 204, 0.3) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0, 102, 204, 0.3) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            animation: 'grid-move 20s linear infinite'
+          }}></div>
+        </div> */}
+
+        {/* Floating particles */}
+        {mounted && (
+            <div className="absolute inset-0">
+            {[...Array(20)].map((_, i) => (
+                <div
+                key={i}
+                className="absolute w-2 h-2 bg-blue-400 rounded-full opacity-60"
+                style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animation: `float-${i % 3} ${3 + Math.random() * 4}s ease-in-out infinite`,
+                    animationDelay: `${Math.random() * 2}s`
+                }}
+                ></div>
+            ))}
+           </div>
+        )}
+
+        {/* Scanning lines */}
+        <div className="absolute inset-0">
+          <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-60"
+               style={{ animation: 'scan-vertical 8s linear infinite' }}></div>
+          <div className="absolute h-full w-px bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-60"
+               style={{ animation: 'scan-horizontal 6s linear infinite' }}></div>
+        </div>
+
+        {/* Pulsing circles */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full border border-blue-500 opacity-20"
+             style={{ animation: 'pulse-ring 4s ease-in-out infinite' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full border border-green-500 opacity-20"
+             style={{ animation: 'pulse-ring 3s ease-in-out infinite 1s' }}></div>
+        
+        {/* Data streams */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-40"
+              style={{
+                width: '200px',
+                top: `${20 + i * 15}%`,
+                animation: `data-stream ${2 + i * 0.5}s linear infinite`,
+                animationDelay: `${i * 0.8}s`
+              }}
+            ></div>
+          ))}
+        </div>
+      </div>
+
+      {/* SC Brand Colors and Animations CSS */}
+      <style>{`
+        :root {
+          --sc-blue: #0066CC;
+          --sc-blue-dark: #004499;
+          --sc-blue-light: #3385D6;
+          --sc-green: #00A651;
+          --sc-green-dark: #008A44;
+          --sc-green-light: #33B86A;
+          --sc-gray: #6B7280;
+          --sc-gray-light: #9CA3AF;
+          --sc-gray-dark: #374151;
+        }
+        
+        .sc-gradient {
+          background: linear-gradient(135deg, var(--sc-blue) 0%, var(--sc-green) 100%);
+        }
+        
+        .sc-gradient-light {
+          background: linear-gradient(135deg, var(--sc-blue-light) 0%, var(--sc-green-light) 100%);
+        }
+
+        @keyframes grid-move {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(50px, 50px); }
+        }
+
+        @keyframes float-0 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        @keyframes float-1 {
+          0%, 100% { transform: translateX(0px) rotate(0deg); }
+          50% { transform: translateX(20px) rotate(-180deg); }
+        }
+
+        @keyframes float-2 {
+          0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+          33% { transform: translate(15px, -15px) rotate(120deg); }
+          66% { transform: translate(-15px, 15px) rotate(240deg); }
+        }
+
+        @keyframes scan-vertical {
+          0% { top: -2px; }
+          100% { top: 100%; }
+        }
+
+        @keyframes scan-horizontal {
+          0% { left: -2px; }
+          100% { left: 100%; }
+        }
+
+        @keyframes pulse-ring {
+          0% { transform: scale(0.8); opacity: 0.8; }
+          50% { transform: scale(1.2); opacity: 0.3; }
+          100% { transform: scale(0.8); opacity: 0.8; }
+        }
+
+        @keyframes data-stream {
+          0% { left: -200px; }
+          100% { left: 100%; }
+        }
+
+        @keyframes lens-pulse {
+          0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+          50% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+        }
+
+        .cyber-glow {
+          box-shadow: 0 0 20px rgba(0, 102, 204, 0.3), 0 0 40px rgba(0, 166, 81, 0.2);
+        }
+
+        .cyber-text-glow {
+          text-shadow: 0 0 10px rgba(0, 102, 204, 0.5);
+        }
+
+        .lens-glow {
+          filter: drop-shadow(0 0 8px rgba(0, 166, 81, 0.6));
+          animation: lens-pulse 3s ease-in-out infinite;
+        }
+      `}</style>
+
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-5xl">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white flex items-center justify-center gap-4">
+              {/* <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-green-400 bg-clip-text text-transparent">
+                FinCrime
+              </span> */}
+              <span className="bg-clip-text text-[#0473EA]">
+                FinCrime
+              </span>
+              <Search className="w-16 h-16 md:w-20 md:h-20 text-[#414749]" />
+              <span className="bg-clip-text text-[#38D200]">
+                LENS
+              </span>
+            </h1>
+            <p className="text-2xl md:text-3xl text-gray-600 mb-4 font-semibold">
+              Advanced Financial Crime Detection System
+            </p>
+            <p className="text-lg text-gray-500 max-w-3xl mx-auto leading-relaxed">
+              Intelligent FinCrime analysis and investigation platform powered by AI-driven threat detection
+            </p>
+          </div>
+
+          {/* Main Search Interface */}
+          <div className="bg-black/30 rounded-3xl shadow-2xl p-8 md:p-16 border border-blue-500/20 cyber-glow">
+            <form onSubmit={handleSearch} className="space-y-8">
+              {/* Integrated Search Box */}
+              <div className="relative" ref={dropdownRef}>
+                <div className="relative flex items-center bg-gray-900/50 border-2 border-blue-500/30 rounded-2xl overflow-hidden hover:border-blue-400/50 focus-within:border-blue-500/70 transition-all duration-300 shadow-lg backdrop-blur-sm">
+                  {/* Dropdown Trigger */}
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex items-center gap-3 px-6 py-4 border-r border-blue-500/30 hover:bg-blue-900/30 transition-colors duration-200 focus:outline-none focus:bg-blue-900/30 min-w-[200px] text-white"
+                    style={{ 
+                      backgroundColor: isDropdownOpen ? 'var(--sc-blue)' : undefined,
+                      borderColor: isDropdownOpen ? 'var(--sc-blue-light)' : undefined
+                    }}
+                  >
+                    <span className="font-semibold text-base">{selectedOption.label}</span>
+                    <ChevronDown 
+                      className={`w-5 h-5 transition-transform duration-200 ${
+                        isDropdownOpen ? 'rotate-180' : ''
+                      }`} 
+                    />
+                  </button>
+
+                  {/* Search Input */}
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    placeholder={selectedOption.placeholder}
+                    className="flex-1 px-6 py-4 bg-transparent text-white placeholder-gray-400 focus:outline-none text-lg"
+                  />
+
+                  {/* Search Button */}
+                  <button
+                    type="submit"
+                    disabled={!searchValue.trim()}
+                    // className="px-8 py-4 text-white font-semibold hover:opacity-90 focus:ring-4 focus:ring-blue-200/50 transition-all 
+                    //   duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 bg-green-500">
+                    className="px-8 py-4 text-white font-semibold hover:opacity-90 focus:ring-4 focus:ring-[#0473EA] transition-all 
+                      duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 bg-green-500">
+                        
+                    <Search className="w-6 h-6" />
+                    <span className="text-lg">ANALYZE</span>
+                  </button>
+                </div>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl shadow-2xl z-20 overflow-hidden">
+                    {searchOptions.map((option, index) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => handleDropdownSelect(option)}
+                        className={`w-full text-left px-6 py-4 hover:bg-blue-900/30 transition-all duration-200 flex items-center justify-between group ${
+                          selectedType === option.value 
+                            ? 'text-white font-semibold sc-gradient' 
+                            : 'text-gray-300 hover:text-blue-300'
+                        } ${index === 0 ? 'rounded-t-2xl' : ''} ${index === searchOptions.length - 1 ? 'rounded-b-2xl' : ''}`}
+                      >
+                        <span className="text-base">{option.label}</span>
+                        {selectedType === option.value && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* FinCrime Analysis Protocol */}
+              {/* <div className="rounded-2xl p-6 border-2 bg-blue-900/20 backdrop-blur-sm" style={{ borderColor: '#38D200' }}>
+               */}
+              <div className="rounded-2xl p-6 border-2 bg-green-900/20 backdrop-blur-sm" style={{ borderColor: '#38D200' }}>
+                <h3 className="font-bold text-lg mb-4 text-green-300 flex items-center gap-2">
+                  <Search className="w-5 h-5" />
+                  FinCrime Lens Analysis Protocol:
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <ul className="space-y-2 text-gray-100">
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>Validate {selectedOption.label.toLowerCase()} authenticity</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>Cross-reference FinCrime intelligence database</span>
+                    </li>
+                  </ul>
+                  <ul className="space-y-2 text-gray-100">
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>AI-powered behavioral pattern analysis</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>Generate comprehensive risk assessment</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </form>
+
+            {/* Quick Access Buttons */}
+            <div className="mt-12 pt-8 border-t border-blue-500/20">
+              <h3 className="text-sm font-bold uppercase tracking-wider mb-6 text-white flex items-center gap-2">
+                <Search className="w-4 h-4" />
+                Quick FinCrime Analysis Access
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {searchOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setSelectedType(option.value);
+                      setSearchValue('');
+                      inputRef.current?.focus();
+                    }}
+                    className={`p-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 backdrop-blur-sm ${
+                      selectedType === option.value
+                        // ? 'text-white shadow-lg sc-gradient focus:[ring-blue-200/50 cyber-glow]'
+                        ? 'text-white shadow-lg bg-[#0473EA] focus:[ring-blue-200/50 cyber-glow]'
+                        // : 'bg-gray-800/50 text-gray-200 hover:bg-gray-700/50 focus:ring-gray-500/50 border border-gray-600/30'
+                        : 'bg-gray-800/50 text-gray-100 hover:bg-gray-700/50 focus:ring-gray-500/50 border border-gray-600/30'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center mt-16">
+            <p className="text-gray-400 text-lg flex items-center justify-center gap-2">
+              <Shield className="w-5 h-5 text-blue-400" />
+              FinCrime Lens - Powered by Standard Chartered's Advanced AI Security Intelligence
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
+
+export default SearchPage;
+
+
+
