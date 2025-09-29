@@ -1,21 +1,35 @@
-import CaseDetailPage from "@/components/CaseDetailPage";
-import CasePage from "@/components/CasePage";
-import AnalysisPage from "@/components/AnalysisPage";
-
-interface Props {
-  params: Promise<{ type: string; id: string }>; // 👈 params is async now
+GET /analysis/caseId/1234 200 in 281ms
+ ⨯ Error: useNavigate() may be used only in the context of a <Router> component.
+    at CasePage (src\components\CasePage.tsx:13:31)
+  11 | const CasePage: React.FC = () => {
+  12 |   const { caseNumber } = useParams<{ caseNumber: string }>();
+> 13 |   const navigate = useNavigate();
+     |                               ^
+  14 |   const [isFullscreen, setIsFullscreen] = useState(false);
+  15 |
+  16 |   const toggleFullscreen = () => { {
+  digest: '611072537'
 }
-
-export default async function AnalysisWrapper({ params }: Props) {
-  const { type, id } = await params; // 👈 await it here
-
-  if (type === "caseId") {
-    return <CaseDetailPage />;
-  }
-
-  if (type === "case") {
-    return <CasePage />;
-  }
-
-  return <AnalysisPage />;
+ ⨯ Error: useNavigate() may be used only in the context of a <Router> component.
+    at CasePage (src\components\CasePage.tsx:13:31)
+  11 | const CasePage: React.FC = () => {
+  12 |   const { caseNumber } = useParams<{ caseNumber: string }>();
+> 13 |   const navigate = useNavigate();
+     |                               ^
+  14 |   const [isFullscreen, setIsFullscreen] = useState(false);
+  15 |
+  16 |   const toggleFullscreen = () => { {
+  digest: '611072537'
 }
+ ⨯ Error: useNavigate() may be used only in the context of a <Router> component.
+    at CasePage (src\components\CasePage.tsx:13:31)
+  11 | const CasePage: React.FC = () => {
+  12 |   const { caseNumber } = useParams<{ caseNumber: string }>();
+> 13 |   const navigate = useNavigate();
+     |                               ^
+  14 |   const [isFullscreen, setIsFullscreen] = useState(false);
+  15 |
+  16 |   const toggleFullscreen = () => { {
+  digest: '611072537'
+}
+ GET /analysis/caseId/1234 500 in 1604ms
