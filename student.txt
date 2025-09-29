@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Download, Calendar, Clock, User, Activity, ChevronLeft, ChevronRight, Sparkles, CalendarDays } from 'lucide-react';
+import { Search, Filter, Download, Calendar, Clock, User, Activity, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import ChatOverlay from './ChatOverlay';
 
 interface EventData {
@@ -16,7 +16,7 @@ interface EventData {
   severity: 'low' | 'medium' | 'high';
 }
 
-const DataTableO: React.FC = () => {
+const DataTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBy, setFilterBy] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -322,14 +322,11 @@ const DataTableO: React.FC = () => {
     <>
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
         {/* Header */}
-        {/* <div className="bg-gradient-to-r from-slate-50 to-purple-50 px-6 py-4 border-b border-gray-200"> */}
-        <div className="bg-gradient-to-r from-sky-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+        <div className="bg-gradient-to-r from-slate-50 to-purple-50 px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              {/* <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg shadow-sm"> */}
-              <div className="p-2 bg-gradient-to-r from-sky-300 to-blue-400 rounded-lg shadow-sm">
-                {/* <Activity className="w-5 h-5 text-white" /> */}
-                <CalendarDays className="w-5 h-5 text-white" />
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg shadow-sm">
+                <Activity className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">Past Events Log</h2>
@@ -340,14 +337,14 @@ const DataTableO: React.FC = () => {
             <div className="flex items-center space-x-2">
               <button 
                 onClick={() => setIsChatOpen(true)}
-                className="p-2 text-gray-600 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all duration-200 hover:scale-105"
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 hover:scale-105"
                 title="Ask AI Assistant"
               >
                 <Sparkles className="w-5 h-5" />
               </button>
               <button 
                 onClick={downloadCSV}
-                className="p-2 text-gray-600 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all duration-200 hover:scale-105"
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 hover:scale-105"
                 title="Download CSV"
               >
                 <Download className="w-5 h-5" />
@@ -416,9 +413,9 @@ const DataTableO: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {currentData.map((item, index) => (
-                <tr key={item.id} className={`hover:bg-gradient-to-r hover:from-sky-50 hover:to-blue-50 transition-all duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                <tr key={item.id} className={`hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-mono text-blue-600 bg-blue-50 rounded px-2 py-1">
+                    <span className="text-sm font-mono text-indigo-600 bg-indigo-50 rounded px-2 py-1">
                       {item.eventId}
                     </span>
                   </td>
@@ -514,8 +511,8 @@ const DataTableO: React.FC = () => {
                         onClick={() => handlePageChange(page)}
                         className={`px-3 py-1 text-sm rounded-lg transition-all duration-200 ${
                           currentPage === page
-                            ? 'bg-blue-600 text-white shadow-sm'
-                            : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                            ? 'bg-purple-600 text-white shadow-sm'
+                            : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
                         }`}
                       >
                         {page}
@@ -558,4 +555,4 @@ const DataTableO: React.FC = () => {
   );
 };
 
-export default DataTableO;
+export default DataTable;
