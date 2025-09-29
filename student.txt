@@ -27,20 +27,77 @@ type EventItem = {
 };
 
 export default function CaseDetailPage() {
-  // existing states
-  const [searchTerm, setSearchTerm] = useState("");
-  const [eventTypeFilter, setEventTypeFilter] = useState("All Event Types");
-  const [pageSize, setPageSize] = useState<number>(5);
-  const [page, setPage] = useState<number>(1);
+  // --- Relation diagram nodes & edges ---
+  const nodes = [
+    {
+      id: "case",
+      data: {
+        label:
+          "Case\nCase ID: CASE-2024-154\nDate: 2024-01-15\nStatus: Active\nDecision: Approve\nType: Investigation",
+      },
+      position: { x: 100, y: 30 },
+      style: {
+        background: "#fee2e2",
+        padding: 12,
+        borderRadius: 10,
+        border: "1px solid #fca5a5",
+        width: 240,
+      },
+    },
+    {
+      id: "profile",
+      data: {
+        label:
+          "Profile\nProfile ID: PROF-789\nName: John Doe\nMMN: Smith\nGender: Male\nDOB: 1985-03-22",
+      },
+      position: { x: 420, y: 30 },
+      style: {
+        background: "#dbeafe",
+        padding: 12,
+        borderRadius: 10,
+        border: "1px solid #93c5fd",
+        width: 220,
+      },
+    },
+    {
+      id: "txn",
+      data: {
+        label:
+          "Transaction Detail\nTrans ID: TXN-456123\nType: Wire Transfer\nAmount: $15,000.00\nFrequency: Multiple",
+      },
+      position: { x: 100, y: 230 },
+      style: {
+        background: "#eef2ff",
+        padding: 12,
+        borderRadius: 10,
+        border: "1px solid #c7d2fe",
+        width: 260,
+      },
+    },
+    {
+      id: "activity",
+      data: {
+        label:
+          "Last 5 Activity\nEVT-001 Login Attempt\nEVT-003 Transaction Alert\nEVT-004 Profile Update",
+      },
+      position: { x: 420, y: 230 },
+      style: {
+        background: "#fff1f2",
+        padding: 12,
+        borderRadius: 10,
+        border: "1px solid #fbcfe8",
+        width: 260,
+      },
+    },
+  ];
 
-  // NEW states
-  const [notes, setNotes] = useState<string[]>([]);
-  const [showNoteModal, setShowNoteModal] = useState(false);
-  const [newNote, setNewNote] = useState("");
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [caseStatus, setCaseStatus] = useState("Active");
+  const edges = [
+    { id: "e1", source: "case", target: "profile", animated: true },
+    { id: "e2", source: "case", target: "txn", animated: true },
+    { id: "e3", source: "profile", target: "activity", animated: true },
+  ];
 
-  // --- Dummy events (shortened for clarity, keep your full list) ---
+  // --- Events data (dummy) ---
   const events: EventItem[] = [
     {
       id: "EVT-001",
@@ -52,9 +109,45 @@ export default function CaseDetailPage() {
       severity: "Low",
       desc: "Successful login from registered device",
     },
+    {
+      id: "EVT-002",
+      type: "Failed Login",
+      date: "2024-01-15 09:15:42",
+      profile: "John Doe",
+      ip: "203.45.67.88",
+      status: "Failed",
+      severity: "High",
+      desc: "Multiple failed login attempts from unknown device",
+    },
+    {
+      id: "EVT-003",
+      type: "Transaction Alert",
+      date: "2024-01-14 16:45:12",
+      profile: "John Doe",
+      ip: "192.168.1.100",
+      status: "Flagged",
+      severity: "Medium",
+      desc: "High-value transaction exceeding daily limit",
+    },
   ];
 
-  // event types
+  // --- UI state ---
+  const [searchTerm, setSearchTerm] = useState("");
+  const [eventTypeFilter, setEventTypeFilter] = useState("All Event Types");
+  const [pageSize, setPageSize] = useState<number>(5);
+  const [page, setPage] = useState<number>(1);
+
+  // Case extra state
+  const [notes, setNotes] = useState<string[]>([]);
+  const [caseStatus, setCaseStatus] = useState("Active");
+
+  // Modals
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [newNote, setNewNote] = useState("");
+  const [newStatus, setNewStatus] = useState(caseStatus);
+
+  // unique event types
   const eventTypes = useMemo(() => {
     const s = new Set<string>();
     events.forEach((e) => s.add(e.type));
@@ -80,6 +173,7 @@ export default function CaseDetailPage() {
     });
   }, [events, searchTerm, eventTypeFilter]);
 
+  // pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(Math.max(1, page), totalPages);
   const startIndex = (currentPage - 1) * pageSize;
@@ -89,7 +183,7 @@ export default function CaseDetailPage() {
     setPage(Math.min(Math.max(1, next), totalPages));
   }
 
-  function handleDownloadCSV() {
+  function handleDownload() {
     const headers = [
       "Event ID",
       "Event Type",
@@ -122,22 +216,16 @@ export default function CaseDetailPage() {
     URL.revokeObjectURL(url);
   }
 
-  // Generate report (simple text)
   function handleGenerateReport() {
-    const report = `
-Case Report
------------
-Case ID: CASE-2024-154
-Status: ${caseStatus}
-Notes:
-${notes.length ? notes.map((n, i) => `${i + 1}. ${n}`).join("\n") : "No notes yet."}
-Events: ${events.length}
-`;
+    const report = [
+      `Case Status: ${caseStatus}`,
+      `Notes: ${notes.join(" | ") || "None"}`,
+    ].join("\n");
     const blob = new Blob([report], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "case-report.txt";
+    a.download = "case_report.txt";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -158,20 +246,25 @@ Events: ${events.length}
 
         <div className="p-6 space-y-4">
           <p className="text-gray-700">
-            Case Status:{" "}
-            <span className="font-semibold text-indigo-700">{caseStatus}</span>
+            Investigation of suspicious wire transfers exceeding{" "}
+            <span className="font-semibold text-gray-900">$15,000</span>.
           </p>
 
-          {notes.length > 0 && (
-            <div className="bg-gray-50 p-3 rounded-lg border text-sm space-y-1">
-              <h3 className="font-semibold">Notes:</h3>
-              {notes.map((n, i) => (
-                <p key={i} className="text-gray-700">
-                  {i + 1}. {n}
-                </p>
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-600">
+            <p>
+              <span className="font-semibold">Assignee:</span> John Smith
+            </p>
+            <p>
+              <span className="font-semibold">Profile:</span> John Doe
+              (PROF-789)
+            </p>
+            <p>
+              <span className="font-semibold">Created:</span> 2024-01-10
+            </p>
+            <p>
+              <span className="font-semibold">Status:</span> {caseStatus}
+            </p>
+          </div>
 
           <div className="flex gap-3">
             <button
@@ -196,27 +289,27 @@ Events: ${events.length}
         </div>
       </div>
 
-      {/* ===== Note Modal ===== */}
+      {/* ===== Add Note Modal ===== */}
       {showNoteModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Add Note</h2>
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96 space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold">Add Note</h3>
               <button onClick={() => setShowNoteModal(false)}>
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5" />
               </button>
             </div>
             <textarea
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
-              className="w-full border rounded-lg p-2 text-sm"
+              className="w-full border rounded p-2 text-sm"
               rows={4}
-              placeholder="Write your note here..."
+              placeholder="Write your note..."
             />
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowNoteModal(false)}
-                className="px-3 py-2 text-sm border rounded-lg"
+                className="px-3 py-1 border rounded"
               >
                 Cancel
               </button>
@@ -228,44 +321,48 @@ Events: ${events.length}
                   }
                   setShowNoteModal(false);
                 }}
-                className="px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg"
+                className="px-3 py-1 bg-indigo-600 text-white rounded"
               >
-                Save Note
+                Save
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ===== Status Modal ===== */}
+      {/* ===== Update Status Modal ===== */}
       {showStatusModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Update Case Status</h2>
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80 space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold">Update Status</h3>
               <button onClick={() => setShowStatusModal(false)}>
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5" />
               </button>
             </div>
             <select
-              value={caseStatus}
-              onChange={(e) => setCaseStatus(e.target.value)}
-              className="w-full border rounded-lg p-2 text-sm"
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+              className="w-full border rounded p-2 text-sm"
             >
-              <option value="Active">Active</option>
-              <option value="Under Review">Under Review</option>
-              <option value="Closed">Closed</option>
+              <option>Active</option>
+              <option>Closed</option>
+              <option>Pending</option>
+              <option>Escalated</option>
             </select>
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowStatusModal(false)}
-                className="px-3 py-2 text-sm border rounded-lg"
+                className="px-3 py-1 border rounded"
               >
                 Cancel
               </button>
               <button
-                onClick={() => setShowStatusModal(false)}
-                className="px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg"
+                onClick={() => {
+                  setCaseStatus(newStatus);
+                  setShowStatusModal(false);
+                }}
+                className="px-3 py-1 bg-indigo-600 text-white rounded"
               >
                 Update
               </button>
@@ -273,6 +370,220 @@ Events: ${events.length}
           </div>
         </div>
       )}
+
+      {/* ===== Relation Diagram ===== */}
+      <div className="bg-white rounded-2xl shadow-lg border p-6">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">
+          Case Relation Diagram
+        </h2>
+        <div className="h-[330px] rounded-md border bg-gradient-to-br from-gray-50 to-gray-100">
+          <ReactFlow nodes={nodes} edges={edges} fitView>
+            <Background />
+            <Controls />
+          </ReactFlow>
+        </div>
+      </div>
+
+      {/* ===== Past Events Log ===== */}
+      <div className="bg-white rounded-2xl shadow-lg border p-6">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">
+              Past Events Log
+            </h2>
+            <p className="text-sm text-gray-500">
+              Recent activity and security events for Profile: John Doe
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownload}
+              className="px-3 py-2 rounded-md bg-gray-50 border hover:bg-gray-100 text-sm"
+            >
+              <Download className="w-4 h-4 inline mr-1" />
+              Download
+            </button>
+            <button className="px-3 py-2 rounded-md bg-gray-50 border hover:bg-gray-100 text-sm">
+              <Settings className="w-4 h-4 inline mr-1" />
+              Settings
+            </button>
+          </div>
+        </div>
+
+        {/* search + filter */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+          <div className="w-full md:max-w-xl">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Search events, status, IP addresses..."
+                className="w-full pl-10 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <select
+              value={eventTypeFilter}
+              onChange={(e) => {
+                setEventTypeFilter(e.target.value);
+                setPage(1);
+              }}
+              className="border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
+            >
+              {eventTypes.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              className="border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
+            >
+              <option value={5}>5 per page</option>
+              <option value={10}>10 per page</option>
+              <option value={25}>25 per page</option>
+            </select>
+          </div>
+        </div>
+
+        {/* table */}
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="w-full text-sm border-collapse">
+            <thead className="bg-gradient-to-r from-indigo-50 to-indigo-100 text-gray-700 text-left">
+              <tr>
+                <th className="p-3">Event ID</th>
+                <th className="p-3">Event Type</th>
+                <th className="p-3">Date & Time</th>
+                <th className="p-3">Profile</th>
+                <th className="p-3">IP Address</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Severity</th>
+                <th className="p-3">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((e, i) => (
+                <tr
+                  key={e.id}
+                  className={`hover:bg-indigo-50 transition-colors ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
+                >
+                  <td className="p-3 font-medium text-indigo-700">{e.id}</td>
+                  <td className="p-3">{e.type}</td>
+                  <td className="p-3 text-gray-600">{e.date}</td>
+                  <td className="p-3">{e.profile}</td>
+                  <td className="p-3 font-mono text-gray-700">{e.ip}</td>
+                  <td className="p-3">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        e.status === "Success"
+                          ? "bg-green-100 text-green-700"
+                          : e.status === "Failed"
+                          ? "bg-red-100 text-red-700"
+                          : e.status === "Flagged"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {e.status}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        e.severity === "Low"
+                          ? "bg-green-100 text-green-700"
+                          : e.severity === "High"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {e.severity}
+                    </span>
+                  </td>
+                  <td className="p-3 text-gray-700">{e.desc}</td>
+                </tr>
+              ))}
+
+              {visible.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="p-4 text-center text-gray-500">
+                    No events found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* pagination */}
+        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+          <span>
+            Showing{" "}
+            <b>{filtered.length === 0 ? 0 : startIndex + 1}</b> to{" "}
+            <b>{Math.min(startIndex + pageSize, filtered.length)}</b> of{" "}
+            <b>{filtered.length}</b> events
+          </span>
+          <div className="flex gap-1">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const pnum = idx + 1;
+              return (
+                <button
+                  key={pnum}
+                  onClick={() => handlePageChange(pnum)}
+                  className={`px-3 py-1 rounded-md ${
+                    pnum === currentPage
+                      ? "bg-indigo-600 text-white"
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {pnum}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== Related Transactions ===== */}
+      <div className="bg-white rounded-2xl shadow-lg border p-6">
+        <h2 className="text-lg font-semibold mb-2 text-gray-800">
+          Related Transactions
+        </h2>
+        <p className="text-sm text-gray-500 mb-3">
+          All transactions made to the same account: ****5678
+        </p>
+        <input
+          type="text"
+          placeholder="Search transactions, amounts, beneficiaries..."
+          className="w-full border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
+        />
+      </div>
     </div>
   );
 }
