@@ -1,53 +1,157 @@
-"use client";
-import React, { useState } from "react";
-import { Search } from "lucide-react";
-
-export default function RelatedTransactions({ transactions }: { transactions: any[] }) {
-  const [query, setQuery] = useState("");
-
-  const filtered = transactions.filter(
-    (t) =>
-      t.id.toLowerCase().includes(query.toLowerCase()) ||
-      t.beneficiary.toLowerCase().includes(query.toLowerCase()) ||
-      t.details.toLowerCase().includes(query.toLowerCase())
-  );
-
-  return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h3 className="text-lg font-bold mb-4">Related Transactions</h3>
-      <div className="flex items-center mb-4">
-        <Search className="w-5 h-5 text-gray-500 mr-2" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search transactions..."
-          className="border rounded px-3 py-2 w-full"
-        />
-      </div>
-      <table className="w-full text-sm border">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="p-2">Transaction</th>
-            <th className="p-2">Date</th>
-            <th className="p-2">Amount</th>
-            <th className="p-2">Beneficiary</th>
-            <th className="p-2">Status</th>
-            <th className="p-2">Details</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((t) => (
-            <tr key={t.id} className="border-t">
-              <td className="p-2">{t.type} ({t.id})</td>
-              <td className="p-2">{t.date}</td>
-              <td className="p-2">{t.amount}</td>
-              <td className="p-2">{t.beneficiary}</td>
-              <td className="p-2">{t.status}</td>
-              <td className="p-2">{t.details}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+{
+  "case": {
+    "id": "223456",
+    "title": "High Value Transaction Investigation",
+    "description": "Investigation of suspicious wire transfers exceeding $15,000 from account ****5678 to multiple beneficiaries. Pattern suggests potential money laundering activity.",
+    "assignee": "John Smith",
+    "profile": {
+      "id": "PROF-789",
+      "name": "John Doe"
+    },
+    "created": "2024-01-10",
+    "updated": "2024-01-15",
+    "status": "Active",
+    "priority": "High Priority",
+    "riskScore": 85
+  },
+  "relationDiagram": {
+    "case": {
+      "caseId": "CASE-2024-001",
+      "date": "2024-01-15",
+      "status": "Active",
+      "decision": "Approved",
+      "type": "Investigation"
+    },
+    "profile": {
+      "id": "PROF-789",
+      "name": "John Doe",
+      "mmn": "Smith",
+      "gender": "Male",
+      "dob": "1985-03-22"
+    },
+    "transaction": {
+      "id": "TXN-456123",
+      "type": "Wire Transfer",
+      "amount": "$15,000.00",
+      "frequency": 3,
+      "recentDate": "2024-01-10",
+      "beneficiary": "ABC Corp"
+    },
+    "beneficiary": {
+      "id": "BENE-789",
+      "name": "ABC Corp",
+      "amount": "$15,000.00"
+    },
+    "last5Activity": [
+      { "id": "EVT-015", "date": "2024-01-15", "type": "Login Attempt" },
+      { "id": "EVT-014", "date": "2024-01-14", "type": "Transaction" },
+      { "id": "EVT-013", "date": "2024-01-13", "type": "Profile Update" },
+      { "id": "EVT-012", "date": "2024-01-12", "type": "Password Change" },
+      { "id": "EVT-011", "date": "2024-01-11", "type": "Device Registration" }
+    ]
+  },
+  "pastEvents": [
+    {
+      "id": "EVT-001",
+      "type": "Login Attempt",
+      "date": "2024-01-15 14:30:25",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Success",
+      "severity": "LOW",
+      "description": "Successful login from registered device"
+    },
+    {
+      "id": "EVT-002",
+      "type": "Failed Login",
+      "date": "2024-01-15 09:15:42",
+      "profile": "John Doe",
+      "ip": "203.45.67.89",
+      "status": "Failed",
+      "severity": "HIGH",
+      "description": "Multiple failed login attempts from an external IP"
+    },
+    {
+      "id": "EVT-003",
+      "type": "Transaction Alert",
+      "date": "2024-01-14 16:45:12",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Flagged",
+      "severity": "MEDIUM",
+      "description": "High-value transaction exceeding daily limit"
+    },
+    {
+      "id": "EVT-004",
+      "type": "Profile Update",
+      "date": "2024-01-14 11:20:33",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Success",
+      "severity": "LOW",
+      "description": "Contact information updated successfully"
+    },
+    {
+      "id": "EVT-005",
+      "type": "Beneficiary Added",
+      "date": "2024-01-13 13:55:18",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Success",
+      "severity": "LOW",
+      "description": "New beneficiary ABC Corp added to account"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "TXN-456123",
+      "type": "Wire Transfer",
+      "date": "2024-01-15 14:30:25",
+      "amount": "$15,000.00",
+      "severity": "HIGH",
+      "beneficiary": "ABC Corp",
+      "status": "Completed",
+      "details": "Business payment for services"
+    },
+    {
+      "id": "TXN-456124",
+      "type": "ACH Transfer",
+      "date": "2024-01-14 09:15:42",
+      "amount": "$2,500.00",
+      "severity": "MEDIUM",
+      "beneficiary": "XYZ Services",
+      "status": "Pending",
+      "details": "Monthly service payment"
+    },
+    {
+      "id": "TXN-456125",
+      "type": "International Wire",
+      "date": "2024-01-13 16:45:12",
+      "amount": "$8,750.00",
+      "severity": "HIGH",
+      "beneficiary": "Global Trading Ltd",
+      "status": "Completed",
+      "details": "International trade payment"
+    },
+    {
+      "id": "TXN-456126",
+      "type": "Check Deposit",
+      "date": "2024-01-12 11:20:33",
+      "amount": "$3,200.00",
+      "severity": "LOW",
+      "beneficiary": "John Doe",
+      "status": "Cleared",
+      "details": "Salary deposit from employer"
+    },
+    {
+      "id": "TXN-456127",
+      "type": "Wire Transfer",
+      "date": "2024-01-11 13:55:18",
+      "amount": "$12,000.00",
+      "severity": "HIGH",
+      "beneficiary": "Tech Solutions Inc",
+      "status": "Completed",
+      "details": "Equipment purchase payment"
+    }
+  ]
 }
