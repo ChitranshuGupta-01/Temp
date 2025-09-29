@@ -1,602 +1,391 @@
-import React, { useState } from 'react';
-import { Search, Filter, Download, Calendar, Clock, CreditCard, ArrowUpRight, ArrowDownLeft, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
-import ChatOverlay from './ChatOverlay';
+"use client"
 
-interface TransactionData {
-  id: string;
-  transactionId: string;
-  type: string;
-  date: string;
-  time: string;
-  amount: number;
-  currency: string;
-  fromAccount: string;
-  toAccount: string;
-  beneficiary: string;
-  status: string;
-  description: string;
-  reference: string;
-  channel: string;
-  priority: 'low' | 'medium' | 'high';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, ChevronDown, Shield } from 'lucide-react';
+//import { useNavigate } from 'react-router-dom';
+import{useRouter} from 'next/navigation';
+
+type SearchType = 'caseId' | 'relationshipId' | 'EBID' | 'accountNumber';
+
+interface SearchOption {
+  value: SearchType;
+  label: string;
+  placeholder: string;
 }
 
-const RelatedTransactions: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterBy, setFilterBy] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+const searchOptions: SearchOption[] = [
+  { value: 'caseId', label: 'Case ID', placeholder: 'Enter FinCrime Case ID...' },
+  { value: 'relationshipId', label: 'Relationship ID', placeholder: 'Enter relationship ID...' },
+  { value: 'EBID', label: 'EBID', placeholder: 'Enter EBID...' },
+  { value: 'accountNumber', label: 'Account Number', placeholder: 'Enter account number...' },
+];
 
-  const transactionData: TransactionData[] = [
-    {
-      id: '1',
-      transactionId: 'TXN-456123',
-      type: 'Wire Transfer',
-      date: '2024-01-15',
-      time: '14:30:25',
-      amount: 15000.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****1234',
-      beneficiary: 'ABC Corp',
-      status: 'Completed',
-      description: 'Business payment for services',
-      reference: 'INV-2024-001',
-      channel: 'Online Banking',
-      priority: 'high'
-    },
-    {
-      id: '2',
-      transactionId: 'TXN-456124',
-      type: 'ACH Transfer',
-      date: '2024-01-14',
-      time: '09:15:42',
-      amount: 2500.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****9876',
-      beneficiary: 'XYZ Services',
-      status: 'Pending',
-      description: 'Monthly service payment',
-      reference: 'AUTO-PAY-001',
-      channel: 'Mobile App',
-      priority: 'medium'
-    },
-    {
-      id: '3',
-      transactionId: 'TXN-456125',
-      type: 'International Wire',
-      date: '2024-01-13',
-      time: '16:45:12',
-      amount: 8750.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****4321',
-      beneficiary: 'Global Trading Ltd',
-      status: 'Completed',
-      description: 'International trade payment',
-      reference: 'SWIFT-2024-001',
-      channel: 'Branch',
-      priority: 'high'
-    },
-    {
-      id: '4',
-      transactionId: 'TXN-456126',
-      type: 'Check Deposit',
-      date: '2024-01-12',
-      time: '11:20:33',
-      amount: 3200.00,
-      currency: 'USD',
-      fromAccount: '****1111',
-      toAccount: '****5678',
-      beneficiary: 'John Doe',
-      status: 'Cleared',
-      description: 'Salary deposit from employer',
-      reference: 'CHK-789456',
-      channel: 'ATM',
-      priority: 'low'
-    },
-    {
-      id: '5',
-      transactionId: 'TXN-456127',
-      type: 'Wire Transfer',
-      date: '2024-01-11',
-      time: '13:55:18',
-      amount: 12000.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****7890',
-      beneficiary: 'Tech Solutions Inc',
-      status: 'Completed',
-      description: 'Equipment purchase payment',
-      reference: 'PO-2024-005',
-      channel: 'Online Banking',
-      priority: 'high'
-    },
-    {
-      id: '6',
-      transactionId: 'TXN-456128',
-      type: 'ACH Debit',
-      date: '2024-01-10',
-      time: '10:30:45',
-      amount: 1850.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****2468',
-      beneficiary: 'Utility Company',
-      status: 'Completed',
-      description: 'Monthly utility bill payment',
-      reference: 'UTIL-JAN-2024',
-      channel: 'Auto-Pay',
-      priority: 'low'
-    },
-    {
-      id: '7',
-      transactionId: 'TXN-456129',
-      type: 'Wire Transfer',
-      date: '2024-01-09',
-      time: '15:20:11',
-      amount: 25000.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****3579',
-      beneficiary: 'Investment Partners LLC',
-      status: 'Flagged',
-      description: 'Large investment transfer - under review',
-      reference: 'INV-FUND-001',
-      channel: 'Online Banking',
-      priority: 'high'
-    },
-    {
-      id: '8',
-      transactionId: 'TXN-456130',
-      type: 'Direct Deposit',
-      date: '2024-01-08',
-      time: '08:45:22',
-      amount: 4500.00,
-      currency: 'USD',
-      fromAccount: '****9999',
-      toAccount: '****5678',
-      beneficiary: 'John Doe',
-      status: 'Completed',
-      description: 'Freelance project payment',
-      reference: 'PROJ-2024-001',
-      channel: 'ACH',
-      priority: 'medium'
-    },
-    {
-      id: '9',
-      transactionId: 'TXN-456131',
-      type: 'Wire Transfer',
-      date: '2024-01-07',
-      time: '12:10:55',
-      amount: 6800.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****1357',
-      beneficiary: 'Legal Services Corp',
-      status: 'Completed',
-      description: 'Legal consultation fees',
-      reference: 'LEGAL-2024-001',
-      channel: 'Branch',
-      priority: 'medium'
-    },
-    {
-      id: '10',
-      transactionId: 'TXN-456132',
-      type: 'ACH Transfer',
-      date: '2024-01-06',
-      time: '16:22:18',
-      amount: 950.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****8642',
-      beneficiary: 'Insurance Co',
-      status: 'Completed',
-      description: 'Monthly insurance premium',
-      reference: 'INS-JAN-2024',
-      channel: 'Auto-Pay',
-      priority: 'low'
-    },
-    {
-      id: '11',
-      transactionId: 'TXN-456133',
-      type: 'International Wire',
-      date: '2024-01-05',
-      time: '14:15:30',
-      amount: 18500.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****9753',
-      beneficiary: 'European Suppliers Ltd',
-      status: 'Completed',
-      description: 'International supplier payment',
-      reference: 'EURO-PAY-001',
-      channel: 'Online Banking',
-      priority: 'high'
-    },
-    {
-      id: '12',
-      transactionId: 'TXN-456134',
-      type: 'Wire Transfer',
-      date: '2024-01-04',
-      time: '11:45:22',
-      amount: 7200.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****4680',
-      beneficiary: 'Marketing Agency',
-      status: 'Completed',
-      description: 'Marketing campaign payment',
-      reference: 'MKT-2024-001',
-      channel: 'Mobile App',
-      priority: 'medium'
-    }
-  ];
+function SearchPage() {
+  //const navigate = useNavigate();
+  const router = useRouter();
+  const [selectedType, setSelectedType] = useState<SearchType>('caseId');
+  const [searchValue, setSearchValue] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const filteredData = transactionData.filter(item => {
-    const matchesSearch = 
-      item.transactionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.beneficiary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.fromAccount.includes(searchTerm) ||
-      item.toAccount.includes(searchTerm) ||
-      item.amount.toString().includes(searchTerm);
-    
-    const matchesFilter = filterBy === 'all' || item.type === filterBy;
-    
-    return matchesSearch && matchesFilter;
-  });
+  const selectedOption = searchOptions.find(option => option.value === selectedType)!;
 
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentData = filteredData.slice(startIndex, endIndex);
+  const [mounted, setMounted] = useState(false);
 
-  // Reset to first page when filters change
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterBy]);
+  useEffect(()=>{setMounted(true);},[]);
 
-  const transactionTypes = [...new Set(transactionData.map(item => item.type))];
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800';
-      case 'medium': return 'bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800';
-      case 'low': return 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800';
-      default: return 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800';
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchValue.trim()) {
+      router.push(`/analysis/${selectedType}/${encodeURIComponent(searchValue.trim())}`);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed': return 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800';
-      case 'pending': return 'bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800';
-      case 'flagged': return 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800';
-      case 'cleared': return 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800';
-      default: return 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800';
-    }
-  };
-
-  const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-    }).format(amount);
-  };
-
-  const getTransactionIcon = (type: string) => {
-    if (type.includes('Wire') || type.includes('Transfer')) {
-      return <ArrowUpRight className="w-4 h-4 text-blue-600 flex-shrink-0" />;
-    } else if (type.includes('Deposit')) {
-      return <ArrowDownLeft className="w-4 h-4 text-green-600 flex-shrink-0" />;
-    } else {
-      return <CreditCard className="w-4 h-4 text-purple-600 flex-shrink-0" />;
-    }
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleItemsPerPageChange = (items: number) => {
-    setItemsPerPage(items);
-    setCurrentPage(1);
-  };
-
-  // CSV Download Function
-  const downloadCSV = () => {
-    const headers = [
-      'Transaction ID',
-      'Type',
-      'Date',
-      'Time',
-      'Amount',
-      'Currency',
-      'From Account',
-      'To Account',
-      'Beneficiary',
-      'Status',
-      'Priority',
-      'Channel',
-      'Reference',
-      'Description'
-    ];
-
-    const csvContent = [
-      headers.join(','),
-      ...filteredData.map(item => [
-        `"${item.transactionId}"`,
-        `"${item.type}"`,
-        `"${item.date}"`,
-        `"${item.time}"`,
-        `"${item.amount}"`,
-        `"${item.currency}"`,
-        `"${item.fromAccount}"`,
-        `"${item.toAccount}"`,
-        `"${item.beneficiary}"`,
-        `"${item.status}"`,
-        `"${item.priority}"`,
-        `"${item.channel}"`,
-        `"${item.reference}"`,
-        `"${item.description.replace(/"/g, '""')}"`
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `related-transactions-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDropdownSelect = (option: SearchOption) => {
+    setSelectedType(option.value);
+    setIsDropdownOpen(false);
+    setSearchValue('');
+    // Focus back to input after selection
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   return (
-    <>
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-50 to-green-50 px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg shadow-sm">
-                <CreditCard className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Related Transactions</h2>
-                <p className="text-sm text-gray-600">All transactions made to the same account: ****5678</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <button 
-                onClick={() => setIsChatOpen(true)}
-                className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 hover:scale-105"
-                title="Ask AI Assistant"
-              >
-                <Sparkles className="w-5 h-5" />
-              </button>
-              <button 
-                onClick={downloadCSV}
-                className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 hover:scale-105"
-                title="Download CSV"
-              >
-                <Download className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Dynamic Animated Background */}
+      <div className="fixed inset-0 -z-10">
+        {/* Base gradient background */}
+        <div className="absolute inset-0 bg-gray-100"></div>
+        
+        {/* Animated grid pattern */}
+        {/* <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `
+              linear-gradient(rgba(0, 102, 204, 0.3) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0, 102, 204, 0.3) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            animation: 'grid-move 20s linear infinite'
+          }}></div>
+        </div> */}
+
+        {/* Floating particles */}
+        {mounted && (
+            <div className="absolute inset-0">
+            {[...Array(20)].map((_, i) => (
+                <div
+                key={i}
+                className="absolute w-2 h-2 bg-blue-400 rounded-full opacity-60"
+                style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animation: `float-${i % 3} ${3 + Math.random() * 4}s ease-in-out infinite`,
+                    animationDelay: `${Math.random() * 2}s`
+                }}
+                ></div>
+            ))}
+           </div>
+        )}
+
+        {/* Scanning lines */}
+        <div className="absolute inset-0">
+          <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-60"
+               style={{ animation: 'scan-vertical 8s linear infinite' }}></div>
+          <div className="absolute h-full w-px bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-60"
+               style={{ animation: 'scan-horizontal 6s linear infinite' }}></div>
         </div>
 
-        {/* Filters */}
-        <div className="p-6 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search transactions, amounts, beneficiaries, or references..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
-              />
-            </div>
-            
-            <div className="flex gap-4">
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <select
-                  value={filterBy}
-                  onChange={(e) => setFilterBy(e.target.value)}
-                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white shadow-sm transition-all duration-200 min-w-48"
-                >
-                  <option value="all">All Transaction Types</option>
-                  {transactionTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <select
-                value={itemsPerPage}
-                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white shadow-sm transition-all duration-200"
-              >
-                <option value={5}>5 per page</option>
-                <option value={10}>10 per page</option>
-                <option value={15}>15 per page</option>
-                <option value={20}>20 per page</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Table Container - Removed overflow-x-auto */}
-        <div>
-          <table className="w-full">
-            <thead className="bg-gradient-to-r from-gray-50 to-slate-100">
-              <tr>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Transaction</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Beneficiary</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Details</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {currentData.map((item, index) => (
-                <tr key={item.id} className={`hover:bg-gradient-to-r hover:from-green-50 hover:to-teal-50 transition-all duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        {getTransactionIcon(item.type)}
-                        <span className="text-sm font-semibold text-gray-900 truncate">{item.type}</span>
-                      </div>
-                      <div className="text-xs font-mono text-indigo-600 bg-indigo-50 rounded px-2 py-1 inline-block">
-                        {item.transactionId}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-1 text-sm text-gray-900">
-                        <Calendar className="w-3 h-3 text-gray-500 flex-shrink-0" />
-                        <span className="text-xs">{item.date}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-xs text-gray-600">
-                        <Clock className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        <span>{item.time}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="text-sm font-bold text-gray-900">
-                        {formatAmount(item.amount, item.currency)}
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-sm ${getPriorityColor(item.priority)}`}>
-                          {item.priority.toUpperCase()}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="text-sm font-medium text-gray-900 truncate max-w-32">{item.beneficiary}</div>
-                      <div className="text-xs text-gray-500">{item.channel}</div>
-                      <div className="text-xs text-gray-600">
-                        <span className="font-mono">{item.fromAccount}</span> → <span className="font-mono">{item.toAccount}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium shadow-sm ${getStatusColor(item.status)}`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="text-sm text-gray-600 max-w-48 truncate" title={item.description}>
-                        {item.description}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Ref: {item.reference}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination Footer */}
-        <div className="bg-gradient-to-r from-gray-50 to-slate-50 px-6 py-4 border-t border-gray-200">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <p className="text-sm text-gray-600 font-medium">
-                Showing <span className="text-green-600 font-semibold">{startIndex + 1}</span> to <span className="text-green-600 font-semibold">{Math.min(endIndex, filteredData.length)}</span> of <span className="text-green-600 font-semibold">{filteredData.length}</span> transactions
-              </p>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-xs text-gray-600">High Value</span>
-              </div>
-            </div>
-            
-            {/* Pagination Controls */}
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-600 disabled:hover:bg-transparent"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              
-              <div className="flex items-center space-x-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Show first page, last page, current page, and pages around current page
-                  if (
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                  ) {
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`px-3 py-1 text-sm rounded-lg transition-all duration-200 ${
-                          currentPage === page
-                            ? 'bg-green-600 text-white shadow-sm'
-                            : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  } else if (
-                    page === currentPage - 2 ||
-                    page === currentPage + 2
-                  ) {
-                    return (
-                      <span key={page} className="px-2 text-gray-400">
-                        ...
-                      </span>
-                    );
-                  }
-                  return null;
-                })}
-              </div>
-              
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-600 disabled:hover:bg-transparent"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+        {/* Pulsing circles */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full border border-blue-500 opacity-20"
+             style={{ animation: 'pulse-ring 4s ease-in-out infinite' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full border border-green-500 opacity-20"
+             style={{ animation: 'pulse-ring 3s ease-in-out infinite 1s' }}></div>
+        
+        {/* Data streams */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-40"
+              style={{
+                width: '200px',
+                top: `${20 + i * 15}%`,
+                animation: `data-stream ${2 + i * 0.5}s linear infinite`,
+                animationDelay: `${i * 0.8}s`
+              }}
+            ></div>
+          ))}
         </div>
       </div>
 
-      {/* Chat Overlay */}
-      <ChatOverlay 
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        tableData={filteredData}
-        tableName="Related Transactions"
-      />
-    </>
-  );
-};
+      {/* SC Brand Colors and Animations CSS */}
+      <style>{`
+        :root {
+          --sc-blue: #0066CC;
+          --sc-blue-dark: #004499;
+          --sc-blue-light: #3385D6;
+          --sc-green: #00A651;
+          --sc-green-dark: #008A44;
+          --sc-green-light: #33B86A;
+          --sc-gray: #6B7280;
+          --sc-gray-light: #9CA3AF;
+          --sc-gray-dark: #374151;
+        }
+        
+        .sc-gradient {
+          background: linear-gradient(135deg, var(--sc-blue) 0%, var(--sc-green) 100%);
+        }
+        
+        .sc-gradient-light {
+          background: linear-gradient(135deg, var(--sc-blue-light) 0%, var(--sc-green-light) 100%);
+        }
 
-export default RelatedTransactions;
+        @keyframes grid-move {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(50px, 50px); }
+        }
+
+        @keyframes float-0 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        @keyframes float-1 {
+          0%, 100% { transform: translateX(0px) rotate(0deg); }
+          50% { transform: translateX(20px) rotate(-180deg); }
+        }
+
+        @keyframes float-2 {
+          0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+          33% { transform: translate(15px, -15px) rotate(120deg); }
+          66% { transform: translate(-15px, 15px) rotate(240deg); }
+        }
+
+        @keyframes scan-vertical {
+          0% { top: -2px; }
+          100% { top: 100%; }
+        }
+
+        @keyframes scan-horizontal {
+          0% { left: -2px; }
+          100% { left: 100%; }
+        }
+
+        @keyframes pulse-ring {
+          0% { transform: scale(0.8); opacity: 0.8; }
+          50% { transform: scale(1.2); opacity: 0.3; }
+          100% { transform: scale(0.8); opacity: 0.8; }
+        }
+
+        @keyframes data-stream {
+          0% { left: -200px; }
+          100% { left: 100%; }
+        }
+
+        @keyframes lens-pulse {
+          0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+          50% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+        }
+
+        .cyber-glow {
+          box-shadow: 0 0 20px rgba(0, 102, 204, 0.3), 0 0 40px rgba(0, 166, 81, 0.2);
+        }
+
+        .cyber-text-glow {
+          text-shadow: 0 0 10px rgba(0, 102, 204, 0.5);
+        }
+
+        .lens-glow {
+          filter: drop-shadow(0 0 8px rgba(0, 166, 81, 0.6));
+          animation: lens-pulse 3s ease-in-out infinite;
+        }
+      `}</style>
+
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-5xl">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white flex items-center justify-center gap-4">
+              {/* <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-green-400 bg-clip-text text-transparent">
+                FinCrime
+              </span> */}
+              <span className="bg-clip-text text-[#0473EA]">
+                FinCrime
+              </span>
+              <Search className="w-16 h-16 md:w-20 md:h-20 text-[#414749]" />
+              <span className="bg-clip-text text-[#38D200]">
+                LENS
+              </span>
+            </h1>
+            <p className="text-2xl md:text-3xl text-gray-600 mb-4 font-semibold">
+              Advanced Financial Crime Detection System
+            </p>
+            <p className="text-lg text-gray-500 max-w-3xl mx-auto leading-relaxed">
+              Intelligent FinCrime analysis and investigation platform powered by AI-driven threat detection
+            </p>
+          </div>
+
+          {/* Main Search Interface */}
+          <div className="bg-black/30 rounded-3xl shadow-2xl p-8 md:p-16 border border-blue-500/20 cyber-glow">
+            <form onSubmit={handleSearch} className="space-y-8">
+              {/* Integrated Search Box */}
+              <div className="relative" ref={dropdownRef}>
+                <div className="relative flex items-center bg-gray-900/50 border-2 border-blue-500/30 rounded-2xl overflow-hidden hover:border-blue-400/50 focus-within:border-blue-500/70 transition-all duration-300 shadow-lg backdrop-blur-sm">
+                  {/* Dropdown Trigger */}
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex items-center gap-3 px-6 py-4 border-r border-blue-500/30 hover:bg-blue-900/30 transition-colors duration-200 focus:outline-none focus:bg-blue-900/30 min-w-[200px] text-white"
+                    style={{ 
+                      backgroundColor: isDropdownOpen ? 'var(--sc-blue)' : undefined,
+                      borderColor: isDropdownOpen ? 'var(--sc-blue-light)' : undefined
+                    }}
+                  >
+                    <span className="font-semibold text-base">{selectedOption.label}</span>
+                    <ChevronDown 
+                      className={`w-5 h-5 transition-transform duration-200 ${
+                        isDropdownOpen ? 'rotate-180' : ''
+                      }`} 
+                    />
+                  </button>
+
+                  {/* Search Input */}
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    placeholder={selectedOption.placeholder}
+                    className="flex-1 px-6 py-4 bg-transparent text-white placeholder-gray-400 focus:outline-none text-lg"
+                  />
+
+                  {/* Search Button */}
+                  <button
+                    type="submit"
+                    disabled={!searchValue.trim()}
+                    // className="px-8 py-4 text-white font-semibold hover:opacity-90 focus:ring-4 focus:ring-blue-200/50 transition-all 
+                    //   duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 bg-green-500">
+                    className="px-8 py-4 text-white font-semibold hover:opacity-90 focus:ring-4 focus:ring-[#0473EA] transition-all 
+                      duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 bg-green-500">
+                        
+                    <Search className="w-6 h-6" />
+                    <span className="text-lg">ANALYZE</span>
+                  </button>
+                </div>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl shadow-2xl z-20 overflow-hidden">
+                    {searchOptions.map((option, index) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => handleDropdownSelect(option)}
+                        className={`w-full text-left px-6 py-4 hover:bg-blue-900/30 transition-all duration-200 flex items-center justify-between group ${
+                          selectedType === option.value 
+                            ? 'text-white font-semibold sc-gradient' 
+                            : 'text-gray-300 hover:text-blue-300'
+                        } ${index === 0 ? 'rounded-t-2xl' : ''} ${index === searchOptions.length - 1 ? 'rounded-b-2xl' : ''}`}
+                      >
+                        <span className="text-base">{option.label}</span>
+                        {selectedType === option.value && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* FinCrime Analysis Protocol */}
+              {/* <div className="rounded-2xl p-6 border-2 bg-blue-900/20 backdrop-blur-sm" style={{ borderColor: '#38D200' }}>
+               */}
+              <div className="rounded-2xl p-6 border-2 bg-green-900/20 backdrop-blur-sm" style={{ borderColor: '#38D200' }}>
+                <h3 className="font-bold text-lg mb-4 text-green-300 flex items-center gap-2">
+                  <Search className="w-5 h-5" />
+                  FinCrime Lens Analysis Protocol:
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <ul className="space-y-2 text-gray-100">
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>Validate {selectedOption.label.toLowerCase()} authenticity</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>Cross-reference FinCrime intelligence database</span>
+                    </li>
+                  </ul>
+                  <ul className="space-y-2 text-gray-100">
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>AI-powered behavioral pattern analysis</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>Generate comprehensive risk assessment</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </form>
+
+            {/* Quick Access Buttons */}
+            <div className="mt-12 pt-8 border-t border-blue-500/20">
+              <h3 className="text-sm font-bold uppercase tracking-wider mb-6 text-white flex items-center gap-2">
+                <Search className="w-4 h-4" />
+                Quick FinCrime Analysis Access
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {searchOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setSelectedType(option.value);
+                      setSearchValue('');
+                      inputRef.current?.focus();
+                    }}
+                    className={`p-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 backdrop-blur-sm ${
+                      selectedType === option.value
+                        // ? 'text-white shadow-lg sc-gradient focus:[ring-blue-200/50 cyber-glow]'
+                        ? 'text-white shadow-lg bg-[#0473EA] focus:[ring-blue-200/50 cyber-glow]'
+                        // : 'bg-gray-800/50 text-gray-200 hover:bg-gray-700/50 focus:ring-gray-500/50 border border-gray-600/30'
+                        : 'bg-gray-800/50 text-gray-100 hover:bg-gray-700/50 focus:ring-gray-500/50 border border-gray-600/30'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center mt-16">
+            <p className="text-gray-400 text-lg flex items-center justify-center gap-2">
+              <Shield className="w-5 h-5 text-blue-400" />
+              FinCrime Lens - Powered by Standard Chartered's Advanced AI Security Intelligence
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default SearchPage;
+
+
+
