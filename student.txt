@@ -1,116 +1,28 @@
-{
-  "case": {
-    "id": "223456",
-    "title": "High Value Transaction Investigation",
-    "description": "Investigation of suspicious wire transfers exceeding $15,000 from account ****5678 to multiple beneficiaries. Pattern suggests potential money laundering activity.",
-    "assignee": "John Smith",
-    "profile": {
-      "id": "PROF-789",
-      "name": "John Doe"
-    },
-    "created": "2024-01-10",
-    "updated": "2024-01-15",
-    "status": "Active",
-    "priority": "High Priority",
-    "riskScore": 85
-  },
-  "relationDiagram": {
-    "case": {
-      "caseId": "CASE-2024-001",
-      "date": "2024-01-15",
-      "status": "Active",
-      "decision": "Approved",
-      "type": "Investigation"
-    },
-    "profile": {
-      "id": "PROF-789",
-      "name": "John Doe",
-      "mmn": "Smith",
-      "gender": "Male",
-      "dob": "1985-03-22"
-    },
-    "transaction": {
-      "id": "TXN-456123",
-      "type": "Wire Transfer",
-      "amount": "$15,000.00",
-      "frequency": 3,
-      "recentDate": "2024-01-10",
-      "beneficiary": "ABC Corp"
-    },
-    "beneficiary": {
-      "id": "BENE-789",
-      "name": "ABC Corp"
-    },
-    "last5Activity": [
-      { "id": "EVT-015", "date": "2024-01-15", "type": "Login Attempt" },
-      { "id": "EVT-014", "date": "2024-01-14", "type": "Transaction" },
-      { "id": "EVT-013", "date": "2024-01-13", "type": "Profile Update" },
-      { "id": "EVT-012", "date": "2024-01-12", "type": "Password Change" },
-      { "id": "EVT-011", "date": "2024-01-11", "type": "Device Registration" }
-    ]
-  },
-  "pastEvents": [
-    {
-      "id": "EVT-001",
-      "type": "Login Attempt",
-      "date": "2024-01-15 14:30:25",
-      "profile": "John Doe",
-      "ip": "192.168.1.100",
-      "status": "Success",
-      "severity": "LOW",
-      "description": "Successful login from registered device"
-    },
-    {
-      "id": "EVT-002",
-      "type": "Failed Login",
-      "date": "2024-01-15 09:15:42",
-      "profile": "John Doe",
-      "ip": "203.45.67.89",
-      "status": "Failed",
-      "severity": "HIGH",
-      "description": "Multiple failed login attempts"
-    },
-    {
-      "id": "EVT-003",
-      "type": "Transaction Alert",
-      "date": "2024-01-14 16:45:12",
-      "profile": "John Doe",
-      "ip": "192.168.1.100",
-      "status": "Flagged",
-      "severity": "MEDIUM",
-      "description": "High-value transaction exceeding daily limit"
-    }
-  ],
-  "transactions": [
-    {
-      "id": "TXN-456123",
-      "type": "Wire Transfer",
-      "date": "2024-01-15 14:30:25",
-      "amount": "$15,000.00",
-      "severity": "HIGH",
-      "beneficiary": "ABC Corp",
-      "status": "Completed",
-      "details": "Business payment for services"
-    },
-    {
-      "id": "TXN-456124",
-      "type": "ACH Transfer",
-      "date": "2024-01-14 09:15:42",
-      "amount": "$2,500.00",
-      "severity": "MEDIUM",
-      "beneficiary": "XYZ Services",
-      "status": "Pending",
-      "details": "Monthly service payment"
-    },
-    {
-      "id": "TXN-456125",
-      "type": "International Wire",
-      "date": "2024-01-13 16:45:12",
-      "amount": "$8,750.00",
-      "severity": "HIGH",
-      "beneficiary": "Global Trading Ltd",
-      "status": "Completed",
-      "details": "International trade payment"
-    }
-  ]
+"use client";
+
+import React, { useEffect, useState } from "react";
+import CaseDetails from "@/components/CaseDetails";
+import CaseRelationDiagram from "@/components/CaseRelationDiagram";
+import PastEventsLog from "@/components/PastEventsLog";
+import RelatedTransactions from "@/components/RelatedTransactions";
+
+export default function CaseDetailPage({ params }: { params: { caseId: string } }) {
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/data/caseData.json")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+
+  if (!data) return <div className="p-10 text-center">Loading...</div>;
+
+  return (
+    <div className="p-6 space-y-8">
+      <CaseDetails caseData={data.case} />
+      <CaseRelationDiagram relation={data.relationDiagram} />
+      <PastEventsLog events={data.pastEvents} />
+      <RelatedTransactions transactions={data.transactions} />
+    </div>
+  );
 }
