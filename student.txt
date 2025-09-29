@@ -1,114 +1,182 @@
 "use client";
-import React, { useCallback } from "react";
-import ReactFlow, { Background, Controls, MiniMap, Node, Edge } from "reactflow";
-import 'reactflow/dist/style.css';
+import React, { useMemo, useState } from "react";
+import { Search, Sliders } from "lucide-react";
 
-export default function CaseRelationDiagram({ relation }: { relation: any }) {
-  // nodes roughly positioned like the screenshot
-  const nodes: Node[] = [
-    {
-      id: "case",
-      position: { x: 100, y: 40 },
-      data: {
-        label: (
-          <div className="rounded-lg p-3 bg-gradient-to-r from-red-400 to-red-300 text-white shadow">
-            <div className="font-bold">Case</div>
-            <div className="text-xs mt-1">Case ID: {relation.case.caseId}</div>
-            <div className="text-xs">Date: {relation.case.date}</div>
-          </div>
-        )
-      },
-      style: { width: 200, height: 90 }
-    },
-    {
-      id: "profile",
-      position: { x: 420, y: 20 },
-      data: {
-        label: (
-          <div className="rounded-lg p-3 bg-gradient-to-r from-blue-400 to-blue-300 text-white shadow">
-            <div className="font-bold">Profile</div>
-            <div className="text-xs mt-1">{relation.profile.name} ({relation.profile.id})</div>
-          </div>
-        )
-      },
-      style: { width: 200, height: 110 }
-    },
-    {
-      id: "txn",
-      position: { x: 40, y: 220 },
-      data: {
-        label: (
-          <div className="rounded-lg p-3 bg-gradient-to-r from-indigo-400 to-indigo-300 text-white shadow">
-            <div className="font-bold">Transaction Detail</div>
-            <div className="text-xs mt-1">{relation.transaction.type} - {relation.transaction.id}</div>
-            <div className="text-xs">{relation.transaction.amount}</div>
-          </div>
-        )
-      },
-      style: { width: 220, height: 120 }
-    },
-    {
-      id: "bene",
-      position: { x: 320, y: 220 },
-      data: {
-        label: (
-          <div className="rounded-lg p-3 bg-yellow-400 text-white shadow">
-            <div className="font-bold">Beneficiary Detail</div>
-            <div className="text-xs mt-1">{relation.beneficiary.name}</div>
-            <div className="text-xs">{relation.beneficiary.amount}</div>
-          </div>
-        )
-      },
-      style: { width: 200, height: 100 }
-    },
-    {
-      id: "activity",
-      position: { x: 520, y: 220 },
-      data: {
-        label: (
-          <div className="rounded-lg p-3 bg-pink-400 text-white shadow">
-            <div className="font-bold">Last 5 Activity</div>
-            <div className="text-xs mt-1">{relation.last5Activity.map((a:any) => a.id).join(", ")}</div>
-          </div>
-        )
-      },
-      style: { width: 240, height: 120 }
-    }
-  ];
+type Event = {
+  id: string;
+  type: string;
+  date: string;
+  profile: string;
+  ip: string;
+  status: string;
+  severity: string;
+  description: string;
+};
 
-  const edges: Edge[] = [
-    { id: 'e1', source: 'case', target: 'profile', animated: true },
-    { id: 'e2', source: 'case', target: 'txn', animated: true },
-    { id: 'e3', source: 'txn', target: 'bene', animated: true },
-    { id: 'e4', source: 'profile', target: 'activity', animated: true },
-    { id: 'e5', source: 'case', target: 'bene', animated: true }
-  ];
+const severityColor = (s: string) => {
+  if (!s) return "bg-gray-100 text-gray-700";
+  if (s.toUpperCase() === "HIGH") return "bg-red-100 text-red-700";
+  if (s.toUpperCase() === "MEDIUM") return "bg-yellow-100 text-yellow-700";
+  return "bg-green-100 text-green-700";
+};
 
-  const onInit = useCallback((instance:any) => {
-    // optional: fit view on init
-    instance.fitView({ padding: 0.1 });
-  }, []);
+export default function PastEventsLog({ events }: { events: Event[] }) {
+  const [query, setQuery] = useState("");
+  const [severityFilter, setSeverityFilter] = useState<string>("All");
+  const [perPage, setPerPage] = useState<number>(5);
+  const [page, setPage] = useState(1);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return events.filter((e) => {
+      if (severityFilter !== "All" && e.severity.toUpperCase() !== severityFilter.toUpperCase()) return false;
+      if (!q) return true;
+      return (
+        e.id.toLowerCase().includes(q) ||
+        e.type.toLowerCase().includes(q) ||
+        e.ip.toLowerCase().includes(q) ||
+        e.description.toLowerCase().includes(q)
+      );
+    });
+  }, [events, query, severityFilter]);
+
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const pageData = filtered.slice((page - 1) * perPage, page * perPage);
+
+  function goto(p: number) {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   return (
-    <div className="bg-white rounded-xl shadow border border-gray-200 p-4">
+    <div className="bg-white rounded-xl shadow border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h4 className="text-lg font-bold">Case Relation Diagram</h4>
-          <p className="text-sm text-gray-500">Visual relations between case, profile, transactions and beneficiaries</p>
+          <h4 className="text-lg font-bold">Past Events Log</h4>
+          <p className="text-sm text-gray-500">Recent activity and security events for Profile: John Doe</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="px-3 py-2 rounded bg-gray-50 border hover:bg-gray-100 text-sm">100%</button>
-          <button className="px-3 py-2 rounded bg-gray-50 border hover:bg-gray-100 text-sm">Zoom</button>
+          <button className="p-2 rounded bg-white border hover:bg-gray-50"><Sliders className="w-4 h-4" /></button>
+          <button className="p-2 rounded bg-white border hover:bg-gray-50">⬇</button>
         </div>
       </div>
 
-      <div style={{ height: 420 }} className="rounded border border-dashed border-gray-200 overflow-hidden">
-        <ReactFlow nodes={nodes} edges={edges} onInit={onInit} fitView>
-          <Background color="#f3f4f6" gap={12} />
-          <Controls />
-          <MiniMap />
-        </ReactFlow>
+      <div className="flex gap-4 items-center mb-4">
+        <div className="flex items-center gap-2 w-full">
+          <Search className="w-5 h-5 text-gray-400" />
+          <input
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+            placeholder="Search events, status, IP addresses, or descriptions..."
+            className="w-full border rounded px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <select
+            value={severityFilter}
+            onChange={(e) => { setSeverityFilter(e.target.value); setPage(1); }}
+            className="border rounded px-3 py-2 text-sm"
+          >
+            <option>All</option>
+            <option>LOW</option>
+            <option>MEDIUM</option>
+            <option>HIGH</option>
+          </select>
+
+          <select
+            value={perPage}
+            onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
+            className="border rounded px-3 py-2 text-sm"
+          >
+            <option value={5}>5 per page</option>
+            <option value={10}>10 per page</option>
+            <option value={20}>20 per page</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-left text-gray-600">
+            <tr>
+              <th className="p-3">EVENT ID</th>
+              <th className="p-3">EVENT TYPE</th>
+              <th className="p-3">DATE & TIME</th>
+              <th className="p-3">PROFILE</th>
+              <th className="p-3">IP ADDRESS</th>
+              <th className="p-3">STATUS</th>
+              <th className="p-3">SEVERITY</th>
+              <th className="p-3">DESCRIPTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pageData.map((e) => (
+              <tr key={e.id} className="border-t">
+                <td className="p-3 text-blue-600 font-semibold">{e.id}</td>
+                <td className="p-3">{e.type}</td>
+                <td className="p-3 text-gray-600">{e.date}</td>
+                <td className="p-3">{e.profile}</td>
+                <td className="p-3">{e.ip}</td>
+                <td className="p-3">
+                  <span className={`px-3 py-1 rounded-full text-xs ${e.status === 'Success' ? 'bg-green-100 text-green-700' : e.status === 'Failed' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {e.status}
+                  </span>
+                </td>
+                <td className="p-3">
+                  <span className={`px-3 py-1 rounded-full text-xs ${severityColor(e.severity)}`}>{e.severity}</span>
+                </td>
+                <td className="p-3 text-gray-700">{e.description}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* footer / pagination */}
+      <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+        <div>
+          Showing <span className="font-semibold">{(page - 1) * perPage + 1}</span> to <span className="font-semibold">{Math.min(page * perPage, total)}</span> of <span className="font-semibold">{total}</span> events
+          <span className="ml-4 inline-flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-500"></span> High Priority</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => goto(Math.max(1, page - 1))}
+            className="px-3 py-1 rounded border bg-white disabled:opacity-50"
+            disabled={page === 1}
+          >
+            ‹
+          </button>
+          {Array.from({ length: totalPages }).map((_, i) => {
+            const p = i + 1;
+            return (
+              <button
+                key={p}
+                onClick={() => goto(p)}
+                className={`px-3 py-1 rounded ${p === page ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+              >
+                {p}
+              </button>
+            );
+          })}
+          <button
+            onClick={() => goto(Math.min(totalPages, page + 1))}
+            className="px-3 py-1 rounded border bg-white disabled:opacity-50"
+            disabled={page === totalPages}
+          >
+            ›
+          </button>
+        </div>
       </div>
     </div>
   );
+
+  function goto(p: number) {
+    setPage(p);
+    // small scroll to top of card
+    const el = document.querySelector(".bg-white.rounded-xl");
+    if (el) (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
