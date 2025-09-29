@@ -1,589 +1,388 @@
-"use client";
+"use client"
 
-import React, { useMemo, useState } from "react";
-import {
-  FileText,
-  AlertTriangle,
-  Search,
-  Filter,
-  Download,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  X,
-} from "lucide-react";
-import ReactFlow, { Background, Controls } from "reactflow";
-import "reactflow/dist/style.css";
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, ChevronDown, Shield } from 'lucide-react';
+//import { useNavigate } from 'react-router-dom';
+import{useRouter} from 'next/navigation';
 
-type EventItem = {
-  id: string;
-  type: string;
-  date: string;
-  profile: string;
-  ip: string;
-  status: "Success" | "Failed" | "Flagged" | "Other";
-  severity: "Low" | "Medium" | "High";
-  desc: string;
-};
+type SearchType = 'caseId' | 'relationshipId' | 'EBID' | 'accountNumber';
 
-export default function CaseDetailPage() {
-  // --- Relation diagram nodes & edges ---
-  const nodes = [
-    {
-      id: "case",
-      data: {
-        label:
-          "Case\nCase ID: CASE-2024-154\nDate: 2024-01-15\nStatus: Active\nDecision: Approve\nType: Investigation",
-      },
-      position: { x: 100, y: 30 },
-      style: {
-        background: "#fee2e2",
-        padding: 12,
-        borderRadius: 10,
-        border: "1px solid #fca5a5",
-        width: 240,
-      },
-    },
-    {
-      id: "profile",
-      data: {
-        label:
-          "Profile\nProfile ID: PROF-789\nName: John Doe\nMMN: Smith\nGender: Male\nDOB: 1985-03-22",
-      },
-      position: { x: 420, y: 30 },
-      style: {
-        background: "#dbeafe",
-        padding: 12,
-        borderRadius: 10,
-        border: "1px solid #93c5fd",
-        width: 220,
-      },
-    },
-    {
-      id: "txn",
-      data: {
-        label:
-          "Transaction Detail\nTrans ID: TXN-456123\nType: Wire Transfer\nAmount: $15,000.00\nFrequency: Multiple",
-      },
-      position: { x: 100, y: 230 },
-      style: {
-        background: "#eef2ff",
-        padding: 12,
-        borderRadius: 10,
-        border: "1px solid #c7d2fe",
-        width: 260,
-      },
-    },
-    {
-      id: "activity",
-      data: {
-        label:
-          "Last 5 Activity\nEVT-001 Login Attempt\nEVT-003 Transaction Alert\nEVT-004 Profile Update",
-      },
-      position: { x: 420, y: 230 },
-      style: {
-        background: "#fff1f2",
-        padding: 12,
-        borderRadius: 10,
-        border: "1px solid #fbcfe8",
-        width: 260,
-      },
-    },
-  ];
+interface SearchOption {
+  value: SearchType;
+  label: string;
+  placeholder: string;
+}
 
-  const edges = [
-    { id: "e1", source: "case", target: "profile", animated: true },
-    { id: "e2", source: "case", target: "txn", animated: true },
-    { id: "e3", source: "profile", target: "activity", animated: true },
-  ];
+const searchOptions: SearchOption[] = [
+  { value: 'caseId', label: 'Case ID', placeholder: 'Enter FinCrime Case ID...' },
+  { value: 'relationshipId', label: 'Relationship ID', placeholder: 'Enter relationship ID...' },
+  { value: 'EBID', label: 'EBID', placeholder: 'Enter EBID...' },
+  { value: 'accountNumber', label: 'Account Number', placeholder: 'Enter account number...' },
+];
 
-  // --- Events data (dummy) ---
-  const events: EventItem[] = [
-    {
-      id: "EVT-001",
-      type: "Login Attempt",
-      date: "2024-01-15 14:30:25",
-      profile: "John Doe",
-      ip: "192.168.1.100",
-      status: "Success",
-      severity: "Low",
-      desc: "Successful login from registered device",
-    },
-    {
-      id: "EVT-002",
-      type: "Failed Login",
-      date: "2024-01-15 09:15:42",
-      profile: "John Doe",
-      ip: "203.45.67.88",
-      status: "Failed",
-      severity: "High",
-      desc: "Multiple failed login attempts from unknown device",
-    },
-    {
-      id: "EVT-003",
-      type: "Transaction Alert",
-      date: "2024-01-14 16:45:12",
-      profile: "John Doe",
-      ip: "192.168.1.100",
-      status: "Flagged",
-      severity: "Medium",
-      desc: "High-value transaction exceeding daily limit",
-    },
-  ];
+function SearchPage() {
+  //const navigate = useNavigate();
+  const router = useRouter();
+  const [selectedType, setSelectedType] = useState<SearchType>('caseId');
+  const [searchValue, setSearchValue] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // --- UI state ---
-  const [searchTerm, setSearchTerm] = useState("");
-  const [eventTypeFilter, setEventTypeFilter] = useState("All Event Types");
-  const [pageSize, setPageSize] = useState<number>(5);
-  const [page, setPage] = useState<number>(1);
+  const selectedOption = searchOptions.find(option => option.value === selectedType)!;
 
-  // Case extra state
-  const [notes, setNotes] = useState<string[]>([]);
-  const [caseStatus, setCaseStatus] = useState("Active");
+  const [mounted, setMounted] = useState(false);
 
-  // Modals
-  const [showNoteModal, setShowNoteModal] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [newNote, setNewNote] = useState("");
-  const [newStatus, setNewStatus] = useState(caseStatus);
+  useEffect(()=>{setMounted(true);},[]);
 
-  // unique event types
-  const eventTypes = useMemo(() => {
-    const s = new Set<string>();
-    events.forEach((e) => s.add(e.type));
-    return ["All Event Types", ...Array.from(s)];
-  }, [events]);
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
 
-  // filtered events
-  const filtered = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
-    return events.filter((e) => {
-      if (eventTypeFilter !== "All Event Types" && e.type !== eventTypeFilter)
-        return false;
-      if (!q) return true;
-      return (
-        e.id.toLowerCase().includes(q) ||
-        e.type.toLowerCase().includes(q) ||
-        e.profile.toLowerCase().includes(q) ||
-        e.ip.toLowerCase().includes(q) ||
-        e.status.toLowerCase().includes(q) ||
-        e.desc.toLowerCase().includes(q) ||
-        e.date.toLowerCase().includes(q)
-      );
-    });
-  }, [events, searchTerm, eventTypeFilter]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  // pagination
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const currentPage = Math.min(Math.max(1, page), totalPages);
-  const startIndex = (currentPage - 1) * pageSize;
-  const visible = filtered.slice(startIndex, startIndex + pageSize);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchValue.trim()) {
+      router.push(`/analysis/${selectedType}/${encodeURIComponent(searchValue.trim())}`);
+    }
+  };
 
-  function handlePageChange(next: number) {
-    setPage(Math.min(Math.max(1, next), totalPages));
-  }
-
-  function handleDownload() {
-    const headers = [
-      "Event ID",
-      "Event Type",
-      "Date & Time",
-      "Profile",
-      "IP Address",
-      "Status",
-      "Severity",
-      "Description",
-    ];
-    const rows = filtered.map((r) =>
-      [
-        r.id,
-        r.type,
-        r.date,
-        r.profile,
-        r.ip,
-        r.status,
-        r.severity,
-        `"${r.desc.replace(/"/g, '""')}"`,
-      ].join(",")
-    );
-    const csv = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "events.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function handleGenerateReport() {
-    const report = [
-      `Case Status: ${caseStatus}`,
-      `Notes: ${notes.join(" | ") || "None"}`,
-    ].join("\n");
-    const blob = new Blob([report], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "case_report.txt";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const handleDropdownSelect = (option: SearchOption) => {
+    setSelectedType(option.value);
+    setIsDropdownOpen(false);
+    setSearchValue('');
+    // Focus back to input after selection
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-      {/* ===== Case Header ===== */}
-      <div className="bg-white rounded-2xl shadow-lg border overflow-hidden">
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 px-6 py-4 border-b">
-          <h1 className="text-xl font-bold text-gray-800 flex items-center gap-3">
-            <FileText className="w-6 h-6 text-orange-600" />
-            Case #54532134
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            High Value Transaction Investigation
-          </p>
-        </div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Dynamic Animated Background */}
+      <div className="fixed inset-0 -z-10">
+        {/* Base gradient background */}
+        <div className="absolute inset-0 bg-gray-100"></div>
+        
+        {/* Animated grid pattern */}
+        {/* <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `
+              linear-gradient(rgba(0, 102, 204, 0.3) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0, 102, 204, 0.3) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            animation: 'grid-move 20s linear infinite'
+          }}></div>
+        </div> */}
 
-        <div className="p-6 space-y-4">
-          <p className="text-gray-700">
-            Investigation of suspicious wire transfers exceeding{" "}
-            <span className="font-semibold text-gray-900">$15,000</span>.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-600">
-            <p>
-              <span className="font-semibold">Assignee:</span> John Smith
-            </p>
-            <p>
-              <span className="font-semibold">Profile:</span> John Doe
-              (PROF-789)
-            </p>
-            <p>
-              <span className="font-semibold">Created:</span> 2024-01-10
-            </p>
-            <p>
-              <span className="font-semibold">Status:</span> {caseStatus}
-            </p>
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowNoteModal(true)}
-              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-gray-50 to-gray-100 border rounded-lg hover:from-indigo-50 hover:to-indigo-100 transition-all shadow-sm"
-            >
-              Add Note
-            </button>
-            <button
-              onClick={() => setShowStatusModal(true)}
-              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-gray-50 to-gray-100 border rounded-lg hover:from-indigo-50 hover:to-indigo-100 transition-all shadow-sm"
-            >
-              Update Status
-            </button>
-            <button
-              onClick={handleGenerateReport}
-              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-gray-50 to-gray-100 border rounded-lg hover:from-indigo-50 hover:to-indigo-100 transition-all shadow-sm"
-            >
-              Generate Report
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ===== Add Note Modal ===== */}
-      {showNoteModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold">Add Note</h3>
-              <button onClick={() => setShowNoteModal(false)}>
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <textarea
-              value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
-              className="w-full border rounded p-2 text-sm"
-              rows={4}
-              placeholder="Write your note..."
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowNoteModal(false)}
-                className="px-3 py-1 border rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (newNote.trim()) {
-                    setNotes((prev) => [...prev, newNote.trim()]);
-                    setNewNote("");
-                  }
-                  setShowNoteModal(false);
+        {/* Floating particles */}
+        {mounted && (
+            <div className="absolute inset-0">
+            {[...Array(20)].map((_, i) => (
+                <div
+                key={i}
+                className="absolute w-2 h-2 bg-blue-400 rounded-full opacity-60"
+                style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animation: `float-${i % 3} ${3 + Math.random() * 4}s ease-in-out infinite`,
+                    animationDelay: `${Math.random() * 2}s`
                 }}
-                className="px-3 py-1 bg-indigo-600 text-white rounded"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                ></div>
+            ))}
+           </div>
+        )}
 
-      {/* ===== Update Status Modal ===== */}
-      {showStatusModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-80 space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold">Update Status</h3>
-              <button onClick={() => setShowStatusModal(false)}>
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <select
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
-              className="w-full border rounded p-2 text-sm"
-            >
-              <option>Active</option>
-              <option>Closed</option>
-              <option>Pending</option>
-              <option>Escalated</option>
-            </select>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowStatusModal(false)}
-                className="px-3 py-1 border rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setCaseStatus(newStatus);
-                  setShowStatusModal(false);
-                }}
-                className="px-3 py-1 bg-indigo-600 text-white rounded"
-              >
-                Update
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ===== Relation Diagram ===== */}
-      <div className="bg-white rounded-2xl shadow-lg border p-6">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">
-          Case Relation Diagram
-        </h2>
-        <div className="h-[330px] rounded-md border bg-gradient-to-br from-gray-50 to-gray-100">
-          <ReactFlow nodes={nodes} edges={edges} fitView>
-            <Background />
-            <Controls />
-          </ReactFlow>
-        </div>
-      </div>
-
-      {/* ===== Past Events Log ===== */}
-      <div className="bg-white rounded-2xl shadow-lg border p-6">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800">
-              Past Events Log
-            </h2>
-            <p className="text-sm text-gray-500">
-              Recent activity and security events for Profile: John Doe
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleDownload}
-              className="px-3 py-2 rounded-md bg-gray-50 border hover:bg-gray-100 text-sm"
-            >
-              <Download className="w-4 h-4 inline mr-1" />
-              Download
-            </button>
-            <button className="px-3 py-2 rounded-md bg-gray-50 border hover:bg-gray-100 text-sm">
-              <Settings className="w-4 h-4 inline mr-1" />
-              Settings
-            </button>
-          </div>
+        {/* Scanning lines */}
+        <div className="absolute inset-0">
+          <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-60"
+               style={{ animation: 'scan-vertical 8s linear infinite' }}></div>
+          <div className="absolute h-full w-px bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-60"
+               style={{ animation: 'scan-horizontal 6s linear infinite' }}></div>
         </div>
 
-        {/* search + filter */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
-          <div className="w-full md:max-w-xl">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setPage(1);
-                }}
-                placeholder="Search events, status, IP addresses..."
-                className="w-full pl-10 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <select
-              value={eventTypeFilter}
-              onChange={(e) => {
-                setEventTypeFilter(e.target.value);
-                setPage(1);
+        {/* Pulsing circles */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full border border-blue-500 opacity-20"
+             style={{ animation: 'pulse-ring 4s ease-in-out infinite' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full border border-green-500 opacity-20"
+             style={{ animation: 'pulse-ring 3s ease-in-out infinite 1s' }}></div>
+        
+        {/* Data streams */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-40"
+              style={{
+                width: '200px',
+                top: `${20 + i * 15}%`,
+                animation: `data-stream ${2 + i * 0.5}s linear infinite`,
+                animationDelay: `${i * 0.8}s`
               }}
-              className="border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
-            >
-              {eventTypes.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1);
-              }}
-              className="border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
-            >
-              <option value={5}>5 per page</option>
-              <option value={10}>10 per page</option>
-              <option value={25}>25 per page</option>
-            </select>
-          </div>
-        </div>
-
-        {/* table */}
-        <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full text-sm border-collapse">
-            <thead className="bg-gradient-to-r from-indigo-50 to-indigo-100 text-gray-700 text-left">
-              <tr>
-                <th className="p-3">Event ID</th>
-                <th className="p-3">Event Type</th>
-                <th className="p-3">Date & Time</th>
-                <th className="p-3">Profile</th>
-                <th className="p-3">IP Address</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Severity</th>
-                <th className="p-3">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((e, i) => (
-                <tr
-                  key={e.id}
-                  className={`hover:bg-indigo-50 transition-colors ${
-                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  }`}
-                >
-                  <td className="p-3 font-medium text-indigo-700">{e.id}</td>
-                  <td className="p-3">{e.type}</td>
-                  <td className="p-3 text-gray-600">{e.date}</td>
-                  <td className="p-3">{e.profile}</td>
-                  <td className="p-3 font-mono text-gray-700">{e.ip}</td>
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        e.status === "Success"
-                          ? "bg-green-100 text-green-700"
-                          : e.status === "Failed"
-                          ? "bg-red-100 text-red-700"
-                          : e.status === "Flagged"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {e.status}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        e.severity === "Low"
-                          ? "bg-green-100 text-green-700"
-                          : e.severity === "High"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {e.severity}
-                    </span>
-                  </td>
-                  <td className="p-3 text-gray-700">{e.desc}</td>
-                </tr>
-              ))}
-
-              {visible.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="p-4 text-center text-gray-500">
-                    No events found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* pagination */}
-        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-          <span>
-            Showing{" "}
-            <b>{filtered.length === 0 ? 0 : startIndex + 1}</b> to{" "}
-            <b>{Math.min(startIndex + pageSize, filtered.length)}</b> of{" "}
-            <b>{filtered.length}</b> events
-          </span>
-          <div className="flex gap-1">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage <= 1}
-              className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            {Array.from({ length: totalPages }).map((_, idx) => {
-              const pnum = idx + 1;
-              return (
-                <button
-                  key={pnum}
-                  onClick={() => handlePageChange(pnum)}
-                  className={`px-3 py-1 rounded-md ${
-                    pnum === currentPage
-                      ? "bg-indigo-600 text-white"
-                      : "hover:bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {pnum}
-                </button>
-              );
-            })}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
-              className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+            ></div>
+          ))}
         </div>
       </div>
 
-      {/* ===== Related Transactions ===== */}
-      <div className="bg-white rounded-2xl shadow-lg border p-6">
-        <h2 className="text-lg font-semibold mb-2 text-gray-800">
-          Related Transactions
-        </h2>
-        <p className="text-sm text-gray-500 mb-3">
-          All transactions made to the same account: ****5678
-        </p>
-        <input
-          type="text"
-          placeholder="Search transactions, amounts, beneficiaries..."
-          className="w-full border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
-        />
+      {/* SC Brand Colors and Animations CSS */}
+      <style>{`
+        :root {
+          --sc-blue: #0066CC;
+          --sc-blue-dark: #004499;
+          --sc-blue-light: #3385D6;
+          --sc-green: #00A651;
+          --sc-green-dark: #008A44;
+          --sc-green-light: #33B86A;
+          --sc-gray: #6B7280;
+          --sc-gray-light: #9CA3AF;
+          --sc-gray-dark: #374151;
+        }
+        
+        .sc-gradient {
+          background: linear-gradient(135deg, var(--sc-blue) 0%, var(--sc-green) 100%);
+        }
+        
+        .sc-gradient-light {
+          background: linear-gradient(135deg, var(--sc-blue-light) 0%, var(--sc-green-light) 100%);
+        }
+
+        @keyframes grid-move {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(50px, 50px); }
+        }
+
+        @keyframes float-0 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        @keyframes float-1 {
+          0%, 100% { transform: translateX(0px) rotate(0deg); }
+          50% { transform: translateX(20px) rotate(-180deg); }
+        }
+
+        @keyframes float-2 {
+          0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+          33% { transform: translate(15px, -15px) rotate(120deg); }
+          66% { transform: translate(-15px, 15px) rotate(240deg); }
+        }
+
+        @keyframes scan-vertical {
+          0% { top: -2px; }
+          100% { top: 100%; }
+        }
+
+        @keyframes scan-horizontal {
+          0% { left: -2px; }
+          100% { left: 100%; }
+        }
+
+        @keyframes pulse-ring {
+          0% { transform: scale(0.8); opacity: 0.8; }
+          50% { transform: scale(1.2); opacity: 0.3; }
+          100% { transform: scale(0.8); opacity: 0.8; }
+        }
+
+        @keyframes data-stream {
+          0% { left: -200px; }
+          100% { left: 100%; }
+        }
+
+        @keyframes lens-pulse {
+          0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+          50% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+        }
+
+        .cyber-glow {
+          box-shadow: 0 0 20px rgba(0, 102, 204, 0.3), 0 0 40px rgba(0, 166, 81, 0.2);
+        }
+
+        .cyber-text-glow {
+          text-shadow: 0 0 10px rgba(0, 102, 204, 0.5);
+        }
+
+        .lens-glow {
+          filter: drop-shadow(0 0 8px rgba(0, 166, 81, 0.6));
+          animation: lens-pulse 3s ease-in-out infinite;
+        }
+      `}</style>
+
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-5xl">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white flex items-center justify-center gap-4">
+              {/* <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-green-400 bg-clip-text text-transparent">
+                FinCrime
+              </span> */}
+              <span className="bg-clip-text text-[#0473EA]">
+                FinCrime
+              </span>
+              <Search className="w-16 h-16 md:w-20 md:h-20 text-[#414749]" />
+              <span className="bg-clip-text text-[#38D200]">
+                LENS
+              </span>
+            </h1>
+            <p className="text-2xl md:text-3xl text-gray-600 mb-4 font-semibold">
+              Advanced Financial Crime Detection System
+            </p>
+            <p className="text-lg text-gray-500 max-w-3xl mx-auto leading-relaxed">
+              Intelligent FinCrime analysis and investigation platform powered by AI-driven threat detection
+            </p>
+          </div>
+
+          {/* Main Search Interface */}
+          <div className="bg-black/30 rounded-3xl shadow-2xl p-8 md:p-16 border border-blue-500/20 cyber-glow">
+            <form onSubmit={handleSearch} className="space-y-8">
+              {/* Integrated Search Box */}
+              <div className="relative" ref={dropdownRef}>
+                <div className="relative flex items-center bg-gray-900/50 border-2 border-blue-500/30 rounded-2xl overflow-hidden hover:border-blue-400/50 focus-within:border-blue-500/70 transition-all duration-300 shadow-lg backdrop-blur-sm">
+                  {/* Dropdown Trigger */}
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex items-center gap-3 px-6 py-4 border-r border-blue-500/30 hover:bg-blue-900/30 transition-colors duration-200 focus:outline-none focus:bg-blue-900/30 min-w-[200px] text-white"
+                    style={{ 
+                      backgroundColor: isDropdownOpen ? 'var(--sc-blue)' : undefined,
+                      borderColor: isDropdownOpen ? 'var(--sc-blue-light)' : undefined
+                    }}
+                  >
+                    <span className="font-semibold text-base">{selectedOption.label}</span>
+                    <ChevronDown 
+                      className={`w-5 h-5 transition-transform duration-200 ${
+                        isDropdownOpen ? 'rotate-180' : ''
+                      }`} 
+                    />
+                  </button>
+
+                  {/* Search Input */}
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    placeholder={selectedOption.placeholder}
+                    className="flex-1 px-6 py-4 bg-transparent text-white placeholder-gray-400 focus:outline-none text-lg"
+                  />
+
+                  {/* Search Button */}
+                  <button
+                    type="submit"
+                    disabled={!searchValue.trim()}
+                    // className="px-8 py-4 text-white font-semibold hover:opacity-90 focus:ring-4 focus:ring-blue-200/50 transition-all 
+                    //   duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 bg-green-500">
+                    className="px-8 py-4 text-white font-semibold hover:opacity-90 focus:ring-4 focus:ring-[#0473EA] transition-all 
+                      duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 bg-green-500">
+                        
+                    <Search className="w-6 h-6" />
+                    <span className="text-lg">ANALYZE</span>
+                  </button>
+                </div>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl shadow-2xl z-20 overflow-hidden">
+                    {searchOptions.map((option, index) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => handleDropdownSelect(option)}
+                        className={`w-full text-left px-6 py-4 hover:bg-blue-900/30 transition-all duration-200 flex items-center justify-between group ${
+                          selectedType === option.value 
+                            ? 'text-white font-semibold sc-gradient' 
+                            : 'text-gray-300 hover:text-blue-300'
+                        } ${index === 0 ? 'rounded-t-2xl' : ''} ${index === searchOptions.length - 1 ? 'rounded-b-2xl' : ''}`}
+                      >
+                        <span className="text-base">{option.label}</span>
+                        {selectedType === option.value && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* FinCrime Analysis Protocol */}
+              {/* <div className="rounded-2xl p-6 border-2 bg-blue-900/20 backdrop-blur-sm" style={{ borderColor: '#38D200' }}>
+               */}
+              <div className="rounded-2xl p-6 border-2 bg-green-900/20 backdrop-blur-sm" style={{ borderColor: '#38D200' }}>
+                <h3 className="font-bold text-lg mb-4 text-green-300 flex items-center gap-2">
+                  <Search className="w-5 h-5" />
+                  FinCrime Lens Analysis Protocol:
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <ul className="space-y-2 text-gray-100">
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>Validate {selectedOption.label.toLowerCase()} authenticity</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>Cross-reference FinCrime intelligence database</span>
+                    </li>
+                  </ul>
+                  <ul className="space-y-2 text-gray-100">
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>AI-powered behavioral pattern analysis</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-green-400"></div>
+                      <span>Generate comprehensive risk assessment</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </form>
+
+            {/* Quick Access Buttons */}
+            <div className="mt-12 pt-8 border-t border-blue-500/20">
+              <h3 className="text-sm font-bold uppercase tracking-wider mb-6 text-white flex items-center gap-2">
+                <Search className="w-4 h-4" />
+                Quick FinCrime Analysis Access
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {searchOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setSelectedType(option.value);
+                      setSearchValue('');
+                      inputRef.current?.focus();
+                    }}
+                    className={`p-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 backdrop-blur-sm ${
+                      selectedType === option.value
+                        // ? 'text-white shadow-lg sc-gradient focus:[ring-blue-200/50 cyber-glow]'
+                        ? 'text-white shadow-lg bg-[#0473EA] focus:[ring-blue-200/50 cyber-glow]'
+                        // : 'bg-gray-800/50 text-gray-200 hover:bg-gray-700/50 focus:ring-gray-500/50 border border-gray-600/30'
+                        : 'bg-gray-800/50 text-gray-100 hover:bg-gray-700/50 focus:ring-gray-500/50 border border-gray-600/30'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center mt-16">
+            <p className="text-gray-400 text-lg flex items-center justify-center gap-2">
+              <Shield className="w-5 h-5 text-blue-400" />
+              FinCrime Lens - Powered by Standard Chartered's Advanced AI Security Intelligence
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+export default SearchPage;
