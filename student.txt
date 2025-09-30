@@ -1,398 +1,66 @@
+import { render, screen, fireEvent } from "@testing-library/react";
+import RelatedTransactions from "@/components/RelatedTransactions";
 
-    You'll find more details and examples of these config options in the docs:
-    https://jestjs.io/docs/configuration
-    For information about custom transformations, see:
-    https://jestjs.io/docs/code-transformation
+const mockTxns = [
+  {
+    id: "TX-1",
+    type: "Wire Transfer",
+    date: "2025-01-01",
+    amount: "$500",
+    beneficiary: "ABC Corp",
+    status: "Completed",
+    details: "Invoice",
+    severity: "HIGH",
+  },
+  {
+    id: "TX-2",
+    type: "ACH Transfer",
+    date: "2025-01-02",
+    amount: "$200",
+    beneficiary: "XYZ Inc",
+    status: "Pending",
+    details: "Subscription",
+    severity: "LOW",
+  },
+];
 
-    Details:
+describe("RelatedTransactions Component", () => {
+  it("renders the component heading", () => {
+    render(<RelatedTransactions transactions={mockTxns} />);
+    expect(screen.getByText("Related Transactions")).toBeInTheDocument();
+  });
 
-    SyntaxError: C:\Users\2030937\pagetwo\src\components\RelatedTransactions.tsx: Unexpected token (39:6)      
+  it("renders transaction rows", () => {
+    render(<RelatedTransactions transactions={mockTxns} />);
+    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+    expect(screen.getByText("XYZ Inc")).toBeInTheDocument();
+  });
 
-      37 |         t.amount?.toLowerCase().includes(q)||
-      38 |
-    > 39 |       );
-         |       ^
-      40 |     });
-      41 |   }, [transactions, query, typeFilter]);
-      42 |
+  it("filters by search query", () => {
+    render(<RelatedTransactions transactions={mockTxns} />);
+    const input = screen.getByPlaceholderText(
+      /Search transactions, amounts, beneficiaries, or references.../i
+    );
 
-      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
-      at TypeScriptParserMixin.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1503:19)
-      at TypeScriptParserMixin.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1543:16)
-      at TypeScriptParserMixin.unexpected (node_modules/@babel/parser/src/parser/expression.ts:1350:16)        
-      at TypeScriptParserMixin.parseExprAtom (node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)      
-      at TypeScriptParserMixin.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:734:23)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (node_modules/@babel/parser/src/parser/expression.ts:589:12)
-      at TypeScriptParserMixin.parseExprOpBaseRightExpr [as parseExprOpRightExpr] (node_modules/@babel/parser/src/parser/expression.ts:574:21)
-      at TypeScriptParserMixin.parseExprOpRightExpr (node_modules/@babel/parser/src/parser/expression.ts:505:27)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/parser/expression.ts:526:21)        
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/parser/expression.ts:526:21)        
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/parser/expression.ts:526:21)        
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:427:17)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3192:12)
-      at TypeScriptParserMixin.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3306:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1813:16)
-      at TypeScriptParserMixin.parseParenAndDistinguishExpression (node_modules/@babel/parser/src/parser/expression.ts:1162:21)
-      at TypeScriptParserMixin.parseExprAtom (node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)      
-      at TypeScriptParserMixin.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:734:23)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:421:23)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at TypeScriptParserMixin.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
-      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3187:16)
-      at TypeScriptParserMixin.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
-      at TypeScriptParserMixin.parseExpression [as parseReturnStatement] (node_modules/@babel/parser/src/parser/statement.ts:1110:28)
-      at TypeScriptParserMixin.parseReturnStatement (node_modules/@babel/parser/src/parser/statement.ts:538:21)
-      at TypeScriptParserMixin.parseStatementContent (node_modules/@babel/parser/src/plugins/typescript/index.ts:3185:20)
-      at TypeScriptParserMixin.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:477:17)
-      at TypeScriptParserMixin.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:426:17)
-      at TypeScriptParserMixin.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1439:16)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1412:10)
-      at TypeScriptParserMixin.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1380:10)
-      at TypeScriptParserMixin.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2616:24)
-      at TypeScriptParserMixin.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2553:10)
-      at TypeScriptParserMixin.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1837:12)
-      at TypeScriptParserMixin.parseParenAndDistinguishExpression (node_modules/@babel/parser/src/parser/expression.ts:1162:21)
-      at TypeScriptParserMixin.parseExprAtom (node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)      
-      at TypeScriptParserMixin.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:734:23)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:421:23)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3192:12)
-      at TypeScriptParserMixin.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3306:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern [as parseExprListItem] (node_modules/@babel/parser/src/parser/expression.ts:2788:18)
-      at TypeScriptParserMixin.parseExprListItem [as parseCallExpressionArguments] (node_modules/@babel/parser/src/parser/expression.ts:1034:14)
-      at TypeScriptParserMixin.parseCallExpressionArguments [as parseCoverCallAndAsyncArrowHead] (node_modules/@babel/parser/src/parser/expression.ts:914:29)
-      at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (node_modules/@babel/parser/src/parser/expression.ts:796:19)
-      at TypeScriptParserMixin.parseSubscript (node_modules/@babel/parser/src/plugins/typescript/index.ts:2850:20)
-      at TypeScriptParserMixin.parseSubscript [as parseSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:755:19)
-      at TypeScriptParserMixin.parseSubscripts [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:740:17)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:421:23)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at TypeScriptParserMixin.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
-      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3187:16)
-      at TypeScriptParserMixin.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
-      at TypeScriptParserMixin.parseExpression [as parseReturnStatement] (node_modules/@babel/parser/src/parser/statement.ts:1110:28)
-      at TypeScriptParserMixin.parseReturnStatement (node_modules/@babel/parser/src/parser/statement.ts:538:21)
-      at TypeScriptParserMixin.parseStatementContent (node_modules/@babel/parser/src/plugins/typescript/index.ts:3185:20)
-      at TypeScriptParserMixin.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:477:17)
-      at TypeScriptParserMixin.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:426:17)
-      at TypeScriptParserMixin.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1439:16)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1412:10)
-      at TypeScriptParserMixin.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1380:10)
-      at TypeScriptParserMixin.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2616:24)
-      at TypeScriptParserMixin.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2553:10)
-      at TypeScriptParserMixin.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1837:12)
+    fireEvent.change(input, { target: { value: "ABC" } });
 
-Test Suites: 1 failed, 2 passed, 3 total
-Tests:       6 passed, 6 total
- PASS  __tests__/CaseDetails.test.tsx
- FAIL  __tests__/RelatedTransactions.test.tsx
-  ● Test suite failed to run
+    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+  });
 
-    Jest encountered an unexpected token
+  it("filters by type dropdown", () => {
+    render(<RelatedTransactions transactions={mockTxns} />);
+    fireEvent.change(screen.getByDisplayValue("All Transaction Types"), {
+      target: { value: "Wire Transfer" },
+    });
 
-    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+  });
 
-    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
-
-    By default "node_modules" folder is ignored by transformers.
-
-    Here's what you can do:
-     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
-     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
-     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
-     • If you need a custom transformation, specify a "transform" option in your config.
-     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
-
-    You'll find more details and examples of these config options in the docs:
-    https://jestjs.io/docs/configuration
-    For information about custom transformations, see:
-    https://jestjs.io/docs/code-transformation
-
-    Details:
-
-    SyntaxError: C:\Users\2030937\pagetwo\src\components\RelatedTransactions.tsx: Unexpected token (39:6)      
-
-      37 |         t.amount?.toLowerCase().includes(q)||
-      38 |
-    > 39 |       );
-         |       ^
-      40 |     });
-      41 |   }, [transactions, query, typeFilter]);
-      42 |
-
-      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
-      at TypeScriptParserMixin.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1503:19)
-      at TypeScriptParserMixin.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1543:16)
-      at TypeScriptParserMixin.unexpected (node_modules/@babel/parser/src/parser/expression.ts:1350:16)        
-      at TypeScriptParserMixin.parseExprAtom (node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)      
-      at TypeScriptParserMixin.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:734:23)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (node_modules/@babel/parser/src/parser/expression.ts:589:12)
-      at TypeScriptParserMixin.parseExprOpBaseRightExpr [as parseExprOpRightExpr] (node_modules/@babel/parser/src/parser/expression.ts:574:21)
-      at TypeScriptParserMixin.parseExprOpRightExpr (node_modules/@babel/parser/src/parser/expression.ts:505:27)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/parser/expression.ts:526:21)        
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/parser/expression.ts:526:21)        
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/parser/expression.ts:526:21)        
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:427:17)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3192:12)
-      at TypeScriptParserMixin.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3306:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1813:16)
-      at TypeScriptParserMixin.parseParenAndDistinguishExpression (node_modules/@babel/parser/src/parser/expression.ts:1162:21)
-      at TypeScriptParserMixin.parseExprAtom (node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)      
-      at TypeScriptParserMixin.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:734:23)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:421:23)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at TypeScriptParserMixin.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
-      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3187:16)
-      at TypeScriptParserMixin.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
-      at TypeScriptParserMixin.parseExpression [as parseReturnStatement] (node_modules/@babel/parser/src/parser/statement.ts:1110:28)
-      at TypeScriptParserMixin.parseReturnStatement (node_modules/@babel/parser/src/parser/statement.ts:538:21)
-      at TypeScriptParserMixin.parseStatementContent (node_modules/@babel/parser/src/plugins/typescript/index.ts:3185:20)
-      at TypeScriptParserMixin.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:477:17)
-      at TypeScriptParserMixin.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:426:17)
-      at TypeScriptParserMixin.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1439:16)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1412:10)
-      at TypeScriptParserMixin.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1380:10)
-      at TypeScriptParserMixin.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2616:24)
-      at TypeScriptParserMixin.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2553:10)
-      at TypeScriptParserMixin.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1837:12)
-      at TypeScriptParserMixin.parseParenAndDistinguishExpression (node_modules/@babel/parser/src/parser/expression.ts:1162:21)
-      at TypeScriptParserMixin.parseExprAtom (node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)      
-      at TypeScriptParserMixin.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:734:23)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:421:23)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3192:12)
-      at TypeScriptParserMixin.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3306:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern [as parseExprListItem] (node_modules/@babel/parser/src/parser/expression.ts:2788:18)
-      at TypeScriptParserMixin.parseExprListItem [as parseCallExpressionArguments] (node_modules/@babel/parser/src/parser/expression.ts:1034:14)
-      at TypeScriptParserMixin.parseCallExpressionArguments [as parseCoverCallAndAsyncArrowHead] (node_modules/@babel/parser/src/parser/expression.ts:914:29)
-      at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (node_modules/@babel/parser/src/parser/expression.ts:796:19)
-      at TypeScriptParserMixin.parseSubscript (node_modules/@babel/parser/src/plugins/typescript/index.ts:2850:20)
-      at TypeScriptParserMixin.parseSubscript [as parseSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:755:19)
-      at TypeScriptParserMixin.parseSubscripts [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:740:17)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:421:23)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at TypeScriptParserMixin.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
-      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3187:16)
-      at TypeScriptParserMixin.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
-      at TypeScriptParserMixin.parseExpression [as parseReturnStatement] (node_modules/@babel/parser/src/parser/statement.ts:1110:28)
-      at TypeScriptParserMixin.parseReturnStatement (node_modules/@babel/parser/src/parser/statement.ts:538:21)
-      at TypeScriptParserMixin.parseStatementContent (node_modules/@babel/parser/src/plugins/typescript/index.ts:3185:20)
-      at TypeScriptParserMixin.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:477:17)
-      at TypeScriptParserMixin.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:426:17)
-      at TypeScriptParserMixin.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1439:16)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1412:10)
-      at TypeScriptParserMixin.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1380:10)
-      at TypeScriptParserMixin.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2616:24)
-      at TypeScriptParserMixin.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2553:10)
-      at TypeScriptParserMixin.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babe
- FAIL  __tests__/RelatedTransactions.test.tsx
-  ● Test suite failed to run
-
-    Jest encountered an unexpected token
-
-    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
-
-    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
-
-    By default "node_modules" folder is ignored by transformers.
-
-    Here's what you can do:
-     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
-     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
-     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
-     • If you need a custom transformation, specify a "transform" option in your config.
-     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
-
-    You'll find more details and examples of these config options in the docs:
-    https://jestjs.io/docs/configuration
-    For information about custom transformations, see:
-    https://jestjs.io/docs/code-transformation
-
-    Details:
-
-    SyntaxError: C:\Users\2030937\pagetwo\src\components\RelatedTransactions.tsx: Unexpected token (39:6)      
-
-      37 |         t.amount?.toLowerCase().includes(q)||
-      38 |
-    > 39 |       );
-         |       ^
-      40 |     });
-      41 |   }, [transactions, query, typeFilter]);
-      42 |
-
-      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
-      at TypeScriptParserMixin.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1503:19)
-      at TypeScriptParserMixin.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1543:16)
-      at TypeScriptParserMixin.unexpected (node_modules/@babel/parser/src/parser/expression.ts:1350:16)        
-      at TypeScriptParserMixin.parseExprAtom (node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)      
-      at TypeScriptParserMixin.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:734:23)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (node_modules/@babel/parser/src/parser/expression.ts:589:12)
-      at TypeScriptParserMixin.parseExprOpBaseRightExpr [as parseExprOpRightExpr] (node_modules/@babel/parser/src/parser/expression.ts:574:21)
-      at TypeScriptParserMixin.parseExprOpRightExpr (node_modules/@babel/parser/src/parser/expression.ts:505:27)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/parser/expression.ts:526:21)        
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/parser/expression.ts:526:21)        
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/parser/expression.ts:526:21)        
-      at TypeScriptParserMixin.parseExprOp (node_modules/@babel/parser/src/plugins/typescript/index.ts:2913:20)
-      at TypeScriptParserMixin.parseExprOp [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:427:17)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3192:12)
-      at TypeScriptParserMixin.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3306:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1813:16)
-      at TypeScriptParserMixin.parseParenAndDistinguishExpression (node_modules/@babel/parser/src/parser/expression.ts:1162:21)
-      at TypeScriptParserMixin.parseExprAtom (node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)      
-      at TypeScriptParserMixin.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:734:23)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:421:23)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at TypeScriptParserMixin.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
-      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3187:16)
-      at TypeScriptParserMixin.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
-      at TypeScriptParserMixin.parseExpression [as parseReturnStatement] (node_modules/@babel/parser/src/parser/statement.ts:1110:28)
-      at TypeScriptParserMixin.parseReturnStatement (node_modules/@babel/parser/src/parser/statement.ts:538:21)
-      at TypeScriptParserMixin.parseStatementContent (node_modules/@babel/parser/src/plugins/typescript/index.ts:3185:20)
-      at TypeScriptParserMixin.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:477:17)
-      at TypeScriptParserMixin.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:426:17)
-      at TypeScriptParserMixin.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1439:16)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1412:10)
-      at TypeScriptParserMixin.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1380:10)
-      at TypeScriptParserMixin.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2616:24)
-      at TypeScriptParserMixin.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2553:10)
-      at TypeScriptParserMixin.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1837:12)
-      at TypeScriptParserMixin.parseParenAndDistinguishExpression (node_modules/@babel/parser/src/parser/expression.ts:1162:21)
-      at TypeScriptParserMixin.parseExprAtom (node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)      
-      at TypeScriptParserMixin.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:734:23)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:421:23)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3192:12)
-      at TypeScriptParserMixin.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3306:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern [as parseExprListItem] (node_modules/@babel/parser/src/parser/expression.ts:2788:18)
-      at TypeScriptParserMixin.parseExprListItem [as parseCallExpressionArguments] (node_modules/@babel/parser/src/parser/expression.ts:1034:14)
-      at TypeScriptParserMixin.parseCallExpressionArguments [as parseCoverCallAndAsyncArrowHead] (node_modules/@babel/parser/src/parser/expression.ts:914:29)
-      at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (node_modules/@babel/parser/src/parser/expression.ts:796:19)
-      at TypeScriptParserMixin.parseSubscript (node_modules/@babel/parser/src/plugins/typescript/index.ts:2850:20)
-      at TypeScriptParserMixin.parseSubscript [as parseSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:755:19)
-      at TypeScriptParserMixin.parseSubscripts [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:740:17)
-      at TypeScriptParserMixin.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:713:21)
-      at TypeScriptParserMixin.parseUpdate (node_modules/@babel/parser/src/parser/expression.ts:675:23)        
-      at TypeScriptParserMixin.parseMaybeUnary (node_modules/@babel/parser/src/plugins/typescript/index.ts:3855:20)
-      at TypeScriptParserMixin.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:409:14)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:421:23)
-      at TypeScriptParserMixin.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:376:23)
-      at TypeScriptParserMixin.parseMaybeConditional (node_modules/@babel/parser/src/parser/expression.ts:301:21)
-      at TypeScriptParserMixin.parseMaybeAssign (node_modules/@babel/parser/src/plugins/typescript/index.ts:3727:22)
-      at TypeScriptParserMixin.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
-      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
-      at TypeScriptParserMixin.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3187:16)
-      at TypeScriptParserMixin.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
-      at TypeScriptParserMixin.parseExpression [as parseReturnStatement] (node_modules/@babel/parser/src/parser/statement.ts:1110:28)
-      at TypeScriptParserMixin.parseReturnStatement (node_modules/@babel/parser/src/parser/statement.ts:538:21)
-      at TypeScriptParserMixin.parseStatementContent (node_modules/@babel/parser/src/plugins/typescript/index.ts:3185:20)
-      at TypeScriptParserMixin.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:477:17)
-      at TypeScriptParserMixin.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:426:17)
-      at TypeScriptParserMixin.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1439:16)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1412:10)
-      at TypeScriptParserMixin.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1380:10)
-      at TypeScriptParserMixin.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2616:24)
-      at TypeScriptParserMixin.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2553:10)
-      at TypeScriptParserMixin.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1837:12)
-
-Test Suites: 1 failed, 1 total
-Tests:       0 total
-Snapshots:   0 total
-Time:        2.325 s
-Ran all test suites.
+  it("shows no transactions when list is empty", () => {
+    render(<RelatedTransactions transactions={[]} />);
+    expect(screen.queryByText("ABC Corp")).not.toBeInTheDocument();
+    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+  });
+});
