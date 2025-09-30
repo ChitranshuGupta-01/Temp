@@ -1,10 +1,7 @@
 module.exports = {
-  testEnvironment: "jsdom",
-  transform: {
-    "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
-  },
-  moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1",   // since components/ is at root
-  },
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  presets: [
+    ["@babel/preset-env", { targets: { node: "current" } }],
+    ["@babel/preset-react", { runtime: "automatic" }],
+    "@babel/preset-typescript",
+  ],
 };
