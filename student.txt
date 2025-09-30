@@ -1,66 +1,58 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import RelatedTransactions from "@/components/RelatedTransactions";
+import PastEventsLog from "@/components/PastEventsLog";
 
-const mockTxns = [
+const mockEvents = [
   {
-    id: "TX-1",
-    type: "Wire Transfer",
+    id: "E1",
+    event: "Login Attempt",
     date: "2025-01-01",
-    amount: "$500",
-    beneficiary: "ABC Corp",
-    status: "Completed",
-    details: "Invoice",
-    severity: "HIGH",
+    status: "Success",
+    risk: "LOW",
   },
   {
-    id: "TX-2",
-    type: "ACH Transfer",
+    id: "E2",
+    event: "Password Change",
     date: "2025-01-02",
-    amount: "$200",
-    beneficiary: "XYZ Inc",
-    status: "Pending",
-    details: "Subscription",
-    severity: "LOW",
+    status: "Failed",
+    risk: "HIGH",
   },
 ];
 
-describe("RelatedTransactions Component", () => {
+describe("PastEventsLog Component", () => {
   it("renders the component heading", () => {
-    render(<RelatedTransactions transactions={mockTxns} />);
-    expect(screen.getByText("Related Transactions")).toBeInTheDocument();
+    render(<PastEventsLog events={mockEvents} />);
+    expect(screen.getByText("Past Event Logs")).toBeInTheDocument();
   });
 
-  it("renders transaction rows", () => {
-    render(<RelatedTransactions transactions={mockTxns} />);
-    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
-    expect(screen.getByText("XYZ Inc")).toBeInTheDocument();
+  it("renders event rows", () => {
+    render(<PastEventsLog events={mockEvents} />);
+    expect(screen.getByText("Login Attempt")).toBeInTheDocument();
+    expect(screen.getByText("Password Change")).toBeInTheDocument();
   });
 
   it("filters by search query", () => {
-    render(<RelatedTransactions transactions={mockTxns} />);
-    const input = screen.getByPlaceholderText(
-      /Search transactions, amounts, beneficiaries, or references.../i
-    );
+    render(<PastEventsLog events={mockEvents} />);
+    const input = screen.getByPlaceholderText(/Search past events/i);
 
-    fireEvent.change(input, { target: { value: "ABC" } });
+    fireEvent.change(input, { target: { value: "Login" } });
 
-    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
-    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+    expect(screen.getByText("Login Attempt")).toBeInTheDocument();
+    expect(screen.queryByText("Password Change")).not.toBeInTheDocument();
   });
 
-  it("filters by type dropdown", () => {
-    render(<RelatedTransactions transactions={mockTxns} />);
-    fireEvent.change(screen.getByDisplayValue("All Transaction Types"), {
-      target: { value: "Wire Transfer" },
+  it("filters by risk dropdown", () => {
+    render(<PastEventsLog events={mockEvents} />);
+    fireEvent.change(screen.getByDisplayValue("All Risks"), {
+      target: { value: "HIGH" },
     });
 
-    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
-    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+    expect(screen.getByText("Password Change")).toBeInTheDocument();
+    expect(screen.queryByText("Login Attempt")).not.toBeInTheDocument();
   });
 
-  it("shows no transactions when list is empty", () => {
-    render(<RelatedTransactions transactions={[]} />);
-    expect(screen.queryByText("ABC Corp")).not.toBeInTheDocument();
-    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+  it("shows empty state when no events", () => {
+    render(<PastEventsLog events={[]} />);
+    expect(screen.queryByText("Login Attempt")).not.toBeInTheDocument();
+    expect(screen.queryByText("Password Change")).not.toBeInTheDocument();
   });
 });
