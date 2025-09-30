@@ -1,10 +1,10 @@
-"jest": {
-    "testEnvironment": "jsdom",
-    "transform": {
-      "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
-    },
-    
-    "setupFileAfterEnv": [
-      "<roootDir>/jest.setup.ts"
-    ]
+module.exports = {
+  testEnvironment: "jsdom",
+  transform: {
+    "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
   },
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/$1",   // since components/ is at root
+  },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+};
