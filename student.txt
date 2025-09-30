@@ -1,39 +1,10 @@
- FAIL  __tests__/CaseDetails.test.tsx
-  ● Test suite failed to run
-
-    Configuration error:
-
-    Could not locate module @/components/CaseDetails mapped as:
-    C:\Users\2030937\pagetwo\$1.
-
-    Please check your configuration for these entries:
-    {
-      "moduleNameMapper": {
-        "/^@\/(.*)$/": "C:\Users\2030937\pagetwo\$1"
-      },
-      "resolver": undefined
-    }
-
-      1 | import { render, screen } from "@testing-library/react";
-    > 2 | import CaseDetails from "@/components/CaseDetails";
-        | ^
-      3 |
-      4 | const mockCase = {
-      5 |   id: "TEST-1",
-
-      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/index.js:1117:17)
-      at Object.require (__tests__/CaseDetails.test.tsx:2:1)
-
-Test Suites: 1 failed, 1 total
-Tests:       0 total
-Snapshots:   0 total
-Time:        5.229 s
-Ran all test suites.
-
-Watch Usage
- › Press f to run only failed tests.
- › Press o to only run tests related to changed files.
- › Press p to filter by a filename regex pattern.
- › Press t to filter by a test name regex pattern.
- › Press q to quit watch mode.
- › Press Enter to trigger a test run.
+module.exports = {
+  testEnvironment: "jsdom",
+  transform: {
+    "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
+  },
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/$1",   // ✅ THIS is correct regex mapping
+  },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+};
