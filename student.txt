@@ -1,33 +1,22 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import PastEventsLog from "@/components/PastEventsLog";
+import RelatedTransactions from "@/components/RelatedTransactions";
 
-const mockEvents = [
-  { id: "E1", type: "Login Attempt", date: "2025-01-01", profile: "A", ip: "127.0.0.1", status: "Success", severity: "LOW", description: "ok" },
-  { id: "E2", type: "Failed Login", date: "2025-01-02", profile: "B", ip: "192.168.0.1", status: "Failed", severity: "HIGH", description: "bad" }
+const mockTxns = [
+  { id: "TX-1", type: "Wire Transfer", date: "2025-01-01", amount: "$500", severity: "HIGH", beneficiary: "ABC Corp", status: "Completed", details: "Invoice" },
+  { id: "TX-2", type: "ACH Transfer", date: "2025-01-02", amount: "$200", severity: "LOW", beneficiary: "XYZ Inc", status: "Pending", details: "Subscription" }
 ];
 
-describe("PastEventsLog Component", () => {
-  it("renders events in table", () => {
-    render(<PastEventsLog events={mockEvents} />);
-    expect(screen.getByText("E1")).toBeInTheDocument();
-    expect(screen.getByText("E2")).toBeInTheDocument();
+describe("RelatedTransactions Component", () => {
+  it("renders transactions in table", () => {
+    render(<RelatedTransactions transactions={mockTxns} />);
+    expect(screen.getByText(/TX-1/)).toBeInTheDocument();
+    expect(screen.getByText(/TX-2/)).toBeInTheDocument();
   });
 
   it("filters by search query", () => {
-    render(<PastEventsLog events={mockEvents} />);
-    fireEvent.change(
-      screen.getByPlaceholderText(/Search events/i),
-      { target: { value: "Failed" } }
-    );
-    expect(screen.getByText("E2")).toBeInTheDocument();
-    expect(screen.queryByText("E1")).not.toBeInTheDocument();
-  });
-
-  it("filters by severity dropdown", () => {
-    render(<PastEventsLog events={mockEvents} />);
-    const severitySelect = screen.getAllByRole("combobox")[0]; // first select
-    fireEvent.change(severitySelect, { target: { value: "HIGH" } });
-    expect(screen.getByText("E2")).toBeInTheDocument();
-    expect(screen.queryByText("E1")).not.toBeInTheDocument();
+    render(<RelatedTransactions transactions={mockTxns} />);
+    fireEvent.change(screen.getByPlaceholderText("Search transactions..."), { target: { value: "ABC" } });
+    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
   });
 });
