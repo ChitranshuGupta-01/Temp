@@ -1,24 +1,29 @@
-import { render, screen } from "@testing-library/react";
-import CaseRelationDiagram from "@/components/CaseRelationDiagram";
+import { render, screen, fireEvent } from "@testing-library/react";
+import PastEventsLog from "@/components/PastEventsLog";
 
-const mockRelation = {
-  case: { caseId: "CASE-001", date: "2025-01-01" },
-  profile: { id: "P-001", name: "Profile A" },
-  transaction: { id: "TX-123", type: "Wire Transfer", amount: "$1000" },
-  beneficiary: { id: "B-001", name: "Beneficiary X" },
-  last5Activity: [{ id: "EV-1" }, { id: "EV-2" }]
-};
+const mockEvents = [
+  { id: "E1", type: "Login Attempt", date: "2025-01-01", profile: "A", ip: "127.0.0.1", status: "Success", severity: "LOW", description: "ok" },
+  { id: "E2", type: "Failed Login", date: "2025-01-02", profile: "B", ip: "192.168.0.1", status: "Failed", severity: "HIGH", description: "bad" }
+];
 
-describe("CaseRelationDiagram Component", () => {
-  it("renders case and profile nodes", () => {
-    render(<CaseRelationDiagram relation={mockRelation} />);
-    expect(screen.getByText(/Case ID: CASE-001/)).toBeInTheDocument();
-    expect(screen.getByText(/Profile A/)).toBeInTheDocument();
+describe("PastEventsLog Component", () => {
+  it("renders events in table", () => {
+    render(<PastEventsLog events={mockEvents} />);
+    expect(screen.getByText("E1")).toBeInTheDocument();
+    expect(screen.getByText("E2")).toBeInTheDocument();
   });
 
-  it("renders transaction and beneficiary nodes", () => {
-    render(<CaseRelationDiagram relation={mockRelation} />);
-    expect(screen.getByText(/Wire Transfer - TX-123/)).toBeInTheDocument();
-    expect(screen.getByText(/Beneficiary X/)).toBeInTheDocument();
+  it("filters by search query", () => {
+    render(<PastEventsLog events={mockEvents} />);
+    fireEvent.change(screen.getByPlaceholderText("Search events..."), { target: { value: "Failed" } });
+    expect(screen.getByText("E2")).toBeInTheDocument();
+    expect(screen.queryByText("E1")).not.toBeInTheDocument();
+  });
+
+  it("filters by severity dropdown", () => {
+    render(<PastEventsLog events={mockEvents} />);
+    fireEvent.change(screen.getByRole("combobox", { name: /severity/i }), { target: { value: "HIGH" } });
+    expect(screen.getByText("E2")).toBeInTheDocument();
+    expect(screen.queryByText("E1")).not.toBeInTheDocument();
   });
 });
