@@ -1,11 +1,64 @@
-it("filters by search query", () => {
-  render(<RelatedTransactions transactions={mockTxns} />);
-  
-  fireEvent.change(
-    screen.getByPlaceholderText(/Search transactions/i), // ✅ regex
-    { target: { value: "ABC" } }
-  );
-  
-  expect(screen.getByText("ABC Corp")).toBeInTheDocument();
-  expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+import { render, screen, fireEvent } from "@testing-library/react";
+import RelatedTransactions from "@/components/RelatedTransactions";
+
+const mockTxns = [
+  {
+    id: "TX-1",
+    type: "Wire Transfer",
+    date: "2025-01-01",
+    amount: "$500",
+    beneficiary: "ABC Corp",
+    account: "****5678",
+    status: "Completed",
+    severity: "HIGH",
+    description: "Invoice",
+  },
+  {
+    id: "TX-2",
+    type: "ACH Transfer",
+    date: "2025-01-02",
+    amount: "$200",
+    beneficiary: "XYZ Inc",
+    account: "****5678",
+    status: "Pending",
+    severity: "LOW",
+    description: "Subscription",
+  },
+];
+
+describe("RelatedTransactions Component", () => {
+  it("renders transactions in table", () => {
+    render(<RelatedTransactions transactions={mockTxns} />);
+    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+    expect(screen.getByText("XYZ Inc")).toBeInTheDocument();
+  });
+
+  it("filters by search query", () => {
+    render(<RelatedTransactions transactions={mockTxns} />);
+    fireEvent.change(
+      screen.getByPlaceholderText(/Search transactions/i), // regex match ✅
+      { target: { value: "ABC" } }
+    );
+    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+  });
+
+  it("filters by transaction type dropdown", () => {
+    render(<RelatedTransactions transactions={mockTxns} />);
+    const typeSelect = screen.getAllByRole("combobox")[0]; // first <select>
+    fireEvent.change(typeSelect, { target: { value: "Wire Transfer" } });
+    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+  });
+
+  it("filters by severity (HIGH/LOW)", () => {
+    render(<RelatedTransactions transactions={mockTxns} />);
+    // Assuming severity is used in filtering in your component
+    fireEvent.change(
+      screen.getByPlaceholderText(/Search transactions/i),
+      { target: { value: "HIGH" } }
+    );
+    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+  });
 });
