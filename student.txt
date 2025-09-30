@@ -1,1 +1,16 @@
-npm uninstall @babel/core babel-jest @babel/preset-env @babel/preset-react @babel/preset-typescript
+const nextJest = require("next/jest");
+
+const createJestConfig = nextJest({
+  dir: "./", // path to your Next.js app
+});
+
+/** @type {import('jest').Config} */
+const customJestConfig = {
+  testEnvironment: "jsdom",
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+};
+
+module.exports = createJestConfig(customJestConfig);
