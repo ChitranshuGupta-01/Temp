@@ -100,6 +100,56 @@
       "status": "Success",
       "severity": "LOW",
       "description": "New beneficiary ABC Corp added to account"
+    },
+    {
+      "id": "EVT-006",
+      "type": "Suspicious Login",
+      "date": "2024-01-12 21:45:55",
+      "profile": "John Doe",
+      "ip": "178.56.34.210",
+      "status": "Success",
+      "severity": "HIGH",
+      "description": "Login from unusual location detected"
+    },
+    {
+      "id": "EVT-007",
+      "type": "Password Reset Request",
+      "date": "2024-01-12 08:10:12",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Success",
+      "severity": "MEDIUM",
+      "description": "User requested password reset"
+    },
+    {
+      "id": "EVT-008",
+      "type": "Device Deregistration",
+      "date": "2024-01-11 17:05:44",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Success",
+      "severity": "LOW",
+      "description": "Mobile device removed from trusted devices"
+    },
+    {
+      "id": "EVT-009",
+      "type": "Unusual Transaction Pattern",
+      "date": "2024-01-10 15:22:30",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Flagged",
+      "severity": "HIGH",
+      "description": "Multiple transactions in short time span detected"
+    },
+    {
+      "id": "EVT-010",
+      "type": "Two-Factor Authentication Bypass",
+      "date": "2024-01-09 19:40:11",
+      "profile": "John Doe",
+      "ip": "203.45.67.89",
+      "status": "Failed",
+      "severity": "CRITICAL",
+      "description": "Attempted 2FA bypass blocked by system"
     }
   ],
   "transactions": [
@@ -152,6 +202,56 @@
       "beneficiary": "Tech Solutions Inc",
       "status": "Completed",
       "details": "Equipment purchase payment"
+    },
+    {
+      "id": "TXN-456128",
+      "type": "Credit Card Payment",
+      "date": "2024-01-10 18:25:40",
+      "amount": "$1,500.00",
+      "severity": "LOW",
+      "beneficiary": "Visa Card Services",
+      "status": "Completed",
+      "details": "Monthly credit card bill payment"
+    },
+    {
+      "id": "TXN-456129",
+      "type": "ATM Withdrawal",
+      "date": "2024-01-09 07:30:22",
+      "amount": "$500.00",
+      "severity": "LOW",
+      "beneficiary": "Cash Withdrawal",
+      "status": "Completed",
+      "details": "Cash withdrawn from local ATM"
+    },
+    {
+      "id": "TXN-456130",
+      "type": "Wire Transfer",
+      "date": "2024-01-08 12:40:19",
+      "amount": "$20,000.00",
+      "severity": "CRITICAL",
+      "beneficiary": "Overseas Holdings Ltd",
+      "status": "Flagged",
+      "details": "Unusual high-value transfer overseas"
+    },
+    {
+      "id": "TXN-456131",
+      "type": "ACH Transfer",
+      "date": "2024-01-07 09:00:55",
+      "amount": "$1,200.00",
+      "severity": "LOW",
+      "beneficiary": "Utility Services",
+      "status": "Completed",
+      "details": "Electricity and water bill payment"
+    },
+    {
+      "id": "TXN-456132",
+      "type": "Wire Transfer",
+      "date": "2024-01-06 14:12:47",
+      "amount": "$7,500.00",
+      "severity": "HIGH",
+      "beneficiary": "Bright Future Education",
+      "status": "Completed",
+      "details": "Tuition fee payment"
     }
   ]
 }
