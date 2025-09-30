@@ -1,64 +1,614 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import RelatedTransactions from "@/components/RelatedTransactions";
 
-const mockTxns = [
-  {
-    id: "TX-1",
-    type: "Wire Transfer",
-    date: "2025-01-01",
-    amount: "$500",
-    beneficiary: "ABC Corp",
-    account: "****5678",
-    status: "Completed",
-    severity: "HIGH",
-    description: "Invoice",
-  },
-  {
-    id: "TX-2",
-    type: "ACH Transfer",
-    date: "2025-01-02",
-    amount: "$200",
-    beneficiary: "XYZ Inc",
-    account: "****5678",
-    status: "Pending",
-    severity: "LOW",
-    description: "Subscription",
-  },
-];
+      16 |   it("filters by search query", () => {
+      17 |     render(<RelatedTransactions transactions={mockTxns} />);
+    > 18 |     fireEvent.change(screen.getByPlaceholderText("Search transactions/i"), { target: { value: "ABC" } });
+         |                             ^
+      19 |     expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+      20 |     expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+      21 |   });
+ FAIL  __tests__/RelatedTransactions.test.tsx
+  ● RelatedTransactions Component › filters by search query
 
-describe("RelatedTransactions Component", () => {
-  it("renders transactions in table", () => {
-    render(<RelatedTransactions transactions={mockTxns} />);
-    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
-    expect(screen.getByText("XYZ Inc")).toBeInTheDocument();
-  });
+    TestingLibraryElementError: Unable to find an element with the placeholder text of: Search transactions/i  
 
-  it("filters by search query", () => {
-    render(<RelatedTransactions transactions={mockTxns} />);
-    fireEvent.change(
-      screen.getByPlaceholderText(/Search transactions/i), // regex match ✅
-      { target: { value: "ABC" } }
-    );
-    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
-    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
-  });
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="bg-white rounded-xl shadow border border-gray-200 p-6"
+        >
+          <div
+            class="flex items-center justify-between mb-4"
+          >
+            <div>
+              <h4
+                class="text-lg font-bold"
+              >
+                Related Transactions
+              </h4>
+              <p
+                class="text-sm text-gray-500"
+              >
+                All transactions made to the same account: ****5678
+              </p>
+            </div>
+            <div
+              class="flex items-center gap-2"
+            >
+              <button
+                class="px-3 py-2 rounded border bg-white"
+              >
+                ⚙
+              </button>
+              <button
+                class="px-3 py-2 rounded border bg-white"
+              >
+                ⬇
+              </button>
+            </div>
+          </div>
+          <div
+            class="flex gap-4 items-center mb-4"
+          >
+            <div
+              class="flex items-center gap-2 w-full"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-search w-5 h-5 text-gray-400"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m21 21-4.34-4.34"
+                />
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="8"
+                />
+              </svg>
+              <input
+                class="w-full border rounded px-3 py-2 text-sm"
+                placeholder="Search transactions, amounts, beneficiaries, or references..."
+                value=""
+              />
+            </div>
+            <div
+              class="flex items-center gap-2"
+            >
+              <select
+                class="border rounded px-3 py-2 text-sm"
+              >
+                <option
+                  value="All"
+                >
+                  All Transaction Types
+                </option>
+                <option
+                  value="Wire Transfer"
+                >
+                  Wire Transfer
+                </option>
+                <option
+                  value="ACH Transfer"
+                >
+                  ACH Transfer
+                </option>
+                <option
+                  value="International Wire"
+                >
+                  International Wire
+                </option>
+                <option
+                  value="Check Deposit"
+                >
+                  Check Deposit
+                </option>
+              </select>
+              <select
+                class="border rounded px-3 py-2 text-sm"
+              >
+                <option
+                  value="5"
+                >
+                  5 per page
+                </option>
+                <option
+                  value="10"
+                >
+                  10 per page
+                </option>
+                <option
+                  value="20"
+                >
+                  20 per page
+                </option>
+              </select>
+            </div>
+          </div>
+          <div
+            class="overflow-x-auto"
+          >
+            <table
+              class="w-full text-sm"
+            >
+              <thead
+                class="text-left text-gray-600"
+              >
+                <tr>
+                  <th
+                    class="p-3"
+                  >
+                    TRANSACTION
+                  </th>
+                  <th
+                    class="p-3"
+                  >
+                    DATE
+                  </th>
+                  <th
+                    class="p-3"
+                  >
+                    AMOUNT
+                  </th>
+                  <th
+                    class="p-3"
+                  >
+                    BENEFICIARY
+                  </th>
+                  <th
+                    class="p-3"
+                  >
+                    STATUS
+                  </th>
+                  <th
+                    class="p-3"
+                  >
+                    DETAILS
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  class="border-t"
+                >
+                  <td
+                    class="p-3"
+                  >
+                    <div
+                      class="text-sm font-semibold text-blue-600"
+                    >
+                      Wire Transfer
+                    </div>
+                    <div
+                      class="text-xs text-blue-500"
+                    >
+                      TX-1
+                    </div>
+                  </td>
+                  <td
+                    class="p-3 text-gray-600"
+                  >
+                    2025-01-01
+                  </td>
+                  <td
+                    class="p-3"
+                  >
+                    <div
+                      class="font-semibold"
+                    >
+                      $500
+                    </div>
+                    <div
+                      class="text-xs mt-1 inline-block px-2 py-1 rounded-full bg-red-100 text-red-700"
+                    >
+                      HIGH
+                    </div>
+                  </td>
+                  <td
+                    class="p-3"
+                  >
+                    <div
+                      class="font-medium"
+                    >
+                      ABC Corp
+                    </div>
+                    <div
+                      class="text-xs text-gray-400"
+                    >
+                      ****5678 · · · ·
+                    </div>
+                  </td>
+                  <td
+                    class="p-3"
+                  >
+                    <div
+                      class="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700"
+                    >
+                      Completed
+                    </div>
+                  </td>
+                  <td
+                    class="p-3 text-gray-700"
+                  >
+                    Invoice
+                  </td>
+                </tr>
+                <tr
+                  class="border-t"
+                >
+                  <td
+                    class="p-3"
+                  >
+                    <div
+                      class="text-sm font-semibold text-blue-600"
+                    >
+                      ACH Transfer
+                    </div>
+                    <div
+                      class="text-xs text-blue-500"
+                    >
+                      TX-2
+                    </div>
+                  </td>
+                  <td
+                    class="p-3 text-gray-600"
+                  >
+                    2025-01-02
+                  </td>
+                  <td
+                    class="p-3"
+                  >
+                    <div
+                      class="font-semibold"
+                    >
+                      $200
+                    </div>
+                    <div
+                      class="text-xs mt-1 inline-block px-2 py-1 rounded-full bg-green-100 text-green-700"     
+                    >
+                      LOW
+                    </div>
+                  </td>
+                  <td
+                    class="p-3"
+                  >
+                    <div
+                      class="font-medium"
+                    >
+                      XYZ Inc
+                    </div>
+                    <div
+                      class="text-xs text-gray-400"
+                    >
+                      ****5678 · · · ·
+                    </div>
+                  </td>
+                  <td
+                    class="p-3"
+                  >
+                    <div
+                      class="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700"
+                    >
+                      Pending
+                    </div>
+                  </td>
+                  <td
+                    class="p-3 text-gray-700"
+                  >
+                    Subscription
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div
+            class="mt-4 flex items-center justify-between text-sm text-gray-600"
+          >
+            <div>
+              Showing
+              <span
+                class="font-semibold"
+              >
+                1
+              </span>
+               to
+              <span
+                class="font-semibold"
+              >
+                2
+              </span>
+               of
+              <span
+                class="font-semibold"
+              >
+                2
+              </span>
+               transactions
+              <span
+                class="ml-4 inline-flex items-center gap-2"
+              >
+                <span
+                  class="w-2 h-2 rounded-full bg-green-500"
+                />
+                 High Value
+              </span>
+            </div>
+            <div
+              class="flex items-center gap-2"
+            >
+              <button
+                class="px-3 py-1 rounded border bg-white disabled:opacity-50"
+                disabled=""
+              >
+                ‹
+              </button>
+              <button
+                class="px-3 py-1 rounded bg-green-600 text-white"
+              >
+                1
+              </button>
+              <button
+                class="px-3 py-1 rounded border bg-white disabled:opacity-50"
+                disabled=""
+              >
+                ›
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
 
-  it("filters by transaction type dropdown", () => {
-    render(<RelatedTransactions transactions={mockTxns} />);
-    const typeSelect = screen.getAllByRole("combobox")[0]; // first <select>
-    fireEvent.change(typeSelect, { target: { value: "Wire Transfer" } });
-    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
-    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
-  });
+      16 |   it("filters by search query", () => {
+      17 |     render(<RelatedTransactions transactions={mockTxns} />);
+    > 18 |     fireEvent.change(screen.getByPlaceholderText("Search transactions/i"), { target: { value: "ABC" } });
+         |                             ^
+      19 |     expect(screen.getByText("ABC Corp")).toBeInTheDocument();
+      20 |     expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
+      21 |   });
 
-  it("filters by severity (HIGH/LOW)", () => {
-    render(<RelatedTransactions transactions={mockTxns} />);
-    // Assuming severity is used in filtering in your component
-    fireEvent.change(
-      screen.getByPlaceholderText(/Search transactions/i),
-      { target: { value: "HIGH" } }
-    );
-    expect(screen.getByText("ABC Corp")).toBeInTheDocument();
-    expect(screen.queryByText("XYZ Inc")).not.toBeInTheDocument();
-  });
-});
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ PASS  __tests__/CaseDetails.test.tsx
+ PASS  __tests__/RelatedTransactions.test.tsx
+ PASS  __tests__/PastEventsLog.test.tsx
+
+ RUNS  __tests__/PastEventsLog.test.tsx
+
+ RUNS  __tests__/PastEventsLog.test.tsx
+
+ RUNS  __tests__/PastEventsLog.test.tsx
+
+ RUNS  __tests__/PastEventsLog.test.tsx
+ PASS  __tests__/CaseDetails.test.tsx
+
+ RUNS  __tests__/PastEventsLog.test.tsx
+
+ RUNS  __tests__/PastEventsLog.test.tsx
+
+ PASS  __tests__/PastEventsLog.test.tsx
+
+ FAIL  __tests__/RelatedTransactions.test.tsx
+  ● RelatedTransactions Component › filters by search query
+                                                                                                               
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')                                     
+                                                                                                               
+      34 |         t.id.toLowerCase().includes(q) ||                                                           
+      35 |         t.beneficiary.toLowerCase().includes(q) ||                                                  
+    > 36 |         t.details.toLowerCase().includes(q) ||
+         |                   ^
+      37 |         t.amount.toLowerCase().includes(q)
+      38 |       );
+      39 |     });
+
+      at toLowerCase (src/components/RelatedTransactions.tsx:36:19)
+          at Array.filter (<anonymous>)
+      at filter (src/components/RelatedTransactions.tsx:30:25)
+      at updateMemo (node_modules/react-dom/cjs/react-dom-client.development.js:6621:19)
+      at Object.useMemo (node_modules/react-dom/cjs/react-dom-client.development.js:23182:18)
+      at process.env.NODE_ENV.exports.useMemo (node_modules/react/cjs/react.development.js:1209:34)
+      at RelatedTransactions (src/components/RelatedTransactions.tsx:28:27)
+      at Object.react-stack-bottom-frame (node_modules/react-dom/cjs/react-dom-client.development.js:23863:20) 
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:5529:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:8897:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:10522:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:1522:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:15140:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:14956:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:14936:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:14462:44)
+      at performSyncWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16231:7)
+      at flushSyncWorkAcrossRoots_impl (node_modules/react-dom/cjs/react-dom-client.development.js:16079:21)   
+      at flushSyncWork$1 (node_modules/react-dom/cjs/react-dom-client.development.js:14721:12)
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3270:14)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:16572:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:20658:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:20626:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)     
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLInputElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9) 
+      at HTMLInputElementImpl.dispatchEvent (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
+      at HTMLInputElement.dispatchEvent (node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)  
+      at node_modules/@testing-library/dom/dist/events.js:19:20
+      at node_modules/@testing-library/react/dist/pure.js:108:16
+      at node_modules/@testing-library/react/dist/act-compat.js:48:24
+      at process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:789:22)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at Object.eventWrapper (node_modules/@testing-library/react/dist/pure.js:107:28)
+      at fireEvent (node_modules/@testing-library/dom/dist/events.js:12:35)
+      at fireEvent.<computed> [as change] (node_modules/@testing-library/dom/dist/events.js:110:36)
+      at fireEvent.<computed> [as change] (node_modules/@testing-library/react/dist/fire-event.js:15:52)       
+      at Object.change (__tests__/RelatedTransactions.test.tsx:38:15)
+
+  ● RelatedTransactions Component › filters by severity (HIGH/LOW)
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+      34 |         t.id.toLowerCase().includes(q) ||
+      35 |         t.beneficiary.toLowerCase().includes(q) ||
+    > 36 |         t.details.toLowerCase().includes(q) ||
+         |                   ^
+      37 |         t.amount.toLowerCase().includes(q)
+      38 |       );
+      39 |     });
+
+      at toLowerCase (src/components/RelatedTransactions.tsx:36:19)
+          at Array.filter (<anonymous>)
+      at filter (src/components/RelatedTransactions.tsx:30:25)
+      at updateMemo (node_modules/react-dom/cjs/react-dom-client.development.js:6621:19)
+      at Object.useMemo (node_modules/react-dom/cjs/react-dom-client.development.js:23182:18)
+      at process.env.NODE_ENV.exports.useMemo (node_modules/react/cjs/react.development.js:1209:34)
+      at RelatedTransactions (src/components/RelatedTransactions.tsx:28:27)
+      at Object.react-stack-bottom-frame (node_modules/react-dom/cjs/react-dom-client.development.js:23863:20) 
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:5529:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:8897:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:10522:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:1522:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:15140:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:14956:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:14936:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:14462:44)
+      at performSyncWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16231:7)
+      at flushSyncWorkAcrossRoots_impl (node_modules/react-dom/cjs/react-dom-client.development.js:16079:21)   
+      at flushSyncWork$1 (node_modules/react-dom/cjs/react-dom-client.development.js:14721:12)
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3270:14)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:16572:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:20658:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:20626:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)     
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLInputElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9) 
+      at HTMLInputElementImpl.dispatchEvent (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104
+ PASS  __tests__/CaseDetails.test.tsx
+ PASS  __tests__/PastEventsLog.test.tsx
+ FAIL  __tests__/RelatedTransactions.test.tsx
+  ● RelatedTransactions Component › filters by search query
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+      34 |         t.id.toLowerCase().includes(q) ||
+      35 |         t.beneficiary.toLowerCase().includes(q) ||
+    > 36 |         t.details.toLowerCase().includes(q) ||
+         |                   ^
+      37 |         t.amount.toLowerCase().includes(q)
+      38 |       );
+      39 |     });
+
+      at toLowerCase (src/components/RelatedTransactions.tsx:36:19)
+          at Array.filter (<anonymous>)
+      at filter (src/components/RelatedTransactions.tsx:30:25)
+      at updateMemo (node_modules/react-dom/cjs/react-dom-client.development.js:6621:19)
+      at Object.useMemo (node_modules/react-dom/cjs/react-dom-client.development.js:23182:18)
+      at process.env.NODE_ENV.exports.useMemo (node_modules/react/cjs/react.development.js:1209:34)
+      at RelatedTransactions (src/components/RelatedTransactions.tsx:28:27)
+      at Object.react-stack-bottom-frame (node_modules/react-dom/cjs/react-dom-client.development.js:23863:20) 
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:5529:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:8897:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:10522:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:1522:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:15140:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:14956:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:14936:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:14462:44)
+      at performSyncWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16231:7)
+      at flushSyncWorkAcrossRoots_impl (node_modules/react-dom/cjs/react-dom-client.development.js:16079:21)   
+      at flushSyncWork$1 (node_modules/react-dom/cjs/react-dom-client.development.js:14721:12)
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3270:14)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:16572:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:20658:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:20626:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)     
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLInputElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9) 
+      at HTMLInputElementImpl.dispatchEvent (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
+      at HTMLInputElement.dispatchEvent (node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)  
+      at node_modules/@testing-library/dom/dist/events.js:19:20
+      at node_modules/@testing-library/react/dist/pure.js:108:16
+      at node_modules/@testing-library/react/dist/act-compat.js:48:24
+      at process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:789:22)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at Object.eventWrapper (node_modules/@testing-library/react/dist/pure.js:107:28)
+      at fireEvent (node_modules/@testing-library/dom/dist/events.js:12:35)
+      at fireEvent.<computed> [as change] (node_modules/@testing-library/dom/dist/events.js:110:36)
+      at fireEvent.<computed> [as change] (node_modules/@testing-library/react/dist/fire-event.js:15:52)       
+      at Object.change (__tests__/RelatedTransactions.test.tsx:38:15)
+
+  ● RelatedTransactions Component › filters by severity (HIGH/LOW)
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+      34 |         t.id.toLowerCase().includes(q) ||
+      35 |         t.beneficiary.toLowerCase().includes(q) ||
+    > 36 |         t.details.toLowerCase().includes(q) ||
+         |                   ^
+      37 |         t.amount.toLowerCase().includes(q)
+      38 |       );
+      39 |     });
+
+      at toLowerCase (src/components/RelatedTransactions.tsx:36:19)
+          at Array.filter (<anonymous>)
+      at filter (src/components/RelatedTransactions.tsx:30:25)
+      at updateMemo (node_modules/react-dom/cjs/react-dom-client.development.js:6621:19)
+      at Object.useMemo (node_modules/react-dom/cjs/react-dom-client.development.js:23182:18)
+      at process.env.NODE_ENV.exports.useMemo (node_modules/react/cjs/react.development.js:1209:34)
+      at RelatedTransactions (src/components/RelatedTransactions.tsx:28:27)
+      at Object.react-stack-bottom-frame (node_modules/react-dom/cjs/react-dom-client.development.js:23863:20) 
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:5529:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:8897:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:10522:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:1522:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:15140:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:14956:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:14936:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:14462:44)
+      at performSyncWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16231:7)
+      at flushSyncWorkAcrossRoots_impl (node_modules/react-dom/cjs/react-dom-client.development.js:16079:21)   
+      at flushSyncWork$1 (node_modules/react-dom/cjs/react-dom-client.development.js:14721:12)
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3270:14)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:16572:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:20658:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:20626:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)     
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLInputElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9) 
+      at HTMLInputElementImpl.dispatchEvent (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
+      at HTMLInputElement.dispatchEvent (node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)  
+      at node_modules/@testing-library/dom/dist/events.js:19:20
+      at node_modules/@testing-library/react/dist/pure.js:108:16
+      at node_modules/@testing-library/react/dist/act-compat.js:48:24
+      at process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:789:22)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at Object.eventWrapper (node_modules/@testing-library/react/dist/pure.js:107:28)
+      at fireEvent (node_modules/@testing-library/dom/dist/events.js:12:35)
+ › Press f to run only failed tests.
+ › Press o to only run tests related to changed files.
+ › Press p to filter by a filename regex pattern.
+ › Press t to filter by a test name regex pattern.
+ › Press q to quit watch mode.
+ › Press i to run failing tests interactively.
+ › Press Enter to trigger a test run.
+
+
+
+
+
+
+
+
+
+
