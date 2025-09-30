@@ -2,57 +2,32 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import PastEventsLog from "@/components/PastEventsLog";
 
 const mockEvents = [
-  {
-    id: "E1",
-    event: "Login Attempt",
-    date: "2025-01-01",
-    status: "Success",
-    risk: "LOW",
-  },
-  {
-    id: "E2",
-    event: "Password Change",
-    date: "2025-01-02",
-    status: "Failed",
-    risk: "HIGH",
-  },
+  { id: "E1", type: "Login Attempt", date: "2025-01-01", profile: "A", ip: "127.0.0.1", status: "Success", severity: "LOW", description: "ok" },
+  { id: "E2", type: "Failed Login", date: "2025-01-02", profile: "B", ip: "192.168.0.1", status: "Failed", severity: "HIGH", description: "bad" }
 ];
 
 describe("PastEventsLog Component", () => {
-  it("renders the component heading", () => {
+  it("renders events in table", () => {
     render(<PastEventsLog events={mockEvents} />);
-    expect(screen.getByText("Past Event Logs")).toBeInTheDocument();
-  });
-
-  it("renders event rows", () => {
-    render(<PastEventsLog events={mockEvents} />);
-    expect(screen.getByText("Login Attempt")).toBeInTheDocument();
-    expect(screen.getByText("Password Change")).toBeInTheDocument();
+    expect(screen.getByText("E1")).toBeInTheDocument();
+    expect(screen.getByText("E2")).toBeInTheDocument();
   });
 
   it("filters by search query", () => {
     render(<PastEventsLog events={mockEvents} />);
-    const input = screen.getByPlaceholderText(/Search past events/i);
-
-    fireEvent.change(input, { target: { value: "Login" } });
-
-    expect(screen.getByText("Login Attempt")).toBeInTheDocument();
-    expect(screen.queryByText("Password Change")).not.toBeInTheDocument();
+    fireEvent.change(
+      screen.getByPlaceholderText(/Search events/i),
+      { target: { value: "Failed" } }
+    );
+    expect(screen.getByText("E2")).toBeInTheDocument();
+    expect(screen.queryByText("E1")).not.toBeInTheDocument();
   });
 
-  it("filters by risk dropdown", () => {
+  it("filters by severity dropdown", () => {
     render(<PastEventsLog events={mockEvents} />);
-    fireEvent.change(screen.getByDisplayValue("All Risks"), {
-      target: { value: "HIGH" },
-    });
-
-    expect(screen.getByText("Password Change")).toBeInTheDocument();
-    expect(screen.queryByText("Login Attempt")).not.toBeInTheDocument();
-  });
-
-  it("shows empty state when no events", () => {
-    render(<PastEventsLog events={[]} />);
-    expect(screen.queryByText("Login Attempt")).not.toBeInTheDocument();
-    expect(screen.queryByText("Password Change")).not.toBeInTheDocument();
+    const severitySelect = screen.getAllByRole("combobox")[0]; // first select
+    fireEvent.change(severitySelect, { target: { value: "HIGH" } });
+    expect(screen.getByText("E2")).toBeInTheDocument();
+    expect(screen.queryByText("E1")).not.toBeInTheDocument();
   });
 });
