@@ -1,982 +1,157 @@
-              >
-                <path
-                  d="m21 21-4.34-4.34"
-                />
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="8"
-                />
-              </svg>
-              <input
-                class="w-full border rounded px-3 py-2 text-sm"
-                placeholder="Search events, status, IP addresses, or descriptions..."
-                value=""
-              />
-            </div>
-            <div
-              class="flex items-center gap-2"
-            >
-              <select
-                class="border rounded px-3 py-2 text-sm"
-              >
-                <option>
-                  All
-                </option>
-                <option>
-                  LOW
-                </option>
-                <option>
-                  MEDIUM
-                </option>
-                <option>
-                  HIGH
-                </option>
-              </select>
-              <select
-                class="border rounded px-3 py-2 text-sm"
-              >
-                <option
-                  value="5"
-                >
-                  5 per page
-                </option>
-                <option
-                  value="10"
-                >
-                  10 per page
-                </option>
-                <option
-                  value="20"
-                >
-                  20 per page
-                </option>
-              </select>
-            </div>
-          </div>
-          <div
-            class="overflow-x-auto"
-          >
-            <table
-              class="w-full text-sm"
-            >
-              <thead
-                class="text-left text-gray-600"
-              >
-                <tr>
-                  <th
-                    class="p-3"
-                  >
-                    EVENT ID
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    EVENT TYPE
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    DATE & TIME
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    PROFILE
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    IP ADDRESS
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    STATUS
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    SEVERITY
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    DESCRIPTION
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  class="border-t"
-                >
-                  <td
-                    class="p-3 text-blue-600 font-semibold"
-                  >
-                    E1
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3 text-gray-600"
-                  >
-                    2025-01-01
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700"
-                    >
-                      Success
-                    </span>
-                  </td>
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                    />
-                  </td>
-                  <td
-                    class="p-3 text-gray-700"
-                  />
-                </tr>
-                <tr
-                  class="border-t"
-                >
-                  <td
-                    class="p-3 text-blue-600 font-semibold"
-                  >
-                    E2
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3 text-gray-600"
-                  >
-                    2025-01-02
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700"
-                    >
-                      Failed
-                    </span>
-                  </td>
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                    />
-                  </td>
-                  <td
-                    class="p-3 text-gray-700"
-                  />
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div
-            class="mt-4 flex items-center justify-between text-sm text-gray-600"
-          >
-            <div>
-              Showing
-              <span
-                class="font-semibold"
-              >
-                1
-              </span>
-               to
-              <span
-                class="font-semibold"
-              >
-                2
-              </span>
-               of
-              <span
-                class="font-semibold"
-              >
-                2
-              </span>
-               events
-              <span
-                class="ml-4 inline-flex items-center gap-2"
-              >
-                <span
-                  class="w-2 h-2 rounded-full bg-red-500"
-                />
-                 High Priority
-              </span>
-            </div>
-            <div
-              class="flex items-center gap-2"
-            >
-              <button
-                class="px-3 py-1 rounded border bg-white disabled:opacity-50"
-                disabled=""
-              >
-                ‹
-              </button>
-              <button
-                class="px-3 py-1 rounded bg-blue-600 text-white"
-              >
-                1
-              </button>
-              <button
-                class="px-3 py-1 rounded border bg-white disabled:opacity-50"
-                disabled=""
-              >
-                ›
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </body>
-
-      27 |   it("renders event rows", () => {
-      28 |     render(<PastEventsLog events={mockEvents} />);
-    > 29 |     expect(screen.getByText("Login Attempt")).toBeInTheDocument();
-         |                   ^
-      30 |     expect(screen.getByText("Password Change")).toBeInTheDocument();
-      31 |   });
-      32 |
-
-      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
-      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
-      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
-      at Object.getByText (__tests__/PastEventsLog.test.tsx:29:19)
-
-  ● PastEventsLog Component › filters by search query
-
-    TestingLibraryElementError: Unable to find an element with the placeholder text of: /Search past events/i  
-
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="bg-white rounded-xl shadow border border-gray-200 p-6"
-        >
-          <div
-            class="flex items-center justify-between mb-4"
-          >
-            <div>
-              <h4
-                class="text-lg font-bold"
-              >
-                Past Events Log
-              </h4>
-              <p
-                class="text-sm text-gray-500"
-              >
-                Recent activity and security events for Profile: John Doe
-              </p>
-            </div>
-            <div
-              class="flex items-center gap-2"
-            >
-              <button
-                class="p-2 rounded bg-white border hover:bg-gray-50"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="lucide lucide-sliders-vertical w-4 h-4"
-                  fill="none"
-                  height="24"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M10 8h4"
-                  />
-                  <path
-                    d="M12 21v-9"
-                  />
-                  <path
-                    d="M12 8V3"
-                  />
-                  <path
-                    d="M17 16h4"
-                  />
-                  <path
-                    d="M19 12V3"
-                  />
-                  <path
-                    d="M19 21v-5"
-                  />
-                  <path
-                    d="M3 14h4"
-                  />
-                  <path
-                    d="M5 10V3"
-                  />
-                  <path
-                    d="M5 21v-7"
-                  />
-                </svg>
-              </button>
-              <button
-                class="p-2 rounded bg-white border hover:bg-gray-50"
-              >
-                ⬇
-              </button>
-            </div>
-          </div>
-          <div
-            class="flex gap-4 items-center mb-4"
-          >
-            <div
-              class="flex items-center gap-2 w-full"
-            >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-search w-5 h-5 text-gray-400"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="m21 21-4.34-4.34"
-                />
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="8"
-                />
-              </svg>
-              <input
-                class="w-full border rounded px-3 py-2 text-sm"
-                placeholder="Search events, status, IP addresses, or descriptions..."
-                value=""
-              />
-            </div>
-            <div
-              class="flex items-center gap-2"
-            >
-              <select
-                class="border rounded px-3 py-2 text-sm"
-              >
-                <option>
-                  All
-                </option>
-                <option>
-                  LOW
-                </option>
-                <option>
-                  MEDIUM
-                </option>
-                <option>
-                  HIGH
-                </option>
-              </select>
-              <select
-                class="border rounded px-3 py-2 text-sm"
-              >
-                <option
-                  value="5"
-                >
-                  5 per page
-                </option>
-                <option
-                  value="10"
-                >
-                  10 per page
-                </option>
-                <option
-                  value="20"
-                >
-                  20 per page
-                </option>
-              </select>
-            </div>
-          </div>
-          <div
-            class="overflow-x-auto"
-          >
-            <table
-              class="w-full text-sm"
-            >
-              <thead
-                class="text-left text-gray-600"
-              >
-                <tr>
-                  <th
-                    class="p-3"
-                  >
-                    EVENT ID
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    EVENT TYPE
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    DATE & TIME
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    PROFILE
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    IP ADDRESS
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    STATUS
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    SEVERITY
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    DESCRIPTION
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  class="border-t"
-                >
-                  <td
-                    class="p-3 text-blue-600 font-semibold"
-                  >
-                    E1
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3 text-gray-600"
-                  >
-                    2025-01-01
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700"
-                    >
-                      Success
-                    </span>
-                  </td>
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                    />
-                  </td>
-                  <td
-                    class="p-3 text-gray-700"
-                  />
-                </tr>
-                <tr
-                  class="border-t"
-                >
-                  <td
-                    class="p-3 text-blue-600 font-semibold"
-                  >
-                    E2
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3 text-gray-600"
-                  >
-                    2025-01-02
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700"
-                    >
-                      Failed
-                    </span>
-                  </td>
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                    />
-                  </td>
-                  <td
-                    class="p-3 text-gray-700"
-                  />
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div
-            class="mt-4 flex items-center justify-between text-sm text-gray-600"
-          >
-            <div>
-              Showing
-              <span
-                class="font-semibold"
-              >
-                1
-              </span>
-               to
-              <span
-                class="font-semibold"
-              >
-                2
-              </span>
-               of
-              <span
-                class="font-semibold"
-              >
-                2
-              </span>
-               events
-              <span
-                class="ml-4 inline-flex items-center gap-2"
-              >
-                <span
-                  class="w-2 h-2 rounded-full bg-red-500"
-                />
-                 High Priority
-              </span>
-            </div>
-            <div
-              class="flex items-center gap-2"
-            >
-              <button
-                class="px-3 py-1 rounded border bg-white disabled:opacity-50"
-                disabled=""
-              >
-                ‹
-              </button>
-              <button
-                class="px-3 py-1 rounded bg-blue-600 text-white"
-              >
-                1
-              </button>
-              <button
-                class="px-3 py-1 rounded border bg-white disabled:opacity-50"
-                disabled=""
-              >
-                ›
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </body>
-
-      33 |   it("filters by search query", () => {
-      34 |     render(<PastEventsLog events={mockEvents} />);
-    > 35 |     const input = screen.getByPlaceholderText(/Search past events/i);
-         |                          ^
-      36 |
-      37 |     fireEvent.change(input, { target: { value: "Login" } });
-      38 |
-
-      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
-      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
-      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
-      at Object.getByPlaceholderText (__tests__/PastEventsLog.test.tsx:35:26)
-
-  ● PastEventsLog Component › filters by risk dropdown
-
-    TestingLibraryElementError: Unable to find an element with the display value: All Risks.
-
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="bg-white rounded-xl shadow border border-gray-200 p-6"
-        >
-          <div
-            class="flex items-center justify-between mb-4"
-          >
-            <div>
-              <h4
-                class="text-lg font-bold"
-              >
-                Past Events Log
-              </h4>
-              <p
-                class="text-sm text-gray-500"
-              >
-                Recent activity and security events for Profile: John Doe
-              </p>
-            </div>
-            <div
-              class="flex items-center gap-2"
-            >
-              <button
-                class="p-2 rounded bg-white border hover:bg-gray-50"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="lucide lucide-sliders-vertical w-4 h-4"
-                  fill="none"
-                  height="24"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M10 8h4"
-                  />
-                  <path
-                    d="M12 21v-9"
-                  />
-                  <path
-                    d="M12 8V3"
-                  />
-                  <path
-                    d="M17 16h4"
-                  />
-                  <path
-                    d="M19 12V3"
-                  />
-                  <path
-                    d="M19 21v-5"
-                  />
-                  <path
-                    d="M3 14h4"
-                  />
-                  <path
-                    d="M5 10V3"
-                  />
-                  <path
-                    d="M5 21v-7"
-                  />
-                </svg>
-              </button>
-              <button
-                class="p-2 rounded bg-white border hover:bg-gray-50"
-              >
-                ⬇
-              </button>
-            </div>
-          </div>
-          <div
-            class="flex gap-4 items-center mb-4"
-          >
-            <div
-              class="flex items-center gap-2 w-full"
-            >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-search w-5 h-5 text-gray-400"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="m21 21-4.34-4.34"
-                />
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="8"
-                />
-              </svg>
-              <input
-                class="w-full border rounded px-3 py-2 text-sm"
-                placeholder="Search events, status, IP addresses, or descriptions..."
-                value=""
-              />
-            </div>
-            <div
-              class="flex items-center gap-2"
-            >
-              <select
-                class="border rounded px-3 py-2 text-sm"
-              >
-                <option>
-                  All
-                </option>
-                <option>
-                  LOW
-                </option>
-                <option>
-                  MEDIUM
-                </option>
-                <option>
-                  HIGH
-                </option>
-              </select>
-              <select
-                class="border rounded px-3 py-2 text-sm"
-              >
-                <option
-                  value="5"
-                >
-                  5 per page
-                </option>
-                <option
-                  value="10"
-                >
-                  10 per page
-                </option>
-                <option
-                  value="20"
-                >
-                  20 per page
-                </option>
-              </select>
-            </div>
-          </div>
-          <div
-            class="overflow-x-auto"
-          >
-            <table
-              class="w-full text-sm"
-            >
-              <thead
-                class="text-left text-gray-600"
-              >
-                <tr>
-                  <th
-                    class="p-3"
-                  >
-                    EVENT ID
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    EVENT TYPE
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    DATE & TIME
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    PROFILE
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    IP ADDRESS
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    STATUS
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    SEVERITY
-                  </th>
-                  <th
-                    class="p-3"
-                  >
-                    DESCRIPTION
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  class="border-t"
-                >
-                  <td
-                    class="p-3 text-blue-600 font-semibold"
-                  >
-                    E1
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3 text-gray-600"
-                  >
-                    2025-01-01
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700"
-                    >
-                      Success
-                    </span>
-                  </td>
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                    />
-                  </td>
-                  <td
-                    class="p-3 text-gray-700"
-                  />
-                </tr>
-                <tr
-                  class="border-t"
-                >
-                  <td
-                    class="p-3 text-blue-600 font-semibold"
-                  >
-                    E2
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3 text-gray-600"
-                  >
-                    2025-01-02
-                  </td>
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  />
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700"
-                    >
-                      Failed
-                    </span>
-                  </td>
-                  <td
-                    class="p-3"
-                  >
-                    <span
-                      class="px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                    />
-                  </td>
-                  <td
-                    class="p-3 text-gray-700"
-                  />
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div
-            class="mt-4 flex items-center justify-between text-sm text-gray-600"
-          >
-            <div>
-              Showing
-              <span
-                class="font-semibold"
-              >
-                1
-              </span>
-               to
-              <span
-                class="font-semibold"
-              >
-                2
-              </span>
-               of
-              <span
-                class="font-semibold"
-              >
-                2
-              </span>
-               events
-              <span
-                class="ml-4 inline-flex items-center gap-2"
-              >
-                <span
-                  class="w-2 h-2 rounded-full bg-red-500"
-                />
-                 High Priority
-              </span>
-            </div>
-            <div
-              class="flex items-center gap-2"
-            >
-              <button
-                class="px-3 py-1 rounded border bg-white disabled:opacity-50"
-                disabled=""
-              >
-                ‹
-              </button>
-              <button
-                class="px-3 py-1 rounded bg-blue-600 text-white"
-              >
-                1
-              </button>
-              <button
-                class="px-3 py-1 rounded border bg-white disabled:opacity-50"
-                disabled=""
-Test Suites: 1 failed, 2 passed, 3 total
-Tests:       4 failed, 9 passed, 13 total
-Snapshots:   0 total
-Time:        4.377 s
-Ran all test suites.
+{
+  "case": {
+    "id": "223456",
+    "title": "High Value Transaction Investigation",
+    "description": "Investigation of suspicious wire transfers exceeding $15,000 from account ****5678 to multiple beneficiaries. Pattern suggests potential money laundering activity.",
+    "assignee": "John Smith",
+    "profile": {
+      "id": "PROF-789",
+      "name": "John Doe"
+    },
+    "created": "2024-01-10",
+    "updated": "2024-01-15",
+    "status": "Active",
+    "priority": "High Priority",
+    "riskScore": 85
+  },
+  "relationDiagram": {
+    "case": {
+      "caseId": "CASE-2024-001",
+      "date": "2024-01-15",
+      "status": "Active",
+      "decision": "Approved",
+      "type": "Investigation"
+    },
+    "profile": {
+      "id": "PROF-789",
+      "name": "John Doe",
+      "mmn": "Smith",
+      "gender": "Male",
+      "dob": "1985-03-22"
+    },
+    "transaction": {
+      "id": "TXN-456123",
+      "type": "Wire Transfer",
+      "amount": "$15,000.00",
+      "frequency": 3,
+      "recentDate": "2024-01-10",
+      "beneficiary": "ABC Corp"
+    },
+    "beneficiary": {
+      "id": "BENE-789",
+      "name": "ABC Corp",
+      "amount": "$15,000.00"
+    },
+    "last5Activity": [
+      { "id": "EVT-015", "date": "2024-01-15", "type": "Login Attempt" },
+      { "id": "EVT-014", "date": "2024-01-14", "type": "Transaction" },
+      { "id": "EVT-013", "date": "2024-01-13", "type": "Profile Update" },
+      { "id": "EVT-012", "date": "2024-01-12", "type": "Password Change" },
+      { "id": "EVT-011", "date": "2024-01-11", "type": "Device Registration" }
+    ]
+  },
+  "pastEvents": [
+    {
+      "id": "EVT-001",
+      "type": "Login Attempt",
+      "date": "2024-01-15 14:30:25",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Success",
+      "severity": "LOW",
+      "description": "Successful login from registered device"
+    },
+    {
+      "id": "EVT-002",
+      "type": "Failed Login",
+      "date": "2024-01-15 09:15:42",
+      "profile": "John Doe",
+      "ip": "203.45.67.89",
+      "status": "Failed",
+      "severity": "HIGH",
+      "description": "Multiple failed login attempts from an external IP"
+    },
+    {
+      "id": "EVT-003",
+      "type": "Transaction Alert",
+      "date": "2024-01-14 16:45:12",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Flagged",
+      "severity": "MEDIUM",
+      "description": "High-value transaction exceeding daily limit"
+    },
+    {
+      "id": "EVT-004",
+      "type": "Profile Update",
+      "date": "2024-01-14 11:20:33",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Success",
+      "severity": "LOW",
+      "description": "Contact information updated successfully"
+    },
+    {
+      "id": "EVT-005",
+      "type": "Beneficiary Added",
+      "date": "2024-01-13 13:55:18",
+      "profile": "John Doe",
+      "ip": "192.168.1.100",
+      "status": "Success",
+      "severity": "LOW",
+      "description": "New beneficiary ABC Corp added to account"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "TXN-456123",
+      "type": "Wire Transfer",
+      "date": "2024-01-15 14:30:25",
+      "amount": "$15,000.00",
+      "severity": "HIGH",
+      "beneficiary": "ABC Corp",
+      "status": "Completed",
+      "details": "Business payment for services"
+    },
+    {
+      "id": "TXN-456124",
+      "type": "ACH Transfer",
+      "date": "2024-01-14 09:15:42",
+      "amount": "$2,500.00",
+      "severity": "MEDIUM",
+      "beneficiary": "XYZ Services",
+      "status": "Pending",
+      "details": "Monthly service payment"
+    },
+    {
+      "id": "TXN-456125",
+      "type": "International Wire",
+      "date": "2024-01-13 16:45:12",
+      "amount": "$8,750.00",
+      "severity": "HIGH",
+      "beneficiary": "Global Trading Ltd",
+      "status": "Completed",
+      "details": "International trade payment"
+    },
+    {
+      "id": "TXN-456126",
+      "type": "Check Deposit",
+      "date": "2024-01-12 11:20:33",
+      "amount": "$3,200.00",
+      "severity": "LOW",
+      "beneficiary": "John Doe",
+      "status": "Cleared",
+      "details": "Salary deposit from employer"
+    },
+    {
+      "id": "TXN-456127",
+      "type": "Wire Transfer",
+      "date": "2024-01-11 13:55:18",
+      "amount": "$12,000.00",
+      "severity": "HIGH",
+      "beneficiary": "Tech Solutions Inc",
+      "status": "Completed",
+      "details": "Equipment purchase payment"
+    }
+  ]
+}
