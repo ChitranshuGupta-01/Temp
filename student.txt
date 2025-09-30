@@ -1,12 +1,35 @@
-"jest": {
-  "testEnvironment": "jsdom",
-  "transform": {
-    "^.+\\.(ts|tsx)$": "ts-jest"
-  },
-  "moduleNameMapper": {
-    "^@/(.*)$": "<rootDir>/$1"
-  },
-  "setupFilesAfterEnv": [
-    "<rootDir>/jest.setup.js"
-  ]
-}
+import { render, screen } from "@testing-library/react";
+import CaseDetails from "@/components/CaseDetails";
+
+const mockCase = {
+  id: "TEST-1",
+  title: "Mock Investigation",
+  description: "Fake case description for testing",
+  assignee: "Test User",
+  profile: { id: "P-001", name: "Mock Profile" },
+  created: "2025-01-01",
+  updated: "2025-01-02",
+  status: "Active",
+  priority: "High Priority",
+  riskScore: 42,
+};
+
+describe("CaseDetails Component", () => {
+  it("renders case id and title", () => {
+    render(<CaseDetails caseData={mockCase} />);
+    expect(screen.getByText(/Case #TEST-1/)).toBeInTheDocument();
+    expect(screen.getByText("Mock Investigation")).toBeInTheDocument();
+  });
+
+  it("shows risk score correctly", () => {
+    render(<CaseDetails caseData={mockCase} />);
+    expect(screen.getByText("42")).toBeInTheDocument();
+    expect(screen.getByText("/100")).toBeInTheDocument();
+  });
+
+  it("displays assignee and profile info", () => {
+    render(<CaseDetails caseData={mockCase} />);
+    expect(screen.getByText(/Assignee:/)).toBeInTheDocument();
+    expect(screen.getByText("Mock Profile")).toBeInTheDocument();
+  });
+});
