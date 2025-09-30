@@ -1,10 +1,24 @@
-module.exports = {
-  testEnvironment: "jsdom",
-  transform: {
-    "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
-  },
-  moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1",   // ✅ THIS is correct regex mapping
-  },
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+import { render, screen } from "@testing-library/react";
+import CaseRelationDiagram from "@/components/CaseRelationDiagram";
+
+const mockRelation = {
+  case: { caseId: "CASE-001", date: "2025-01-01" },
+  profile: { id: "P-001", name: "Profile A" },
+  transaction: { id: "TX-123", type: "Wire Transfer", amount: "$1000" },
+  beneficiary: { id: "B-001", name: "Beneficiary X" },
+  last5Activity: [{ id: "EV-1" }, { id: "EV-2" }]
 };
+
+describe("CaseRelationDiagram Component", () => {
+  it("renders case and profile nodes", () => {
+    render(<CaseRelationDiagram relation={mockRelation} />);
+    expect(screen.getByText(/Case ID: CASE-001/)).toBeInTheDocument();
+    expect(screen.getByText(/Profile A/)).toBeInTheDocument();
+  });
+
+  it("renders transaction and beneficiary nodes", () => {
+    render(<CaseRelationDiagram relation={mockRelation} />);
+    expect(screen.getByText(/Wire Transfer - TX-123/)).toBeInTheDocument();
+    expect(screen.getByText(/Beneficiary X/)).toBeInTheDocument();
+  });
+});
