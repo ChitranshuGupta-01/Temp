@@ -1,16 +1,152 @@
-const nextJest = require("next/jest");
+"use client";
 
-const createJestConfig = nextJest({
-  dir: "./", // path to your Next.js app
-});
+import React, { useEffect, useRef } from "react";
+import * as d3 from "d3";
 
-/** @type {import('jest').Config} */
-const customJestConfig = {
-  testEnvironment: "jsdom",
-  moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/src/$1",
-  },
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-};
+export default function CaseRelationDiagram({ relation }: { relation: any }) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
 
-module.exports = createJestConfig(customJestConfig);
+  useEffect(() => {
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove(); // clear old diagram
+
+    const width = 800;
+    const height = 420;
+
+    // Nodes (same positions as your ReactFlow code)
+    const nodes = [
+      { id: "case", x: 100, y: 40, w: 200, h: 90 },
+      { id: "profile", x: 420, y: 20, w: 200, h: 110 },
+      { id: "txn", x: 40, y: 220, w: 220, h: 120 },
+      { id: "bene", x: 320, y: 220, w: 200, h: 100 },
+      { id: "activity", x: 520, y: 220, w: 240, h: 120 },
+    ];
+
+    // Edges
+    const edges = [
+      { source: "case", target: "profile" },
+      { source: "case", target: "txn" },
+      { source: "txn", target: "bene" },
+      { source: "profile", target: "activity" },
+      { source: "case", target: "bene" },
+    ];
+
+    // Lookup map
+    const nodeById: any = {};
+    nodes.forEach((n) => (nodeById[n.id] = n));
+
+    // Draw edges
+    const linkGroup = svg.append("g").attr("stroke", "#999").attr("stroke-width", 2);
+
+    linkGroup
+      .selectAll("line")
+      .data(edges)
+      .join("line")
+      .attr("x1", (d) => nodeById[d.source].x + nodeById[d.source].w / 2)
+      .attr("y1", (d) => nodeById[d.source].y + nodeById[d.source].h / 2)
+      .attr("x2", (d) => nodeById[d.target].x + nodeById[d.target].w / 2)
+      .attr("y2", (d) => nodeById[d.target].y + nodeById[d.target].h / 2)
+      .attr("marker-end", "url(#arrow)");
+
+    // Arrow marker
+    svg
+      .append("defs")
+      .append("marker")
+      .attr("id", "arrow")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 12)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", "#999");
+
+    // Nodes as foreignObjects (so we can use HTML/Tailwind inside SVG)
+    const nodeGroup = svg.append("g");
+
+    nodeGroup
+      .selectAll("foreignObject")
+      .data(nodes)
+      .join("foreignObject")
+      .attr("x", (d) => d.x)
+      .attr("y", (d) => d.y)
+      .attr("width", (d) => d.w)
+      .attr("height", (d) => d.h)
+      .append("xhtml:div")
+      .style("width", "100%")
+      .style("height", "100%")
+      .html((d) => {
+        switch (d.id) {
+          case "case":
+            return `
+              <div class="rounded-lg p-3 bg-gradient-to-r from-red-400 to-red-300 text-white shadow">
+                <div class="font-bold">Case</div>
+                <div class="text-xs mt-1">Case ID: ${relation.case.caseId}</div>
+                <div class="text-xs">Date: ${relation.case.date}</div>
+              </div>
+            `;
+          case "profile":
+            return `
+              <div class="rounded-lg p-3 bg-gradient-to-r from-blue-400 to-blue-300 text-white shadow">
+                <div class="font-bold">Profile</div>
+                <div class="text-xs mt-1">${relation.profile.name} (${relation.profile.id})</div>
+              </div>
+            `;
+          case "txn":
+            return `
+              <div class="rounded-lg p-3 bg-gradient-to-r from-indigo-400 to-indigo-300 text-white shadow">
+                <div class="font-bold">Transaction Detail</div>
+                <div class="text-xs mt-1">${relation.transaction.type} - ${relation.transaction.id}</div>
+                <div class="text-xs">${relation.transaction.amount}</div>
+              </div>
+            `;
+          case "bene":
+            return `
+              <div class="rounded-lg p-3 bg-yellow-400 text-white shadow">
+                <div class="font-bold">Beneficiary Detail</div>
+                <div class="text-xs mt-1">${relation.beneficiary.name}</div>
+                <div class="text-xs">${relation.beneficiary.amount}</div>
+              </div>
+            `;
+          case "activity":
+            return `
+              <div class="rounded-lg p-3 bg-pink-400 text-white shadow">
+                <div class="font-bold">Last 5 Activity</div>
+                <div class="text-xs mt-1">${relation.last5Activity
+                  .map((a: any) => a.id)
+                  .join(", ")}</div>
+              </div>
+            `;
+          default:
+            return "";
+        }
+      });
+  }, [relation]);
+
+  return (
+    <div className="bg-white rounded-xl shadow border border-gray-200 p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h4 className="text-lg font-bold">Case Relation Diagram</h4>
+          <p className="text-sm text-gray-500">
+            Visual relations between case, profile, transactions and beneficiaries
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="px-3 py-2 rounded bg-gray-50 border hover:bg-gray-100 text-sm">
+            100%
+          </button>
+          <button className="px-3 py-2 rounded bg-gray-50 border hover:bg-gray-100 text-sm">
+            Zoom
+          </button>
+        </div>
+      </div>
+
+      <div className="rounded border border-dashed border-gray-200 overflow-hidden">
+        <svg ref={svgRef} width="100%" height="420"></svg>
+      </div>
+    </div>
+  );
+}
