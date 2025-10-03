@@ -1,45 +1,59 @@
 import { useState } from 'react';
-import { Shield, UserCircle, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Shield, UserCircle, Lock, Eye, EyeOff, LogIn, Loader2, Check } from 'lucide-react';
 
 export default function LoginPage() {
-  // State to show/hide password
+  // State to track if password is visible or hidden
   const [showPassword, setShowPassword] = useState(false);
   
-  // State for form inputs
+  // State to track loading and success status
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  
+  // State to store user input
   const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
-  
-  // State for button loading
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Function when user clicks login button
-  function handleLogin() {
+  // Function to handle login button click
+  const handleLogin = () => {
     setIsLoading(true);
     
-    // Simulate login process (replace this with your actual login API call)
+    // Wait 2 seconds to simulate authentication
     setTimeout(() => {
       setIsLoading(false);
-      alert('Login successful!');
-      console.log('User ID:', userid);
-      console.log('Password:', password);
+      setIsSuccess(true);
+      
+      // After 1.5 seconds, reset success state
+      setTimeout(() => {
+        setIsSuccess(false);
+        console.log('User logged in with:', { userid, password });
+      }, 1500);
     }, 2000);
-  }
+  };
 
   // Function to toggle password visibility
-  function togglePassword() {
+  const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 flex items-center justify-center p-4 relative overflow-hidden">
       
+      {/* Animated Background Lines */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[20%] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-30 animate-[scan_4s_linear_infinite]" />
+        <div className="absolute top-[50%] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-30 animate-[scan_4s_linear_infinite_2s]" />
+        <div className="absolute top-[80%] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-30 animate-[scan_4s_linear_infinite_1s]" />
+      </div>
+
       {/* Login Box */}
-      <div className="w-full max-w-md bg-slate-800 rounded-3xl shadow-2xl border border-emerald-400/20 p-12">
+      <div className="w-full max-w-md bg-slate-800/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-emerald-400/20 p-12 relative z-10 animate-[slideIn_0.6s_ease-out]">
         
         {/* Logo and Title */}
         <div className="text-center mb-10">
-          <Shield className="w-14 h-14 text-emerald-400 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold text-emerald-400 mb-2 tracking-wider uppercase">
+          <div className="mb-4 animate-[pulse_2s_ease-in-out_infinite]">
+            <Shield className="w-14 h-14 text-emerald-400 mx-auto" style={{ filter: 'drop-shadow(0 0 20px rgba(52,211,153,0.5))' }} />
+          </div>
+          <h1 className="text-4xl font-bold text-emerald-400 mb-2 tracking-wider uppercase" style={{ textShadow: '0 0 20px rgba(52,211,153,0.5)' }}>
             FinCrime
           </h1>
           <p className="text-slate-400 text-sm tracking-widest">
@@ -48,53 +62,68 @@ export default function LoginPage() {
         </div>
 
         {/* User ID Input */}
-        <div className="mb-6">
-          <div className="relative">
-            <UserCircle className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
-            <input
-              type="text"
-              placeholder="User ID"
-              value={userid}
-              onChange={(e) => setUserid(e.target.value)}
-              className="w-full px-14 py-4 bg-slate-700/60 border-2 border-emerald-400/30 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400"
-            />
-          </div>
+        <div className="mb-6 relative">
+          <UserCircle className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
+          <input
+            type="text"
+            placeholder="User ID"
+            value={userid}
+            onChange={(e) => setUserid(e.target.value)}
+            className="w-full px-14 py-4 bg-slate-700/60 border-2 border-emerald-400/30 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:bg-slate-700/80 transition-all duration-300"
+            style={{ boxShadow: 'none' }}
+            onFocus={(e) => e.target.style.boxShadow = '0 0 20px rgba(52,211,153,0.2)'}
+            onBlur={(e) => e.target.style.boxShadow = 'none'}
+          />
         </div>
 
         {/* Password Input */}
-        <div className="mb-6">
-          <div className="relative">
-            <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-14 py-4 bg-slate-700/60 border-2 border-emerald-400/30 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400"
-            />
-            <button
-              onClick={togglePassword}
-              className="absolute right-5 top-1/2 -translate-y-1/2 text-emerald-400"
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
+        <div className="mb-6 relative">
+          <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
+          <input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-14 py-4 bg-slate-700/60 border-2 border-emerald-400/30 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:bg-slate-700/80 transition-all duration-300"
+            style={{ boxShadow: 'none' }}
+            onFocus={(e) => e.target.style.boxShadow = '0 0 20px rgba(52,211,153,0.2)'}
+            onBlur={(e) => e.target.style.boxShadow = 'none'}
+          />
+          
+          {/* Eye Icon to Toggle Password */}
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            className="absolute right-5 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-300 transition-colors"
+          >
+            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
         </div>
 
         {/* Login Button */}
         <button
           onClick={handleLogin}
-          disabled={isLoading}
-          className="w-full py-4 bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-slate-900 font-bold text-base uppercase tracking-widest rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+          disabled={isLoading || isSuccess || !userid || !password}
+          className="w-full py-4 bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-slate-900 font-bold text-base uppercase tracking-widest rounded-xl shadow-[0_8px_25px_rgba(52,211,153,0.3)] hover:shadow-[0_12px_35px_rgba(52,211,153,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 disabled:opacity-80 disabled:cursor-not-allowed relative overflow-hidden"
         >
-          {isLoading ? (
-            'Authenticating...'
-          ) : (
-            <span className="flex items-center justify-center gap-2">
-              <LogIn className="w-5 h-5" />
-              Login
-            </span>
-          )}
+          <span className="flex items-center justify-center gap-2">
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Authenticating...
+              </>
+            ) : isSuccess ? (
+              <>
+                <Check className="w-5 h-5" />
+                Access Granted
+              </>
+            ) : (
+              <>
+                <LogIn className="w-5 h-5" />
+                Login
+              </>
+            )}
+          </span>
         </button>
 
         {/* Footer Text */}
@@ -104,6 +133,28 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes scan {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `}</style>
     </div>
   );
 }
