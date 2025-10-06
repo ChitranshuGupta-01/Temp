@@ -1,42 +1,40 @@
-// src/app/hoc/withAuth.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSessionValid, clearSession } from "../utils/session";
 
-export default function withAuth(WrappedComponent: React.ComponentType<any>) {
-  const AuthenticatedComponent = (props: any) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const router = useRouter();
+export default function AuthWrapper({ children }: { children: React.ReactNode }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
 
-    useEffect(() => {
-      const checkAuth = async () => {
-        const valid = isSessionValid();
+  useEffect(() => {
+    const checkAuth = () => {
+      const valid = isSessionValid();
+      if (valid) {
+        setIsAuthenticated(true);
+      } else {
+        clearSession();
+        router.push("/login");
+      }
+      setIsLoading(false);
+    };
 
-        if (valid) {
-          setIsAuthenticated(true);
-        } else {
-          clearSession();
-          router.push("/login");
-        }
-        setIsLoading(false);
-      };
+    checkAuth();
+  }, [router]);
 
-      checkAuth();
-    }, [router]);
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
 
-    if (isLoading) {
-      return <div style={{ textAlign: "center", marginTop: "50px" }}>Loading...</div>;
-    }
+  if (!isAuthenticated) {
+    return null;
+  }
 
-    if (!isAuthenticated) {
-      return null;
-    }
-
-    return <WrappedComponent {...props} />;
-  };
-
-  return AuthenticatedComponent;
+  return <>{children}</>;
 }
