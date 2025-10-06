@@ -1,35 +1,6 @@
-{
-  "name": "ksphere-apps",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "NODE_EXTRA_CA_CERTS=/Users/1623972/Library/CloudStorage/OneDrive-StandardCharteredBank/Documents/ADO/52003-sma-dags/include/cacerts/ca_cert_bundle.crt next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@databricks/sql": "^1.11.0",
-    "cross-env": "^10.1.0",
-    "http-proxy-agent": "^7.0.2",
-    "https-proxy-agent": "^7.0.6",
-    "lucide-react": "^0.540.0",
-    "next": "15.5.0",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "undici": "^7.15.0",
-    "yarn": "^1.22.22"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.0",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  }
-}
+PS C:\Users\2030937\Downloads\52003-ksphereapps-1\52003-ksphereapps-1> npm run dev
+
+> ksphere-apps@0.1.0 dev
+> cross-env NODE_EXTRA_CA_CERTS="/Users/1623972/Library/CloudStorage/OneDrive-StandardCharteredBank/Documents/ADO/52003-sma-dags/include/cacerts/ca_cert_bundle.crt" next dev --turbopack
+
+This program is blocked by group policy. For more information, contact your system administrator.
