@@ -1,28 +1,42 @@
-// src/app/utils/session.js
+// src/app/hoc/withAuth.tsx
+"use client";
 
-// Save token + expiry (15 minutes)
-export function setSession(token) {
-  const expiry = Date.now() + 15 * 60 * 1000; // 15 min
-  sessionStorage.setItem("authToken", token);
-  sessionStorage.setItem("expiry", expiry.toString());
-}
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { isSessionValid, clearSession } from "../utils/session";
 
-// Get token from sessionStorage
-export function getToken() {
-  return sessionStorage.getItem("authToken");
-}
+export default function withAuth(WrappedComponent: React.ComponentType<any>) {
+  const AuthenticatedComponent = (props: any) => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const router = useRouter();
 
-// Clear session
-export function clearSession() {
-  sessionStorage.removeItem("authToken");
-  sessionStorage.removeItem("expiry");
-}
+    useEffect(() => {
+      const checkAuth = async () => {
+        const valid = isSessionValid();
 
-// Validate token and expiry
-export function isSessionValid() {
-  const token = sessionStorage.getItem("authToken");
-  const expiry = sessionStorage.getItem("expiry");
+        if (valid) {
+          setIsAuthenticated(true);
+        } else {
+          clearSession();
+          router.push("/login");
+        }
+        setIsLoading(false);
+      };
 
-  if (!token || !expiry) return false;
-  return Date.now() < parseInt(expiry);
+      checkAuth();
+    }, [router]);
+
+    if (isLoading) {
+      return <div style={{ textAlign: "center", marginTop: "50px" }}>Loading...</div>;
+    }
+
+    if (!isAuthenticated) {
+      return null;
+    }
+
+    return <WrappedComponent {...props} />;
+  };
+
+  return AuthenticatedComponent;
 }
