@@ -1,12 +1,5 @@
-"use client";
-import { useRouter } from "next/navigation";
+Hello Sir,
+Hope you’re doing well. I wanted to share a quick update that I’ve started working under the guidance of Abhiram Sir. I also wanted to check if there’s a specific day when I should visit the office. Additionally, I’d be glad to meet you in person whenever it’s convenient for you.
 
-const Events: React.FC<EventsProps> = (props) => {
-  const router = useRouter();
-
-  // ✅ Navigate using relationshipId instead of caseId
-  const handleGraphClick = (e: any, relationshipId: string) => {
-    e.stopPropagation();
-    console.log("Navigating to Graph Page for Relationship ID:", relationshipId);
-    router.push(`/fincrime/graph?relationshipId=${relationshipId}`);
-  };
+Best regards,
+Chitranshu
