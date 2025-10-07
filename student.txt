@@ -1,5 +1,12 @@
-  const handleGraphClick = (e: any, caseId: string) => {
-    e.stopPropagation(); // prevent triggering other parent click events if any
-    console.log("Navigating to Graph Page for Case:", caseId);
-    router.push(`/fincrime/graph?caseId=${caseId}`);
+"use client";
+import { useRouter } from "next/navigation";
+
+const Events: React.FC<EventsProps> = (props) => {
+  const router = useRouter();
+
+  // ✅ Navigate using relationshipId instead of caseId
+  const handleGraphClick = (e: any, relationshipId: string) => {
+    e.stopPropagation();
+    console.log("Navigating to Graph Page for Relationship ID:", relationshipId);
+    router.push(`/fincrime/graph?relationshipId=${relationshipId}`);
   };
