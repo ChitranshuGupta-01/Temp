@@ -1,60 +1,99 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { use } from "react";
-import AuthWrapper from "@/app/Authwrapper";
-import CaseDetails from "@/app/fincrime/components/CaseDetails";
-import CaseRelationDiagram from "@/app/fincrime/components/CaseRelationDiagram";
-import PastEventsLog from "@/app/fincrime/components/PastEventsLog";
-import RelatedTransactions from "@/app/fincrime/components/RelatedTransactions";
+import React from "react";
+import Header from "../components/Header";
+import Profile from "../components/Profile";
+import Accounts from "../components/Accounts";
+import CASASummary from "../components/CASASummary";
+import Events from "../components/Events";
 
-export default function AnalysisPage({ 
-  params 
-}: { 
-  params: Promise<{ type: string; id: string }> 
-}) {
-  const { type, id } = use(params);
-  const [data, setData] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+import {
+  fetchCASAContact, fetchCustomerCASA,
+  fetchCASACorperateProfile, fetchCASACustomers, fetchCASADeposists, fetchCASATransactions
+} from "../services/ebbs";
 
-  useEffect(() => {
-    fetch("/data/caseData.json")
-      .then((res) => res.json())
-      .then((d) => setData(d))
-      .finally(() => setLoading(false));
-  }, [type, id]);
+import {fetchICMProfile, fetchICMCrossProducts} from "../services/icm";
 
-  if (loading) {
-    return (
-      <AuthWrapper>
-        <div className="p-12 text-center">Loading case...</div>
-      </AuthWrapper>
-    );
+import DatabricksClient from "../services/databricks";
+
+const AnalysisPage = async ({
+  searchParams
+}: {
+  searchParams: { [key: string]: string | undefined };
+}) => {
+
+  const type = searchParams?.type || "";
+  let value = searchParams?.value || "";
+  let relId = "";
+  var [contacts, customer, coperateProfile, deposists,casaCustomer, transactions, tmxLogs,
+    profileICM, productsICM]: any = [{}, {}, {},{},[],[],[], [], []];
+  if (type == "accountNumber") {
+     [casaCustomer, transactions] = await Promise.all([fetchCASACustomers(value),
+      fetchCASATransactions(value)
+    ]);
+    try {
+      console.log(casaCustomer["data"][0]["attributes"]["casa-customers"][0]["profile-id"]);
+      relId = casaCustomer["data"] ?
+        casaCustomer["data"][0]["attributes"]["casa-customers"][0]["profile-id"] : "";
+    } catch (error) {
+      console.error("Error extracting profile-id from data:", error);
+      relId = ""; // Fallback value in case of error
+    }
+  }
+  if (type == "relationshipId") {
+      relId = value;
   }
 
-  if (!data) {
-    return (
-      <AuthWrapper>
-        <div className="p-12 text-center text-red-500">Failed to load data</div>
-      </AuthWrapper>
-    );
+  // console.log("@@@");
+  // console.log(relId)
+  // console.log(value)
+
+
+
+  if (relId) {
+    // Fetch data concurrently
+    const DBRClient:any = new DatabricksClient();
+    [contacts, customer, coperateProfile, deposists, profileICM, productsICM, tmxLogs] = await Promise.all([
+      fetchCASAContact(relId),
+      fetchCustomerCASA(relId),
+      fetchCASACorperateProfile(relId),
+      fetchCASADeposists(relId),
+      fetchICMProfile(relId),
+      fetchICMCrossProducts(relId),
+      //DBRClient.runQuery(),
+      []
+    ]);
+
+  } else {
+    console.log("No value provided in searchParams.");
   }
 
   return (
-    <AuthWrapper>
-      <div className="min-h-screen bg-gray-50 p-6 space-y-8">
-        <div className="max-w-7xl mx-auto">
-          <CaseDetails caseData={data.case} />
-        </div>
-        
-        <div className="max-w-7xl mx-auto space-y-8">
-          <CaseRelationDiagram relation={data.relationDiagram} />
-          
-          <div className="space-y-6">
-            <PastEventsLog events={data.pastEvents} />
-            <RelatedTransactions transactions={data.transactions} />
+    <div>
+      <Header value={value} type={type} />
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl border overflow-hidden">
+            <Profile contacts={contacts}
+              customer={customer}
+              coperateProfile={coperateProfile}
+              deposists={deposists} />
+          </div>
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl border overflow-hidden">
+            <Accounts contacts={contacts}
+              customer={customer}
+              coperateProfile={coperateProfile}
+              deposists={deposists}/>
           </div>
         </div>
+        <div className="bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-gray-200  overflow-hidden mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+              <CASASummary>
+              </CASASummary>
+            </div>
+        </div>
+        <Events transactions={transactions} tmxLogs={tmxLogs}></Events>
       </div>
-    </AuthWrapper>
+    </div>
   );
-}
+};
+
+export default AnalysisPage;
