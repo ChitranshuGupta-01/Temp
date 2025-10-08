@@ -1,115 +1,182 @@
 "use client";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import ReactFlow, { Background, Controls, MiniMap, Node, Edge } from "reactflow";
+import { ZoomIn, ZoomOut, Maximize2, Minimize2, FileText } from "lucide-react";
 import 'reactflow/dist/style.css';
 
 export default function CaseRelationDiagram({ relation }: { relation: any }) {
-  // nodes roughly positioned like the screenshot
+  const [zoom, setZoom] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   const nodes: Node[] = [
     {
       id: "case",
       position: { x: 100, y: 40 },
       data: {
         label: (
-          <div className="rounded-lg p-3 bg-gradient-to-r from-red-400 to-red-300 text-white shadow">
-            <div className="font-bold">Case</div>
+          <div className="rounded-lg p-3 bg-gradient-to-r from-red-500 to-red-400 text-white shadow-md">
+            <div className="font-bold text-base">Case</div>
             <div className="text-xs mt-1">Case ID: {relation.case.caseId}</div>
             <div className="text-xs">Date: {relation.case.date}</div>
+            <div className="text-xs">Status: {relation.case.status}</div>
           </div>
-        )
+        ),
       },
-      style: { width: 200, height: 90 }
+      style: { width: 200, height: 120 },
     },
     {
       id: "profile",
       position: { x: 420, y: 20 },
       data: {
         label: (
-          <div className="rounded-lg p-3 bg-gradient-to-r from-blue-400 to-blue-300 text-white shadow">
-            <div className="font-bold">Profile</div>
-            <div className="text-xs mt-1">{relation.profile.name} ({relation.profile.id})</div>
+          <div className="rounded-lg p-3 bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-md">
+            <div className="font-bold text-base">Profile</div>
+            <div className="text-xs mt-1">{relation.profile.name}</div>
+            <div className="text-xs">{relation.profile.id}</div>
           </div>
-        )
+        ),
       },
-      style: { width: 200, height: 110 }
+      style: { width: 200, height: 120 },
     },
     {
       id: "txn",
       position: { x: 40, y: 220 },
       data: {
         label: (
-          <div className="rounded-lg p-3 bg-gradient-to-r from-indigo-400 to-indigo-300 text-white shadow">
-            <div className="font-bold">Transaction Detail</div>
-            <div className="text-xs mt-1">{relation.transaction.type} - {relation.transaction.id}</div>
+          <div className="rounded-lg p-3 bg-gradient-to-r from-indigo-500 to-indigo-400 text-white shadow-md">
+            <div className="font-bold text-base">Transaction Detail</div>
+            <div className="text-xs mt-1">
+              {relation.transaction.type} - {relation.transaction.id}
+            </div>
             <div className="text-xs">{relation.transaction.amount}</div>
           </div>
-        )
+        ),
       },
-      style: { width: 220, height: 120 }
+      style: { width: 220, height: 120 },
     },
     {
       id: "bene",
       position: { x: 320, y: 220 },
       data: {
         label: (
-          <div className="rounded-lg p-3 bg-yellow-400 text-white shadow">
-            <div className="font-bold">Beneficiary Detail</div>
+          <div className="rounded-lg p-3 bg-gradient-to-r from-yellow-400 to-yellow-300 text-white shadow-md">
+            <div className="font-bold text-base">Beneficiary Detail</div>
             <div className="text-xs mt-1">{relation.beneficiary.name}</div>
             <div className="text-xs">{relation.beneficiary.amount}</div>
           </div>
-        )
+        ),
       },
-      style: { width: 200, height: 100 }
+      style: { width: 200, height: 100 },
     },
     {
       id: "activity",
-      position: { x: 520, y: 220 },
+      position: { x: 560, y: 220 },
       data: {
         label: (
-          <div className="rounded-lg p-3 bg-pink-400 text-white shadow">
-            <div className="font-bold">Last 5 Activity</div>
-            <div className="text-xs mt-1">{relation.last5Activity.map((a:any) => a.id).join(", ")}</div>
+          <div className="rounded-lg p-3 bg-gradient-to-r from-pink-500 to-pink-400 text-white shadow-md">
+            <div className="font-bold text-base">Last 5 Activity</div>
+            <div className="text-xs mt-1">
+              {relation.last5Activity.map((a: any) => a.id).join(", ")}
+            </div>
           </div>
-        )
+        ),
       },
-      style: { width: 240, height: 120 }
-    }
+      style: { width: 240, height: 120 },
+    },
   ];
 
   const edges: Edge[] = [
-    { id: 'e1', source: 'case', target: 'profile', animated: true },
-    { id: 'e2', source: 'case', target: 'txn', animated: true },
-    { id: 'e3', source: 'txn', target: 'bene', animated: true },
-    { id: 'e4', source: 'profile', target: 'activity', animated: true },
-    { id: 'e5', source: 'case', target: 'bene', animated: true }
+    { id: "e1", source: "case", target: "profile", animated: true },
+    { id: "e2", source: "case", target: "txn", animated: true },
+    { id: "e3", source: "txn", target: "bene", animated: true },
+    { id: "e4", source: "profile", target: "activity", animated: true },
+    { id: "e5", source: "case", target: "bene", animated: true },
   ];
 
-  const onInit = useCallback((instance:any) => {
-    // optional: fit view on init
+  const onInit = useCallback((instance: any) => {
     instance.fitView({ padding: 0.1 });
   }, []);
 
+  const handleZoomIn = () => setZoom((z) => Math.min(z + 0.2, 2));
+  const handleZoomOut = () => setZoom((z) => Math.max(z - 0.2, 0.5));
+  const toggleFullscreen = () => setIsFullscreen((f) => !f);
+
   return (
-    <div className="bg-white rounded-xl shadow border border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h4 className="text-lg font-bold">Case Relation Diagram</h4>
-          <p className="text-sm text-gray-500">Visual relations between case, profile, transactions and beneficiaries</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="px-3 py-2 rounded bg-gray-50 border hover:bg-gray-100 text-sm">100%</button>
-          <button className="px-3 py-2 rounded bg-gray-50 border hover:bg-gray-100 text-sm">Zoom</button>
+    <div
+      className={`rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 ${
+        isFullscreen
+          ? "fixed inset-4 z-50 bg-white"
+          : "h-[600px] bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50"
+      }`}
+    >
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-slate-50 to-orange-50 px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          {/* Case Info */}
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-r from-orange-300 to-orange-400 rounded-lg">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Case #{relation.case.caseId || "223456"}
+              </h2>
+              <p className="text-sm text-gray-600">Case Relation Diagram</p>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 bg-white rounded-lg border border-gray-200 p-1">
+              <button
+                onClick={handleZoomOut}
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-all duration-200"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <span className="px-2 text-sm font-medium text-gray-700 min-w-[3rem] text-center">
+                {Math.round(zoom * 100)}%
+              </span>
+              <button
+                onClick={handleZoomIn}
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-all duration-200"
+                title="Zoom In"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+            </div>
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 hover:scale-105"
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="w-5 h-5" />
+              ) : (
+                <Maximize2 className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div style={{ height: 420 }} className="rounded border border-dashed border-gray-200 overflow-hidden">
-        <ReactFlow nodes={nodes} edges={edges} onInit={onInit} fitView>
-          <Background color="#f3f4f6" gap={12} />
+      {/* Diagram Area */}
+      <div className="relative flex-1 overflow-hidden">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onInit={onInit}
+          fitView
+          zoomOnScroll={false}
+          zoomOnPinch={false}
+          minZoom={0.5}
+          maxZoom={2}
+        >
+          <Background color="#f3f4f6" gap={18} />
           <Controls />
-        
         </ReactFlow>
       </div>
     </div>
   );
 }
-
