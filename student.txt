@@ -1,335 +1,549 @@
-"use client";
-import React, { useState } from "react";
-import {
-  FileText,
-  AlertTriangle,
-  User,
-  Calendar,
-  X,
-  Edit,
-  Trash2,
-  Download,
-} from "lucide-react";
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
+import { Maximize2, Minimize2, ZoomIn, ZoomOut, FileText } from 'lucide-react';
+import { Entity, Connection } from '../types';
 
-export default function CaseDetails({ caseData }: { caseData: any }) {
-  const [notes, setNotes] = useState<{ id: number; text: string }[]>([]);
-  const [showNoteInput, setShowNoteInput] = useState(false);
-  const [noteText, setNoteText] = useState("");
-  const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
-  const [status, setStatus] = useState(caseData.status || "Active");
-  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
-
-  // ✅ Utility color functions
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800";
-      case "under review":
-        return "bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800";
-      case "closed":
-        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800";
-      default:
-        return "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800";
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority?.toLowerCase()) {
-      case "high":
-        return "bg-gradient-to-r from-red-100 to-pink-100 text-red-800";
-      case "medium":
-        return "bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800";
-      case "low":
-        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800";
-      default:
-        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800";
-    }
-  };
-
-  const getRiskScoreColor = (score: number) => {
-    if (score >= 80) return "text-red-600 bg-red-50";
-    if (score >= 60) return "text-orange-600 bg-orange-50";
-    if (score >= 40) return "text-yellow-600 bg-yellow-50";
-    return "text-green-600 bg-green-50";
-  };
-
-  // ✅ Add or Update Note
-  const handleSaveNote = () => {
-    if (noteText.trim() === "") return;
-    if (editingNoteId !== null) {
-      setNotes((prev) =>
-        prev.map((note) =>
-          note.id === editingNoteId ? { ...note, text: noteText } : note
-        )
-      );
-      setEditingNoteId(null);
-    } else {
-      setNotes([...notes, { id: Date.now(), text: noteText }]);
-    }
-    setNoteText("");
-    setShowNoteInput(false);
-  };
-
-  // ✅ Edit Note
-  const handleEditNote = (id: number, text: string) => {
-    setEditingNoteId(id);
-    setNoteText(text);
-    setShowNoteInput(true);
-  };
-
-  // ✅ Delete Note
-  const handleDeleteNote = (id: number) => {
-    setNotes(notes.filter((note) => note.id !== id));
-  };
-
-  // ✅ Update Status
-  const handleStatusChange = (newStatus: string) => {
-    setStatus(newStatus);
-    setShowStatusDropdown(false);
-  };
-
-  // ✅ Generate Report
-  const handleGenerateReport = () => {
-    const reportContent = `
---- Case Report ---
-Case ID: ${caseData.id}
-Title: ${caseData.title}
-Status: ${status}
-Priority: ${caseData.priority}
-Assignee: ${caseData.assignee}
-Profile: ${caseData.profile?.name} (${caseData.profile?.id})
-Created: ${caseData.created}
-Updated: ${caseData.updated}
-Risk Score: ${caseData.riskScore}/100
-Description: ${caseData.description}
-
-Notes:
-${
-  notes.length > 0
-    ? notes.map((n, i) => `${i + 1}. ${n.text}`).join("\n")
-    : "No notes yet."
+interface ERDiagramProps {
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }
--------------------
-    `;
 
-    const blob = new Blob([reportContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Case_${caseData.id}_Report.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+const ERDiagram: React.FC<ERDiagramProps> = ({ isFullscreen, onToggleFullscreen }) => {
+  const { caseNumber } = useParams<{ caseNumber: string }>();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragEntity, setDragEntity] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [lastPanOffset, setLastPanOffset] = useState({ x: 0, y: 0 });
+
+  const [entities, setEntities] = useState<Entity[]>([
+    {
+      id: 'case',
+      name: 'Case',
+      x: 200,
+      y: 100,
+      width: 200,
+      height: 160,
+      color: '#EF4444',
+      fields: [
+        { name: 'Case ID', type: 'VARCHAR(50)', sampleValue: `CASE-2024-${caseNumber?.slice(-3) || '001'}`, isPrimaryKey: true },
+        { name: 'Date', type: 'DATE', sampleValue: '2024-01-15' },
+        { name: 'Status', type: 'VARCHAR(20)', sampleValue: 'Active' },
+        { name: 'Decision', type: 'VARCHAR(50)', sampleValue: 'Approved' },
+        { name: 'Type', type: 'VARCHAR(30)', sampleValue: 'Investigation' }
+      ]
+    },
+    {
+      id: 'profile',
+      name: 'Profile',
+      x: 550,
+      y: 120,
+      width: 200,
+      height: 180,
+      color: '#3B82F6',
+      fields: [
+        { name: 'Profile ID', type: 'VARCHAR(50)', sampleValue: 'PROF-789', isPrimaryKey: true },
+        { name: 'Name', type: 'VARCHAR(100)', sampleValue: 'John Doe' },
+        { name: 'MMN', type: 'VARCHAR(50)', sampleValue: 'Smith' },
+        { name: 'Gender', type: 'VARCHAR(10)', sampleValue: 'Male' },
+        { name: 'DOB', type: 'DATE', sampleValue: '1985-03-22' },
+        { name: 'Case ID', type: 'VARCHAR(50)', sampleValue: `CASE-2024-${caseNumber?.slice(-3) || '001'}`, isForeignKey: true }
+      ]
+    },
+    {
+      id: 'trans_detail',
+      name: 'Transaction Detail',
+      x: 50,
+      y: 320,
+      width: 220,
+      height: 220,
+      color: '#8B5CF6',
+      fields: [
+        { name: 'Trans ID', type: 'VARCHAR(50)', sampleValue: 'TXN-456123', isPrimaryKey: true },
+        { name: 'Type', type: 'VARCHAR(30)', sampleValue: 'Wire Transfer' },
+        { name: 'Amount', type: 'DECIMAL(10,2)', sampleValue: '$15,000.00' },
+        { name: 'Frequency', type: 'INT', sampleValue: '3' },
+        { name: 'Recent Date', type: 'DATE', sampleValue: '2024-01-10' },
+        { name: 'Beneficiary', type: 'VARCHAR(100)', sampleValue: 'ABC Corp' },
+        { name: 'Account', type: 'VARCHAR(20)', sampleValue: '****1234' },
+        { name: 'From Account', type: 'VARCHAR(20)', sampleValue: '****5678' },
+        { name: 'Case ID', type: 'VARCHAR(50)', sampleValue: `CASE-2024-${caseNumber?.slice(-3) || '001'}`, isForeignKey: true }
+      ]
+    },
+    {
+      id: 'rule',
+      name: 'Rule',
+      x: 120,
+      y: 580,
+      width: 180,
+      height: 140,
+      color: '#10B981',
+      fields: [
+        { name: 'Rule ID', type: 'VARCHAR(50)', sampleValue: 'RULE-001', isPrimaryKey: true },
+        { name: 'Rule Name', type: 'VARCHAR(100)', sampleValue: 'High Amount Alert' },
+        { name: 'Policy', type: 'TEXT', sampleValue: 'Flag transactions > $10K' },
+        { name: 'Case ID', type: 'VARCHAR(50)', sampleValue: `CASE-2024-${caseNumber?.slice(-3) || '001'}`, isForeignKey: true }
+      ]
+    },
+    {
+      id: 'bene_detail',
+      name: 'Beneficiary Detail',
+      x: 380,
+      y: 420,
+      width: 200,
+      height: 160,
+      color: '#F59E0B',
+      fields: [
+        { name: 'Bene ID', type: 'VARCHAR(50)', sampleValue: 'BENE-789', isPrimaryKey: true },
+        { name: 'Name', type: 'VARCHAR(100)', sampleValue: 'ABC Corp' },
+        { name: 'Amount', type: 'DECIMAL(10,2)', sampleValue: '$15,000.00' },
+        { name: 'Gender', type: 'VARCHAR(10)', sampleValue: 'N/A' },
+        { name: 'Added Date', type: 'DATE', sampleValue: '2023-12-01' },
+        { name: 'Trans ID', type: 'VARCHAR(50)', sampleValue: 'TXN-456123', isForeignKey: true }
+      ]
+    },
+    {
+      id: 'last_5_activity',
+      name: 'Last 5 Activity',
+      x: 620,
+      y: 350,
+      width: 220,
+      height: 200,
+      color: '#EC4899',
+      fields: [
+        { name: 'EVT-015', type: '2024-01-15', sampleValue: 'Login Attempt' },
+        { name: 'EVT-014', type: '2024-01-14', sampleValue: 'Transaction Alert' },
+        { name: 'EVT-013', type: '2024-01-13', sampleValue: 'Profile Update' },
+        { name: 'EVT-012', type: '2024-01-12', sampleValue: 'Password Change' },
+        { name: 'EVT-011', type: '2024-01-11', sampleValue: 'Device Registration' }
+      ]
+    }
+  ]);
+
+  const [connections] = useState<Connection[]>([
+    { id: '1', from: 'case', to: 'profile', fromField: 'Case ID', toField: 'Case ID', type: 'one-to-many' },
+    { id: '2', from: 'case', to: 'trans_detail', fromField: 'Case ID', toField: 'Case ID', type: 'one-to-many' },
+    { id: '3', from: 'case', to: 'rule', fromField: 'Case ID', toField: 'Case ID', type: 'one-to-many' },
+    { id: '4', from: 'trans_detail', to: 'bene_detail', fromField: 'Trans ID', toField: 'Trans ID', type: 'one-to-many' },
+    { id: '5', from: 'profile', to: 'last_5_activity', fromField: 'Profile ID', toField: 'Profile ID', type: 'one-to-many' }
+  ]);
+
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 0.2, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 0.2, 0.5));
+  };
+
+  const drawGrid = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    ctx.strokeStyle = '#f8fafc';
+    ctx.lineWidth = 1;
+    
+    const gridSize = 25 * zoom;
+    
+    for (let x = panOffset.x % gridSize; x <= width; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    
+    for (let y = panOffset.y % gridSize; y <= height; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+  }, [zoom, panOffset]);
+
+  const getFieldPosition = (entity: Entity, fieldName: string) => {
+    const fieldIndex = entity.fields.findIndex(f => f.name === fieldName);
+    if (fieldIndex === -1) return { 
+      x: (entity.x + entity.width / 2) * zoom + panOffset.x, 
+      y: (entity.y + entity.height / 2) * zoom + panOffset.y 
+    };
+    
+    const fieldY = entity.y + 50 + fieldIndex * 24;
+    return {
+      x: (entity.x + entity.width) * zoom + panOffset.x,
+      y: (fieldY + 8) * zoom + panOffset.y
+    };
+  };
+
+  const drawEntity = useCallback((ctx: CanvasRenderingContext2D, entity: Entity) => {
+    const x = entity.x * zoom + panOffset.x;
+    const y = entity.y * zoom + panOffset.y;
+    const width = entity.width * zoom;
+    const height = entity.height * zoom;
+    
+    // Draw shadow
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+    ctx.shadowBlur = 12 * zoom;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4 * zoom;
+    
+    // Draw main rectangle with rounded corners
+    const radius = 12 * zoom;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, radius);
+    ctx.fill();
+    
+    // Draw border
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 2 * zoom;
+    ctx.stroke();
+    
+    // Reset shadow
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    
+    // Draw title background with gradient
+    const gradient = ctx.createLinearGradient(x, y, x, y + 40 * zoom);
+    gradient.addColorStop(0, entity.color);
+    gradient.addColorStop(1, entity.color + 'CC');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, 40 * zoom, [radius, radius, 0, 0]);
+    ctx.fill();
+    
+    // Draw title
+    ctx.fillStyle = 'white';
+    ctx.font = `bold ${16 * zoom}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(entity.name, x + width / 2, y + 26 * zoom);
+    
+    // Special handling for Last 5 Activity entity
+    if (entity.id === 'last_5_activity') {
+      // Draw table headers
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#374151';
+      ctx.font = `bold ${11 * zoom}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+      
+      const headerY = y + 55 * zoom;
+      ctx.fillText('Event ID', x + 8 * zoom, headerY);
+      ctx.fillText('Date', x + 80 * zoom, headerY);
+      ctx.fillText('Type', x + 140 * zoom, headerY);
+      
+      // Draw header separator line
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(x + 8 * zoom, headerY + 5 * zoom);
+      ctx.lineTo(x + width - 8 * zoom, headerY + 5 * zoom);
+      ctx.stroke();
+      
+      // Draw activity rows
+      ctx.font = `${10 * zoom}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+      entity.fields.forEach((field, index) => {
+        const rowY = headerY + 20 * zoom + index * 18 * zoom;
+        
+        // Alternate row background
+        if (index % 2 === 0) {
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(x + 4 * zoom, rowY - 8 * zoom, width - 8 * zoom, 16 * zoom);
+        }
+        
+        // Event ID
+        ctx.fillStyle = '#1e40af';
+        ctx.fillText(field.name, x + 8 * zoom, rowY + 4 * zoom);
+        
+        // Date
+        ctx.fillStyle = '#374151';
+        ctx.fillText(field.type, x + 80 * zoom, rowY + 4 * zoom);
+        
+        // Event Type (truncated)
+        ctx.fillStyle = '#6b7280';
+        const eventType = field.sampleValue.length > 12 ? field.sampleValue.substring(0, 12) + '...' : field.sampleValue;
+        ctx.fillText(eventType, x + 140 * zoom, rowY + 4 * zoom);
+      });
+    } else {
+      // Draw fields for other entities
+      ctx.textAlign = 'left';
+      
+      entity.fields.forEach((field, index) => {
+        const fieldY = y + 50 * zoom + index * 24 * zoom;
+        
+        // Field background on hover (simplified for demo)
+        if (index % 2 === 0) {
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(x + 1 * zoom, fieldY - 2 * zoom, width - 2 * zoom, 20 * zoom);
+        }
+        
+        // Field name
+        if (field.isPrimaryKey) {
+          ctx.fillStyle = '#1e40af';
+          ctx.font = `bold ${12 * zoom}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+          // Draw key icon
+          ctx.fillText('🔑', x + 8 * zoom, fieldY + 12 * zoom);
+          ctx.fillText(field.name, x + 28 * zoom, fieldY + 12 * zoom);
+        } else if (field.isForeignKey) {
+          ctx.fillStyle = '#dc2626';
+          ctx.font = `${12 * zoom}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+          // Draw link icon
+          ctx.fillText('🔗', x + 8 * zoom, fieldY + 12 * zoom);
+          ctx.fillText(field.name, x + 28 * zoom, fieldY + 12 * zoom);
+        } else {
+          ctx.fillStyle = '#374151';
+          ctx.font = `${12 * zoom}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+          ctx.fillText(field.name, x + 12 * zoom, fieldY + 12 * zoom);
+        }
+        
+        // Sample value
+        ctx.fillStyle = '#6b7280';
+        ctx.font = `${11 * zoom}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.textAlign = 'right';
+        ctx.fillText(field.sampleValue, x + width - 12 * zoom, fieldY + 12 * zoom);
+        ctx.textAlign = 'left';
+      });
+    }
+  }, [zoom, panOffset]);
+
+  const drawConnection = useCallback((ctx: CanvasRenderingContext2D, connection: Connection) => {
+    const fromEntity = entities.find(e => e.id === connection.from);
+    const toEntity = entities.find(e => e.id === connection.to);
+    
+    if (!fromEntity || !toEntity) return;
+    
+    const fromPos = getFieldPosition(fromEntity, connection.fromField);
+    const toPos = getFieldPosition(toEntity, connection.toField);
+    
+    // Draw connection line with bezier curve
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 2 * zoom;
+    ctx.setLineDash([]);
+    
+    const midX = (fromPos.x + toPos.x) / 2;
+    
+    ctx.beginPath();
+    ctx.moveTo(fromPos.x, fromPos.y);
+    ctx.bezierCurveTo(
+      midX, fromPos.y,
+      midX, toPos.y,
+      toPos.x - 8 * zoom, toPos.y
+    );
+    ctx.stroke();
+    
+    // Draw arrow
+    const arrowSize = 8 * zoom;
+    ctx.fillStyle = '#6366f1';
+    ctx.beginPath();
+    ctx.moveTo(toPos.x - 8 * zoom, toPos.y);
+    ctx.lineTo(toPos.x - 8 * zoom - arrowSize, toPos.y - arrowSize/2);
+    ctx.lineTo(toPos.x - 8 * zoom - arrowSize, toPos.y + arrowSize/2);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Draw connection points
+    ctx.fillStyle = '#6366f1';
+    ctx.beginPath();
+    ctx.arc(fromPos.x, fromPos.y, 4 * zoom, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.arc(toPos.x - 8 * zoom, toPos.y, 4 * zoom, 0, 2 * Math.PI);
+    ctx.fill();
+  }, [entities, zoom, panOffset, getFieldPosition]);
+
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Clear canvas with gradient background
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, '#f8fafc');
+    gradient.addColorStop(1, '#f1f5f9');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw grid
+    drawGrid(ctx, canvas.width, canvas.height);
+    
+    // Draw connections first (so they appear behind entities)
+    connections.forEach(connection => drawConnection(ctx, connection));
+    
+    // Draw entities
+    entities.forEach(entity => drawEntity(ctx, entity));
+  }, [entities, connections, drawGrid, drawEntity, drawConnection]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const resizeCanvas = () => {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      draw();
+    };
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    return () => window.removeEventListener('resize', resizeCanvas);
+  }, [draw]);
+
+  useEffect(() => {
+    draw();
+  }, [draw]);
+
+  const getEntityAt = (x: number, y: number): Entity | null => {
+    return entities.find(entity => {
+      const entityX = entity.x * zoom + panOffset.x;
+      const entityY = entity.y * zoom + panOffset.y;
+      const entityWidth = entity.width * zoom;
+      const entityHeight = entity.height * zoom;
+      
+      return x >= entityX && x <= entityX + entityWidth &&
+             y >= entityY && y <= entityY + entityHeight;
+    }) || null;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const entity = getEntityAt(x, y);
+    
+    if (entity) {
+      // Entity dragging
+      setIsDragging(true);
+      setDragEntity(entity.id);
+      const entityX = entity.x * zoom + panOffset.x;
+      const entityY = entity.y * zoom + panOffset.y;
+      setDragOffset({ x: x - entityX, y: y - entityY });
+    } else {
+      // Canvas panning
+      setIsPanning(true);
+      setPanStart({ x, y });
+      setLastPanOffset({ ...panOffset });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    if (isDragging && dragEntity) {
+      // Entity dragging
+      setEntities(prev => prev.map(entity => 
+        entity.id === dragEntity
+          ? { 
+              ...entity, 
+              x: (x - dragOffset.x - panOffset.x) / zoom, 
+              y: (y - dragOffset.y - panOffset.y) / zoom 
+            }
+          : entity
+      ));
+    } else if (isPanning) {
+      // Canvas panning
+      const deltaX = x - panStart.x;
+      const deltaY = y - panStart.y;
+      setPanOffset({
+        x: lastPanOffset.x + deltaX,
+        y: lastPanOffset.y + deltaY
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setDragEntity(null);
+    setIsPanning(false);
+  };
+
+  const getCursor = () => {
+    if (isDragging) return 'grabbing';
+    if (isPanning) return 'grabbing';
+    return 'grab';
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-      {/* ---------- HEADER ---------- */}
-      <div className="px-6 py-5 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white">
-        <div className="flex items-center space-x-4">
-          <div className="p-3 bg-gradient-to-r from-orange-200 to-orange-300 rounded-xl shadow-md">
-            <FileText className="w-6 h-6 text-white" />
+    <div className={`rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 ${
+      isFullscreen ? 'fixed inset-4 z-50 bg-white' : 'h-[600px] bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50'
+    }`}>
+      {/* Header with Case Number and Controls */}
+      <div className="bg-gradient-to-r from-slate-50 to-orange-50 px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          {/* Case Number */}
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-r from-orange-200 to-orange-300 rounded-lg">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Case #{caseNumber || '223456'}</h2>
+              <p className="text-sm text-gray-600">Case Relation Diagram</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              Case #{caseData.id}
-            </h2>
-            <p className="text-sm text-gray-600">{caseData.title}</p>
+          
+          {/* Controls */}
+          <div className="flex items-center space-x-2">
+            {/* Zoom Controls */}
+            <div className="flex items-center space-x-1 bg-white rounded-lg border border-gray-200 p-1">
+              <button
+                onClick={handleZoomOut}
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-all duration-200"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <span className="px-2 text-sm font-medium text-gray-700 min-w-[3rem] text-center">
+                {Math.round(zoom * 100)}%
+              </span>
+              <button
+                onClick={handleZoomIn}
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-all duration-200"
+                title="Zoom In"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+            </div>
+            
+            {/* Fullscreen Toggle */}
+            <button
+              onClick={onToggleFullscreen}
+              className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 hover:scale-105"
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+            </button>
           </div>
-        </div>
-
-        <div className="flex flex-wrap items-center space-x-2 mt-3 sm:mt-0">
-          <span
-            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${getStatusColor(
-              status
-            )}`}
-          >
-            {status}
-          </span>
-          <span
-            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${getPriorityColor(
-              caseData.priority
-            )}`}
-          >
-            {caseData.priority} Priority
-          </span>
         </div>
       </div>
-
-      {/* ---------- BODY ---------- */}
-      <div className="p-6 bg-gradient-to-r from-slate-50 to-blue-50">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Left: Case Details */}
-          <div className="lg:col-span-2">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Case Details
-            </h3>
-            <p className="text-gray-700 mb-4">{caseData.description}</p>
-
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="flex items-center space-x-2">
-                <User className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-600">
-                  Assignee:{" "}
-                  <span className="font-medium text-gray-900">
-                    {caseData.assignee}
-                  </span>
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-600">
-                  Created:{" "}
-                  <span className="font-medium text-gray-900">
-                    {caseData.created}
-                  </span>
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <FileText className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-600">
-                  Profile:{" "}
-                  <span className="font-medium text-gray-900">
-                    {caseData.profile?.name} ({caseData.profile?.id})
-                  </span>
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-600">
-                  Updated:{" "}
-                  <span className="font-medium text-gray-900">
-                    {caseData.updated}
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            {/* Notes Section */}
-            {notes.length > 0 && (
-              <div className="mt-6 bg-white rounded-lg border border-gray-200 p-4">
-                <h4 className="text-sm font-semibold text-gray-800 mb-2">
-                  Notes
-                </h4>
-                <ul className="space-y-2">
-                  {notes.map((note) => (
-                    <li
-                      key={note.id}
-                      className="flex justify-between items-start border border-gray-100 rounded-md p-2 bg-gray-50"
-                    >
-                      <p className="text-sm text-gray-800">{note.text}</p>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEditNote(note.id, note.text)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteNote(note.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Middle: Risk Score */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center space-x-3">
-              <AlertTriangle className="w-6 h-6 text-orange-600" />
-              <div>
-                <p className="text-sm text-gray-600">Risk Score</p>
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`text-2xl font-bold px-3 py-1 rounded-lg ${getRiskScoreColor(
-                      caseData.riskScore
-                    )}`}
-                  >
-                    {caseData.riskScore}
-                  </span>
-                  <span className="text-sm text-gray-500">/100</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Quick Actions */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 relative">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">
-              Quick Actions
-            </h4>
-            <div className="space-y-2">
-              <button
-                onClick={() => setShowNoteInput(!showNoteInput)}
-                className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200"
-              >
-                Add / Edit Note
-              </button>
-              <button
-                onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200"
-              >
-                Update Status
-              </button>
-              <button
-                onClick={handleGenerateReport}
-                className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200"
-              >
-                Generate Report
-              </button>
-            </div>
-
-            {/* Note Input */}
-            {showNoteInput && (
-              <div className="absolute top-6 left-0 right-0 bg-white border border-gray-300 shadow-lg rounded-lg p-4 z-20">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-sm font-semibold">
-                    {editingNoteId ? "Edit Note" : "Add Note"}
-                  </h4>
-                  <button onClick={() => setShowNoteInput(false)}>
-                    <X className="w-4 h-4 text-gray-500" />
-                  </button>
-                </div>
-                <textarea
-                  value={noteText}
-                  onChange={(e) => setNoteText(e.target.value)}
-                  rows={3}
-                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
-                  placeholder="Type your note..."
-                />
-                <div className="mt-2 text-right">
-                  <button
-                    onClick={handleSaveNote}
-                    className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-purple-700"
-                  >
-                    {editingNoteId ? "Update" : "Save"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Status Dropdown */}
-            {showStatusDropdown && (
-              <div className="absolute top-20 left-0 right-0 bg-white border border-gray-300 shadow-lg rounded-lg p-3 z-20">
-                {["Active", "Under Review", "Closed"].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => handleStatusChange(s)}
-                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+      
+      {/* Canvas */}
+      <div className="relative flex-1 overflow-hidden">
+        <canvas
+          ref={canvasRef}
+          className="w-full h-full"
+          style={{ cursor: getCursor() }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        />
       </div>
     </div>
   );
-}
+};
+
+export default ERDiagram;
