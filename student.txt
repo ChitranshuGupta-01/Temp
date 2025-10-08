@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import {use} from  "react";
+import AuthWrapper from "@/app/Authwrapper";
 import CaseDetails from "@/app/fincrime/components/CaseDetails";
 import CaseRelationDiagram from "@/app/fincrime/components/CaseRelationDiagram";
 import PastEventsLog from "@/app/fincrime/components/PastEventsLog";
 import RelatedTransactions from "@/app/fincrime/components/RelatedTransactions";
 
-export default function CaseDetailPage({ params }: { params: { caseId: string } }) {
+export default function AnalysisPage({ params }: { params: Promise< { type: string; id: string } >}) {
+  const {type, id} = use(params);
   const [data, setData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -16,7 +19,7 @@ export default function CaseDetailPage({ params }: { params: { caseId: string } 
       .then((res) => res.json()) // convert to JS object
       .then((d) => setData(d))
       .finally(() => setLoading(false));
-  }, []);
+  }, [type,id]);
 
   if (loading) return <div className="p-12 text-center">Loading case...</div>;
   if (!data) return <div className="p-12 text-center text-red-500">Failed to load data</div>;
