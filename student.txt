@@ -1,44 +1,45 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { Search, Sliders } from "lucide-react";
+import { Search } from "lucide-react";
 
-type Event = {
+type Tx = {
   id: string;
   type: string;
   date: string;
-  profile: string;
-  ip: string;
-  status: string;
+  amount: string;
   severity: string;
-  description: string;
+  beneficiary: string;
+  status: string;
+  details: string;
 };
 
-const severityColor = (s: string) => {
-  if (!s) return "bg-gray-100 text-gray-700";
+const severityBadge = (s: string) => {
   if (s.toUpperCase() === "HIGH") return "bg-red-100 text-red-700";
   if (s.toUpperCase() === "MEDIUM") return "bg-yellow-100 text-yellow-700";
   return "bg-green-100 text-green-700";
 };
 
-export default function PastEventsLog({ events }: { events: Event[] }) {
+export default function RelatedTransactions({ transactions }: { transactions: Tx[] }) {
   const [query, setQuery] = useState("");
-  const [severityFilter, setSeverityFilter] = useState<string>("All");
-  const [perPage, setPerPage] = useState<number>(5);
+  const [typeFilter, setTypeFilter] = useState("All");
+  const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return events.filter((e) => {
-      if (severityFilter !== "All" && e.severity.toUpperCase() !== severityFilter.toUpperCase()) return false;
+    return transactions.filter((t) => {
+      if (typeFilter !== "All" && t.type !== typeFilter) return false;
       if (!q) return true;
       return (
-        e.id.toLowerCase().includes(q) ||
-        e.type.toLowerCase().includes(q) ||
-        e.ip.toLowerCase().includes(q) ||
-        e.description.toLowerCase().includes(q)
+        t.id.toLowerCase().includes(q) ||
+        t.beneficiary?.toLowerCase().includes(q) ||
+        t.details?.toLowerCase().includes(q) ||
+        t.amount?.toLowerCase().includes(q)
+      
+        
       );
     });
-  }, [events, query, severityFilter]);
+  }, [transactions, query, typeFilter]);
 
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / perPage));
@@ -53,12 +54,12 @@ export default function PastEventsLog({ events }: { events: Event[] }) {
     <div className="bg-white rounded-xl shadow border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h4 className="text-lg font-bold">Past Events Log</h4>
-          <p className="text-sm text-gray-500">Recent activity and security events for Profile: John Doe</p>
+          <h4 className="text-lg font-bold">Related Transactions</h4>
+          <p className="text-sm text-gray-500">All transactions made to the same account: ****5678</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="p-2 rounded bg-white border hover:bg-gray-50"><Sliders className="w-4 h-4" /></button>
-          <button className="p-2 rounded bg-white border hover:bg-gray-50">⬇</button>
+          <button className="px-3 py-2 rounded border bg-white">⚙</button>
+          <button className="px-3 py-2 rounded border bg-white">⬇</button>
         </div>
       </div>
 
@@ -68,21 +69,22 @@ export default function PastEventsLog({ events }: { events: Event[] }) {
           <input
             value={query}
             onChange={(e) => { setQuery(e.target.value); setPage(1); }}
-            placeholder="Search events, status, IP addresses, or descriptions..."
+            placeholder="Search transactions, amounts, beneficiaries, or references..."
             className="w-full border rounded px-3 py-2 text-sm"
           />
         </div>
 
         <div className="flex items-center gap-2">
           <select
-            value={severityFilter}
-            onChange={(e) => { setSeverityFilter(e.target.value); setPage(1); }}
+            value={typeFilter}
+            onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
             className="border rounded px-3 py-2 text-sm"
           >
-            <option>All</option>
-            <option>LOW</option>
-            <option>MEDIUM</option>
-            <option>HIGH</option>
+            <option value="All">All Transaction Types</option>
+            <option value="Wire Transfer">Wire Transfer</option>
+            <option value="ACH Transfer">ACH Transfer</option>
+            <option value="International Wire">International Wire</option>
+            <option value="Check Deposit">Check Deposit</option>
           </select>
 
           <select
@@ -101,33 +103,36 @@ export default function PastEventsLog({ events }: { events: Event[] }) {
         <table className="w-full text-sm">
           <thead className="text-left text-gray-600">
             <tr>
-              <th className="p-3">EVENT ID</th>
-              <th className="p-3">EVENT TYPE</th>
-              <th className="p-3">DATE & TIME</th>
-              <th className="p-3">PROFILE</th>
-              <th className="p-3">IP ADDRESS</th>
+              <th className="p-3">TRANSACTION</th>
+              <th className="p-3">DATE</th>
+              <th className="p-3">AMOUNT</th>
+              <th className="p-3">BENEFICIARY</th>
               <th className="p-3">STATUS</th>
-              <th className="p-3">SEVERITY</th>
-              <th className="p-3">DESCRIPTION</th>
+              <th className="p-3">DETAILS</th>
             </tr>
           </thead>
           <tbody>
-            {pageData.map((e) => (
-              <tr key={e.id} className="border-t">
-                <td className="p-3 text-blue-600 font-semibold">{e.id}</td>
-                <td className="p-3">{e.type}</td>
-                <td className="p-3 text-gray-600">{e.date}</td>
-                <td className="p-3">{e.profile}</td>
-                <td className="p-3">{e.ip}</td>
+            {pageData.map((t) => (
+              <tr key={t.id} className="border-t">
                 <td className="p-3">
-                  <span className={`px-3 py-1 rounded-full text-xs ${e.status === 'Success' ? 'bg-green-100 text-green-700' : e.status === 'Failed' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                    {e.status}
-                  </span>
+                  <div className="text-sm font-semibold text-blue-600">{t.type}</div>
+                  <div className="text-xs text-blue-500">{t.id}</div>
+                </td>
+                <td className="p-3 text-gray-600">{t.date}</td>
+                <td className="p-3">
+                  <div className="font-semibold">{t.amount}</div>
+                  <div className={`text-xs mt-1 inline-block px-2 py-1 rounded-full ${severityBadge(t.severity)}`}>{t.severity}</div>
                 </td>
                 <td className="p-3">
-                  <span className={`px-3 py-1 rounded-full text-xs ${severityColor(e.severity)}`}>{e.severity}</span>
+                  <div className="font-medium">{t.beneficiary}</div>
+                  <div className="text-xs text-gray-400">****5678 · · · ·</div>
                 </td>
-                <td className="p-3 text-gray-700">{e.description}</td>
+                <td className="p-3">
+                  <div className={`px-3 py-1 rounded-full text-xs ${t.status === 'Completed' ? 'bg-green-100 text-green-700' : t.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>
+                    {t.status}
+                  </div>
+                </td>
+                <td className="p-3 text-gray-700">{t.details}</td>
               </tr>
             ))}
           </tbody>
@@ -137,8 +142,8 @@ export default function PastEventsLog({ events }: { events: Event[] }) {
       {/* footer / pagination */}
       <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
         <div>
-          Showing <span className="font-semibold">{(page - 1) * perPage + 1}</span> to <span className="font-semibold">{Math.min(page * perPage, total)}</span> of <span className="font-semibold">{total}</span> events
-          <span className="ml-4 inline-flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-500"></span> High Priority</span>
+          Showing <span className="font-semibold">{(page - 1) * perPage + 1}</span> to <span className="font-semibold">{Math.min(page * perPage, total)}</span> of <span className="font-semibold">{total}</span> transactions
+          <span className="ml-4 inline-flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-500"></span> High Value</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -155,7 +160,7 @@ export default function PastEventsLog({ events }: { events: Event[] }) {
               <button
                 key={p}
                 onClick={() => goto(p)}
-                className={`px-3 py-1 rounded ${p === page ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+                className={`px-3 py-1 rounded ${p === page ? 'bg-green-600 text-white' : 'bg-white border'}`}
               >
                 {p}
               </button>
@@ -175,7 +180,6 @@ export default function PastEventsLog({ events }: { events: Event[] }) {
 
   function goto(p: number) {
     setPage(p);
-    // small scroll to top of card
     const el = document.querySelector(".bg-white.rounded-xl");
     if (el) (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "start" });
   }
