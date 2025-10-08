@@ -1,44 +1,60 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
-import {use} from  "react";
+import { use } from "react";
 import AuthWrapper from "@/app/Authwrapper";
 import CaseDetails from "@/app/fincrime/components/CaseDetails";
 import CaseRelationDiagram from "@/app/fincrime/components/CaseRelationDiagram";
 import PastEventsLog from "@/app/fincrime/components/PastEventsLog";
 import RelatedTransactions from "@/app/fincrime/components/RelatedTransactions";
 
-export default function AnalysisPage({ params }: { params: Promise< { type: string; id: string } >}) {
-  const {type, id} = use(params);
+export default function AnalysisPage({ 
+  params 
+}: { 
+  params: Promise<{ type: string; id: string }> 
+}) {
+  const { type, id } = use(params);
   const [data, setData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // fetch from public/data/caseData.json
     fetch("/data/caseData.json")
-      .then((res) => res.json()) // convert to JS object
+      .then((res) => res.json())
       .then((d) => setData(d))
       .finally(() => setLoading(false));
-  }, [type,id]);
+  }, [type, id]);
 
-  if (loading) return <div className="p-12 text-center">Loading case...</div>;
-  if (!data) return <div className="p-12 text-center text-red-500">Failed to load data</div>;
+  if (loading) {
+    return (
+      <AuthWrapper>
+        <div className="p-12 text-center">Loading case...</div>
+      </AuthWrapper>
+    );
+  }
+
+  if (!data) {
+    return (
+      <AuthWrapper>
+        <div className="p-12 text-center text-red-500">Failed to load data</div>
+      </AuthWrapper>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-8">
-      {/* Header area */}
-      <div className="max-w-7xl mx-auto">
-        <CaseDetails caseData={data.case} />
-      </div>
-
-      <div className="max-w-7xl mx-auto space-y-8">
-        <CaseRelationDiagram relation={data.relationDiagram} />
-
-        <div className="space-y-6">
-          <PastEventsLog events={data.pastEvents} />
-          <RelatedTransactions transactions={data.transactions} />
+    <AuthWrapper>
+      <div className="min-h-screen bg-gray-50 p-6 space-y-8">
+        <div className="max-w-7xl mx-auto">
+          <CaseDetails caseData={data.case} />
+        </div>
+        
+        <div className="max-w-7xl mx-auto space-y-8">
+          <CaseRelationDiagram relation={data.relationDiagram} />
+          
+          <div className="space-y-6">
+            <PastEventsLog events={data.pastEvents} />
+            <RelatedTransactions transactions={data.transactions} />
+          </div>
         </div>
       </div>
-    </div>
+    </AuthWrapper>
   );
 }
