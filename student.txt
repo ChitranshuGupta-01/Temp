@@ -1,161 +1,115 @@
 "use client";
-import React from "react";
-import { FileText, AlertTriangle, User, Calendar } from "lucide-react";
+import React, { useCallback } from "react";
+import ReactFlow, { Background, Controls, MiniMap, Node, Edge } from "reactflow";
+import 'reactflow/dist/style.css';
 
-export default function CaseDetails({ caseData }: { caseData: any }) {
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800";
-      case "under review":
-        return "bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800";
-      case "closed":
-        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800";
-      default:
-        return "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800";
+export default function CaseRelationDiagram({ relation }: { relation: any }) {
+  // nodes roughly positioned like the screenshot
+  const nodes: Node[] = [
+    {
+      id: "case",
+      position: { x: 100, y: 40 },
+      data: {
+        label: (
+          <div className="rounded-lg p-3 bg-gradient-to-r from-red-400 to-red-300 text-white shadow">
+            <div className="font-bold">Case</div>
+            <div className="text-xs mt-1">Case ID: {relation.case.caseId}</div>
+            <div className="text-xs">Date: {relation.case.date}</div>
+          </div>
+        )
+      },
+      style: { width: 200, height: 90 }
+    },
+    {
+      id: "profile",
+      position: { x: 420, y: 20 },
+      data: {
+        label: (
+          <div className="rounded-lg p-3 bg-gradient-to-r from-blue-400 to-blue-300 text-white shadow">
+            <div className="font-bold">Profile</div>
+            <div className="text-xs mt-1">{relation.profile.name} ({relation.profile.id})</div>
+          </div>
+        )
+      },
+      style: { width: 200, height: 110 }
+    },
+    {
+      id: "txn",
+      position: { x: 40, y: 220 },
+      data: {
+        label: (
+          <div className="rounded-lg p-3 bg-gradient-to-r from-indigo-400 to-indigo-300 text-white shadow">
+            <div className="font-bold">Transaction Detail</div>
+            <div className="text-xs mt-1">{relation.transaction.type} - {relation.transaction.id}</div>
+            <div className="text-xs">{relation.transaction.amount}</div>
+          </div>
+        )
+      },
+      style: { width: 220, height: 120 }
+    },
+    {
+      id: "bene",
+      position: { x: 320, y: 220 },
+      data: {
+        label: (
+          <div className="rounded-lg p-3 bg-yellow-400 text-white shadow">
+            <div className="font-bold">Beneficiary Detail</div>
+            <div className="text-xs mt-1">{relation.beneficiary.name}</div>
+            <div className="text-xs">{relation.beneficiary.amount}</div>
+          </div>
+        )
+      },
+      style: { width: 200, height: 100 }
+    },
+    {
+      id: "activity",
+      position: { x: 520, y: 220 },
+      data: {
+        label: (
+          <div className="rounded-lg p-3 bg-pink-400 text-white shadow">
+            <div className="font-bold">Last 5 Activity</div>
+            <div className="text-xs mt-1">{relation.last5Activity.map((a:any) => a.id).join(", ")}</div>
+          </div>
+        )
+      },
+      style: { width: 240, height: 120 }
     }
-  };
+  ];
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "bg-gradient-to-r from-red-100 to-pink-100 text-red-800";
-      case "medium":
-        return "bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800";
-      case "low":
-        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800";
-      default:
-        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800";
-    }
-  };
+  const edges: Edge[] = [
+    { id: 'e1', source: 'case', target: 'profile', animated: true },
+    { id: 'e2', source: 'case', target: 'txn', animated: true },
+    { id: 'e3', source: 'txn', target: 'bene', animated: true },
+    { id: 'e4', source: 'profile', target: 'activity', animated: true },
+    { id: 'e5', source: 'case', target: 'bene', animated: true }
+  ];
 
-  const getRiskScoreColor = (score: number) => {
-    if (score >= 80) return "text-red-600 bg-red-50";
-    if (score >= 60) return "text-orange-600 bg-orange-50";
-    if (score >= 40) return "text-yellow-600 bg-yellow-50";
-    return "text-green-600 bg-green-50";
-  };
+  const onInit = useCallback((instance:any) => {
+    // optional: fit view on init
+    instance.fitView({ padding: 0.1 });
+  }, []);
 
   return (
-    <div className="bg-gradient-to-r from-slate-50 to-blue-50 border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-      <div className="p-6 flex flex-col lg:flex-row gap-8">
-        {/* Left: Case Details */}
-        <div className="flex-1">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="p-3 bg-gradient-to-r from-orange-200 to-orange-300 rounded-xl shadow-md">
-              <FileText className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">
-                Case #{caseData.id}
-              </h3>
-              <p className="text-gray-600">{caseData.title}</p>
-            </div>
-          </div>
-
-          <p className="text-gray-700 mb-6 leading-relaxed">
-            {caseData.description}
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center space-x-2">
-              <User className="w-4 h-4 text-gray-500" />
-              <span className="text-gray-600">
-                Assignee:{" "}
-                <span className="font-medium text-gray-900">
-                  {caseData.assignee}
-                </span>
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <FileText className="w-4 h-4 text-gray-500" />
-              <span className="text-gray-600">
-                Profile:{" "}
-                <span className="font-medium text-gray-900">
-                  {caseData.profile.name} ({caseData.profile.id})
-                </span>
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-gray-500" />
-              <span className="text-gray-600">
-                Created:{" "}
-                <span className="font-medium text-gray-900">
-                  {caseData.created}
-                </span>
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-gray-500" />
-              <span className="text-gray-600">
-                Updated:{" "}
-                <span className="font-medium text-gray-900">
-                  {caseData.updated}
-                </span>
-              </span>
-            </div>
-          </div>
+    <div className="bg-white rounded-xl shadow border border-gray-200 p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h4 className="text-lg font-bold">Case Relation Diagram</h4>
+          <p className="text-sm text-gray-500">Visual relations between case, profile, transactions and beneficiaries</p>
         </div>
-
-        {/* Right: Risk Score & Actions */}
-        <div className="w-full lg:w-80 flex flex-col space-y-5">
-          {/* Status + Priority */}
-          <div className="flex space-x-3 justify-end">
-            <span
-              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${getStatusColor(
-                caseData.status
-              )}`}
-            >
-              {caseData.status}
-            </span>
-            <span
-              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${getPriorityColor(
-                caseData.priority
-              )}`}
-            >
-              {caseData.priority} Priority
-            </span>
-          </div>
-
-          {/* Risk Score */}
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-5">
-            <div className="flex items-center space-x-3">
-              <AlertTriangle className="w-6 h-6 text-orange-600" />
-              <div>
-                <p className="text-sm text-gray-600">Risk Score</p>
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`text-2xl font-bold px-3 py-1 rounded-lg ${getRiskScoreColor(
-                      caseData.riskScore
-                    )}`}
-                  >
-                    {caseData.riskScore}
-                  </span>
-                  <span className="text-sm text-gray-500">/100</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-5">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">
-              Quick Actions
-            </h4>
-            <div className="space-y-2">
-              <button className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200">
-                Add Note
-              </button>
-              <button className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200">
-                Update Status
-              </button>
-              <button className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200">
-                Generate Report
-              </button>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <button className="px-3 py-2 rounded bg-gray-50 border hover:bg-gray-100 text-sm">100%</button>
+          <button className="px-3 py-2 rounded bg-gray-50 border hover:bg-gray-100 text-sm">Zoom</button>
         </div>
+      </div>
+
+      <div style={{ height: 420 }} className="rounded border border-dashed border-gray-200 overflow-hidden">
+        <ReactFlow nodes={nodes} edges={edges} onInit={onInit} fitView>
+          <Background color="#f3f4f6" gap={12} />
+          <Controls />
+        
+        </ReactFlow>
       </div>
     </div>
   );
 }
+
