@@ -1,602 +1,414 @@
-import React, { useState } from 'react';
-import { Search, Filter, Download, Calendar, Clock, CreditCard, ArrowUpRight, ArrowDownLeft, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
-import ChatOverlay from './ChatOverlay';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Minimize2, Maximize2, Send, Sparkles, Bot, User, Clock } from 'lucide-react';
 
-interface TransactionData {
+interface Message {
   id: string;
-  transactionId: string;
-  type: string;
-  date: string;
-  time: string;
-  amount: number;
-  currency: string;
-  fromAccount: string;
-  toAccount: string;
-  beneficiary: string;
-  status: string;
-  description: string;
-  reference: string;
-  channel: string;
-  priority: 'low' | 'medium' | 'high';
+  type: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
 }
 
-const RelatedTransactionsO: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterBy, setFilterBy] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+interface ChatOverlayProps {
+  isOpen: boolean;
+  onClose: () => void;
+  tableData?: any[];
+  tableName?: string;
+}
 
-  const transactionData: TransactionData[] = [
+const ChatOverlay: React.FC<ChatOverlayProps> = ({ 
+  isOpen, 
+  onClose, 
+  tableData = [], 
+  tableName = "Data Table" 
+}) => {
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      transactionId: 'TXN-456123',
-      type: 'Wire Transfer',
-      date: '2024-01-15',
-      time: '14:30:25',
-      amount: 15000.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****1234',
-      beneficiary: 'ABC Corp',
-      status: 'Completed',
-      description: 'Business payment for services',
-      reference: 'INV-2024-001',
-      channel: 'Online Banking',
-      priority: 'high'
-    },
-    {
-      id: '2',
-      transactionId: 'TXN-456124',
-      type: 'ACH Transfer',
-      date: '2024-01-14',
-      time: '09:15:42',
-      amount: 2500.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****9876',
-      beneficiary: 'XYZ Services',
-      status: 'Pending',
-      description: 'Monthly service payment',
-      reference: 'AUTO-PAY-001',
-      channel: 'Mobile App',
-      priority: 'medium'
-    },
-    {
-      id: '3',
-      transactionId: 'TXN-456125',
-      type: 'International Wire',
-      date: '2024-01-13',
-      time: '16:45:12',
-      amount: 8750.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****4321',
-      beneficiary: 'Global Trading Ltd',
-      status: 'Completed',
-      description: 'International trade payment',
-      reference: 'SWIFT-2024-001',
-      channel: 'Branch',
-      priority: 'high'
-    },
-    {
-      id: '4',
-      transactionId: 'TXN-456126',
-      type: 'Check Deposit',
-      date: '2024-01-12',
-      time: '11:20:33',
-      amount: 3200.00,
-      currency: 'USD',
-      fromAccount: '****1111',
-      toAccount: '****5678',
-      beneficiary: 'John Doe',
-      status: 'Cleared',
-      description: 'Salary deposit from employer',
-      reference: 'CHK-789456',
-      channel: 'ATM',
-      priority: 'low'
-    },
-    {
-      id: '5',
-      transactionId: 'TXN-456127',
-      type: 'Wire Transfer',
-      date: '2024-01-11',
-      time: '13:55:18',
-      amount: 12000.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****7890',
-      beneficiary: 'Tech Solutions Inc',
-      status: 'Completed',
-      description: 'Equipment purchase payment',
-      reference: 'PO-2024-005',
-      channel: 'Online Banking',
-      priority: 'high'
-    },
-    {
-      id: '6',
-      transactionId: 'TXN-456128',
-      type: 'ACH Debit',
-      date: '2024-01-10',
-      time: '10:30:45',
-      amount: 1850.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****2468',
-      beneficiary: 'Utility Company',
-      status: 'Completed',
-      description: 'Monthly utility bill payment',
-      reference: 'UTIL-JAN-2024',
-      channel: 'Auto-Pay',
-      priority: 'low'
-    },
-    {
-      id: '7',
-      transactionId: 'TXN-456129',
-      type: 'Wire Transfer',
-      date: '2024-01-09',
-      time: '15:20:11',
-      amount: 25000.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****3579',
-      beneficiary: 'Investment Partners LLC',
-      status: 'Flagged',
-      description: 'Large investment transfer - under review',
-      reference: 'INV-FUND-001',
-      channel: 'Online Banking',
-      priority: 'high'
-    },
-    {
-      id: '8',
-      transactionId: 'TXN-456130',
-      type: 'Direct Deposit',
-      date: '2024-01-08',
-      time: '08:45:22',
-      amount: 4500.00,
-      currency: 'USD',
-      fromAccount: '****9999',
-      toAccount: '****5678',
-      beneficiary: 'John Doe',
-      status: 'Completed',
-      description: 'Freelance project payment',
-      reference: 'PROJ-2024-001',
-      channel: 'ACH',
-      priority: 'medium'
-    },
-    {
-      id: '9',
-      transactionId: 'TXN-456131',
-      type: 'Wire Transfer',
-      date: '2024-01-07',
-      time: '12:10:55',
-      amount: 6800.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****1357',
-      beneficiary: 'Legal Services Corp',
-      status: 'Completed',
-      description: 'Legal consultation fees',
-      reference: 'LEGAL-2024-001',
-      channel: 'Branch',
-      priority: 'medium'
-    },
-    {
-      id: '10',
-      transactionId: 'TXN-456132',
-      type: 'ACH Transfer',
-      date: '2024-01-06',
-      time: '16:22:18',
-      amount: 950.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****8642',
-      beneficiary: 'Insurance Co',
-      status: 'Completed',
-      description: 'Monthly insurance premium',
-      reference: 'INS-JAN-2024',
-      channel: 'Auto-Pay',
-      priority: 'low'
-    },
-    {
-      id: '11',
-      transactionId: 'TXN-456133',
-      type: 'International Wire',
-      date: '2024-01-05',
-      time: '14:15:30',
-      amount: 18500.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****9753',
-      beneficiary: 'European Suppliers Ltd',
-      status: 'Completed',
-      description: 'International supplier payment',
-      reference: 'EURO-PAY-001',
-      channel: 'Online Banking',
-      priority: 'high'
-    },
-    {
-      id: '12',
-      transactionId: 'TXN-456134',
-      type: 'Wire Transfer',
-      date: '2024-01-04',
-      time: '11:45:22',
-      amount: 7200.00,
-      currency: 'USD',
-      fromAccount: '****5678',
-      toAccount: '****4680',
-      beneficiary: 'Marketing Agency',
-      status: 'Completed',
-      description: 'Marketing campaign payment',
-      reference: 'MKT-2024-001',
-      channel: 'Mobile App',
-      priority: 'medium'
+      type: 'assistant',
+      content: `Hello! I'm your AI assistant for analyzing the ${tableName}. I can help you understand patterns, trends, and specific insights from your data. What would you like to know?`,
+      timestamp: new Date()
     }
-  ];
+  ]);
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const filteredData = transactionData.filter(item => {
-    const matchesSearch = 
-      item.transactionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.beneficiary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.fromAccount.includes(searchTerm) ||
-      item.toAccount.includes(searchTerm) ||
-      item.amount.toString().includes(searchTerm);
-    
-    const matchesFilter = filterBy === 'all' || item.type === filterBy;
-    
-    return matchesSearch && matchesFilter;
-  });
-
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentData = filteredData.slice(startIndex, endIndex);
-
-  // Reset to first page when filters change
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterBy]);
-
-  const transactionTypes = [...new Set(transactionData.map(item => item.type))];
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800';
-      case 'medium': return 'bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800';
-      case 'low': return 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800';
-      default: return 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed': return 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800';
-      case 'pending': return 'bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800';
-      case 'flagged': return 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800';
-      case 'cleared': return 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800';
-      default: return 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800';
-    }
-  };
-
-  const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-    }).format(amount);
-  };
-
-  const getTransactionIcon = (type: string) => {
-    if (type.includes('Wire') || type.includes('Transfer')) {
-      return <ArrowUpRight className="w-4 h-4 text-blue-600 flex-shrink-0" />;
-    } else if (type.includes('Deposit')) {
-      return <ArrowDownLeft className="w-4 h-4 text-green-600 flex-shrink-0" />;
+  // Dynamic sample questions based on table type
+  const getSampleQuestions = () => {
+    if (tableName.toLowerCase().includes('transaction')) {
+      return [
+        "What's the total transaction volume this month?",
+        "Which beneficiaries receive the most payments?",
+        "Show me all high-value transactions above $10,000",
+        "What are the most common transaction types?",
+        "Are there any flagged or suspicious transactions?",
+        "What's the average transaction amount by channel?"
+      ];
     } else {
-      return <CreditCard className="w-4 h-4 text-purple-600 flex-shrink-0" />;
+      return [
+        "How many high severity events were there in the past month?",
+        "What are the most common event types?",
+        "Show me all failed login attempts",
+        "Which IP addresses appear most frequently?",
+        "What's the trend of security events over time?",
+        "Are there any suspicious patterns in the data?"
+      ];
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  const sampleQuestions = getSampleQuestions();
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleItemsPerPageChange = (items: number) => {
-    setItemsPerPage(items);
-    setCurrentPage(1);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    if (isOpen && !isMinimized) {
+      inputRef.current?.focus();
+    }
+  }, [isOpen, isMinimized]);
+
+  const generateResponse = (userMessage: string): string => {
+    const lowerMessage = userMessage.toLowerCase();
+    
+    // Transaction-specific responses
+    if (tableName.toLowerCase().includes('transaction')) {
+      if (lowerMessage.includes('total') && (lowerMessage.includes('volume') || lowerMessage.includes('amount'))) {
+        const totalAmount = tableData.reduce((sum, item) => sum + (item.amount || 0), 0);
+        const transactionCount = tableData.length;
+        return `Based on the current data, the **total transaction volume** is **$${totalAmount.toLocaleString()}** across **${transactionCount} transactions**. This represents significant financial activity that should be monitored for compliance purposes.`;
+      }
+      
+      if (lowerMessage.includes('beneficiar')) {
+        const beneficiaries = tableData.reduce((acc: any, item: any) => {
+          const beneficiary = item.beneficiary;
+          if (beneficiary) {
+            acc[beneficiary] = (acc[beneficiary] || 0) + (item.amount || 0);
+          }
+          return acc;
+        }, {});
+        const topBeneficiaries = Object.entries(beneficiaries)
+          .sort(([,a]: any, [,b]: any) => b - a)
+          .slice(0, 3)
+          .map(([name, amount]: any) => `**${name}** ($${amount.toLocaleString()})`)
+          .join(', ');
+        return `The top beneficiaries by transaction volume are: ${topBeneficiaries}. These entities receive the most significant payments and may warrant additional due diligence.`;
+      }
+      
+      if (lowerMessage.includes('high') && (lowerMessage.includes('value') || lowerMessage.includes('amount'))) {
+        const highValueTransactions = tableData.filter(item => (item.amount || 0) > 10000);
+        const totalHighValue = highValueTransactions.reduce((sum, item) => sum + (item.amount || 0), 0);
+        return `I found **${highValueTransactions.length} high-value transactions** (above $10,000) totaling **$${totalHighValue.toLocaleString()}**. These transactions require enhanced monitoring and may trigger regulatory reporting requirements.`;
+      }
+      
+      if (lowerMessage.includes('common') && lowerMessage.includes('type')) {
+        const transactionTypes = tableData.reduce((acc: any, item: any) => {
+          const type = item.type;
+          acc[type] = (acc[type] || 0) + 1;
+          return acc;
+        }, {});
+        const mostCommon = Object.entries(transactionTypes)
+          .sort(([,a]: any, [,b]: any) => b - a)
+          .slice(0, 3)
+          .map(([type, count]) => `**${type}** (${count} transactions)`)
+          .join(', ');
+        return `The most common transaction types are: ${mostCommon}. This distribution helps identify the primary payment patterns in your system.`;
+      }
+      
+      if (lowerMessage.includes('flagged') || lowerMessage.includes('suspicious')) {
+        const flaggedTransactions = tableData.filter(item => 
+          item.status?.toLowerCase().includes('flagged') || 
+          item.priority === 'high' ||
+          item.status?.toLowerCase().includes('blocked')
+        );
+        return `I identified **${flaggedTransactions.length} flagged or suspicious transactions** that require immediate attention. These include high-priority transfers, blocked transactions, and those under review for potential compliance issues.`;
+      }
+      
+      if (lowerMessage.includes('average') && lowerMessage.includes('channel')) {
+        const channelAverages = tableData.reduce((acc: any, item: any) => {
+          const channel = item.channel;
+          if (channel) {
+            if (!acc[channel]) acc[channel] = { total: 0, count: 0 };
+            acc[channel].total += (item.amount || 0);
+            acc[channel].count += 1;
+          }
+          return acc;
+        }, {});
+        
+        const averagesByChannel = Object.entries(channelAverages)
+          .map(([channel, data]: any) => `**${channel}**: $${Math.round(data.total / data.count).toLocaleString()}`)
+          .join(', ');
+        return `Average transaction amounts by channel: ${averagesByChannel}. This analysis helps identify channel-specific transaction patterns and potential anomalies.`;
+      }
+    } else {
+      // Event-specific responses (existing logic)
+      if (lowerMessage.includes('high severity') || lowerMessage.includes('high priority')) {
+        const highSeverityCount = tableData.filter(item => 
+          item.severity === 'high' || item.priority === 'high'
+        ).length;
+        return `Based on the current data, there are **${highSeverityCount} high severity events** in the table. These include failed login attempts, suspicious activities, and transaction alerts that require immediate attention.`;
+      }
+      
+      if (lowerMessage.includes('common') && lowerMessage.includes('event')) {
+        const eventTypes = tableData.reduce((acc: any, item: any) => {
+          const type = item.eventType || item.type;
+          acc[type] = (acc[type] || 0) + 1;
+          return acc;
+        }, {});
+        const mostCommon = Object.entries(eventTypes)
+          .sort(([,a]: any, [,b]: any) => b - a)
+          .slice(0, 3)
+          .map(([type, count]) => `**${type}** (${count} occurrences)`)
+          .join(', ');
+        return `The most common event types are: ${mostCommon}. This suggests these are the primary activities being monitored in your system.`;
+      }
+      
+      if (lowerMessage.includes('failed') && lowerMessage.includes('login')) {
+        const failedLogins = tableData.filter(item => 
+          item.eventType?.toLowerCase().includes('failed') || 
+          item.status?.toLowerCase() === 'failed'
+        ).length;
+        return `I found **${failedLogins} failed login attempts** in the data. These events should be monitored closely as they may indicate potential security threats or account compromise attempts.`;
+      }
+      
+      if (lowerMessage.includes('ip') || lowerMessage.includes('address')) {
+        const ipAddresses = [...new Set(tableData.map(item => item.ipAddress).filter(Boolean))];
+        return `There are **${ipAddresses.length} unique IP addresses** in the data. The most frequently appearing ones include addresses from your internal network (192.168.x.x) and some external IPs that may require investigation.`;
+      }
+      
+      if (lowerMessage.includes('trend') || lowerMessage.includes('pattern')) {
+        return `Based on the temporal analysis of your data, I can see patterns in event timing and frequency. There appears to be higher activity during business hours, with some suspicious activities occurring outside normal hours. Would you like me to analyze specific time periods?`;
+      }
+      
+      if (lowerMessage.includes('suspicious')) {
+        return `I've identified several potentially suspicious patterns: multiple failed login attempts from foreign IP addresses, high-value transactions outside normal patterns, and unusual access times. These events are flagged with high severity and should be investigated further.`;
+      }
+    }
+    
+    // Default response
+    return `I understand you're asking about "${userMessage}". While I can see the data structure, I'd recommend being more specific about what aspect you'd like me to analyze. You can ask about counts, patterns, trends, or specific data points from the ${tableName}.`;
   };
 
-  // CSV Download Function
-  const downloadCSV = () => {
-    const headers = [
-      'Transaction ID',
-      'Type',
-      'Date',
-      'Time',
-      'Amount',
-      'Currency',
-      'From Account',
-      'To Account',
-      'Beneficiary',
-      'Status',
-      'Priority',
-      'Channel',
-      'Reference',
-      'Description'
-    ];
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
 
-    const csvContent = [
-      headers.join(','),
-      ...filteredData.map(item => [
-        `"${item.transactionId}"`,
-        `"${item.type}"`,
-        `"${item.date}"`,
-        `"${item.time}"`,
-        `"${item.amount}"`,
-        `"${item.currency}"`,
-        `"${item.fromAccount}"`,
-        `"${item.toAccount}"`,
-        `"${item.beneficiary}"`,
-        `"${item.status}"`,
-        `"${item.priority}"`,
-        `"${item.channel}"`,
-        `"${item.reference}"`,
-        `"${item.description.replace(/"/g, '""')}"`
-      ].join(','))
-    ].join('\n');
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: inputValue,
+      timestamp: new Date()
+    };
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `related-transactions-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsTyping(true);
+
+    // Simulate AI thinking time
+    setTimeout(() => {
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: generateResponse(inputValue),
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+      setIsTyping(false);
+    }, 1500);
   };
+
+  const handleSampleQuestion = (question: string) => {
+    setInputValue(question);
+    inputRef.current?.focus();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  // Dynamic color scheme based on table type
+  const getColorScheme = () => {
+    if (tableName.toLowerCase().includes('transaction')) {
+      return {
+        gradient: 'from-green-50 to-teal-50',
+        iconGradient: 'from-green-500 to-teal-600',
+        buttonHover: 'hover:text-green-600 hover:bg-green-50',
+        userMessage: 'from-green-500 to-teal-600',
+        focusRing: 'focus:ring-green-500'
+      };
+    } else {
+      return {
+        gradient: 'from-sky-50 to-blue-50',
+        iconGradient: 'from-sky-500 to-blue-600',
+        buttonHover: 'hover:text-sky-600 hover:bg-sky-50',
+        userMessage: 'from-sky-500 to-blue-600',
+        focusRing: 'focus:ring-sky-500'
+      };
+    }
+  };
+
+  const colors = getColorScheme();
 
   return (
-    <>
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+    <div className={`fixed bottom-0 right-6 z-50 transition-all duration-300 ${
+      isMinimized 
+        ? 'w-80 h-16' 
+        : 'w-96 h-[500px]'
+    }`}>
+      <div className="bg-white rounded-t-2xl shadow-2xl border border-gray-200 border-b-0 h-full flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-slate-50 to-green-50 px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg shadow-sm">
-                <CreditCard className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Related Transactions</h2>
-                <p className="text-sm text-gray-600">All transactions made to the same account: ****5678</p>
-              </div>
+        <div className={`flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r ${colors.gradient} rounded-t-2xl flex-shrink-0`}>
+          <div className="flex items-center space-x-3">
+            <div className={`p-2 bg-gradient-to-r ${colors.iconGradient} rounded-lg shadow-sm`}>
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
-              
-              <div className="flex items-center space-x-2">
-                <button 
-                  onClick={() => setIsChatOpen(true)}
-                  className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 hover:scale-105"
-                  title="Ask AI Assistant"
-                >
-                  <Sparkles className="w-5 h-5" />
-                </button>
-              <button 
-                onClick={downloadCSV}
-                className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 hover:scale-105"
-                title="Download CSV"
-              >
-                <Download className="w-5 h-5" />
-              </button>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">AI Assistant</h3>
+              {!isMinimized && (
+                <p className="text-xs text-gray-600">Ask questions about {tableName}</p>
+              )}
             </div>
           </div>
-        </div>
-        
-        {/* Filters */}
-        <div className="p-6 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search transactions, amounts, beneficiaries, or references..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
-              />
-            </div>
-            
-            <div className="flex gap-4">
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <select
-                  value={filterBy}
-                  onChange={(e) => setFilterBy(e.target.value)}
-                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white shadow-sm transition-all duration-200 min-w-48"
-                >
-                  <option value="all">All Transaction Types</option>
-                  {transactionTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <select
-                value={itemsPerPage}
-                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white shadow-sm transition-all duration-200"
-              >
-                <option value={5}>5 per page</option>
-                <option value={10}>10 per page</option>
-                <option value={15}>15 per page</option>
-                <option value={20}>20 per page</option>
-              </select>
-            </div>
+          
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => setIsMinimized(!isMinimized)}
+              className={`p-1.5 text-gray-600 ${colors.buttonHover} rounded-md transition-all duration-200`}
+              title={isMinimized ? "Maximize" : "Minimize"}
+            >
+              {isMinimized ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-all duration-200"
+              title="Close"
+            >
+              <X className="w-3 h-3" />
+            </button>
           </div>
         </div>
 
-        {/* Table Container - Removed overflow-x-auto */}
-        <div>
-          <table className="w-full">
-            <thead className="bg-gradient-to-r from-gray-50 to-slate-100">
-              <tr>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Transaction</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Beneficiary</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Details</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {currentData.map((item, index) => (
-                <tr key={item.id} className={`hover:bg-gradient-to-r hover:from-green-50 hover:to-teal-50 transition-all duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        {getTransactionIcon(item.type)}
-                        <span className="text-sm font-semibold text-gray-900 truncate">{item.type}</span>
-                      </div>
-                      <div className="text-xs font-mono text-indigo-600 bg-indigo-50 rounded px-2 py-1 inline-block">
-                        {item.transactionId}
+        {/* Content */}
+        {!isMinimized && (
+          <>
+            {/* Sample Questions */}
+            <div className="p-3 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200 flex-shrink-0">
+              <p className="text-xs font-medium text-gray-700 mb-2">Quick questions:</p>
+              <div className="flex flex-wrap gap-1">
+                {sampleQuestions.slice(0, 2).map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSampleQuestion(question)}
+                    className={`text-xs bg-white border border-gray-200 rounded-full px-2 py-1 ${colors.buttonHover} transition-all duration-200 truncate max-w-full`}
+                    title={question}
+                  >
+                    {question.length > 35 ? question.substring(0, 35) + '...' : question}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex items-start space-x-2 ${
+                    message.type === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  {message.type === 'assistant' && (
+                    <div className={`p-1.5 bg-gradient-to-r ${colors.iconGradient} rounded-lg shadow-sm flex-shrink-0`}>
+                      <Bot className="w-3 h-3 text-white" />
+                    </div>
+                  )}
+                  
+                  <div className={`max-w-[75%] ${message.type === 'user' ? 'order-2' : ''}`}>
+                    <div
+                      className={`p-2.5 rounded-xl shadow-sm text-xs ${
+                        message.type === 'user'
+                          ? `bg-gradient-to-r ${colors.userMessage} text-white`
+                          : 'bg-gray-50 text-gray-900 border border-gray-200'
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap">
+                        {message.content.split('**').map((part, index) => 
+                          index % 2 === 1 ? <strong key={index}>{part}</strong> : part
+                        )}
                       </div>
                     </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-1 text-sm text-gray-900">
-                        <Calendar className="w-3 h-3 text-gray-500 flex-shrink-0" />
-                        <span className="text-xs">{item.date}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-xs text-gray-600">
-                        <Clock className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        <span>{item.time}</span>
-                      </div>
+                    <div className="flex items-center space-x-1 mt-1 text-xs text-gray-500">
+                      <Clock className="w-2 h-2" />
+                      <span className="text-xs">{message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="text-sm font-bold text-gray-900">
-                        {formatAmount(item.amount, item.currency)}
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-sm ${getPriorityColor(item.priority)}`}>
-                          {item.priority.toUpperCase()}
-                        </span>
-                      </div>
+                  </div>
+                  
+                  {message.type === 'user' && (
+                    <div className={`p-1.5 bg-gradient-to-r ${colors.userMessage} rounded-lg shadow-sm flex-shrink-0 order-3`}>
+                      <User className="w-3 h-3 text-white" />
                     </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="text-sm font-medium text-gray-900 truncate max-w-32">{item.beneficiary}</div>
-                      <div className="text-xs text-gray-500">{item.channel}</div>
-                      <div className="text-xs text-gray-600">
-                        <span className="font-mono">{item.fromAccount}</span> → <span className="font-mono">{item.toAccount}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium shadow-sm ${getStatusColor(item.status)}`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="text-sm text-gray-600 max-w-48 truncate" title={item.description}>
-                        {item.description}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Ref: {item.reference}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
+                  )}
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+              
+              {/* Typing Indicator */}
+              {isTyping && (
+                <div className="flex items-start space-x-2">
+                  <div className={`p-1.5 bg-gradient-to-r ${colors.iconGradient} rounded-lg shadow-sm`}>
+                    <Bot className="w-3 h-3 text-white" />
+                  </div>
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 shadow-sm">
+                    <div className="flex space-x-1">
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
 
-        {/* Pagination Footer */}
-        <div className="bg-gradient-to-r from-gray-50 to-slate-50 px-6 py-4 border-t border-gray-200">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <p className="text-sm text-gray-600 font-medium">
-                Showing <span className="text-green-600 font-semibold">{startIndex + 1}</span> to <span className="text-green-600 font-semibold">{Math.min(endIndex, filteredData.length)}</span> of <span className="text-green-600 font-semibold">{filteredData.length}</span> transactions
-              </p>
+            {/* Input */}
+            <div className="p-3 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-slate-50 flex-shrink-0">
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-xs text-gray-600">High Value</span>
+                <div className="flex-1 relative">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask about your data..."
+                    className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 ${colors.focusRing} focus:border-transparent transition-all duration-200 bg-white shadow-sm`}
+                  />
+                </div>
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!inputValue.trim() || isTyping}
+                  className={`p-2 bg-gradient-to-r ${colors.userMessage} text-white rounded-lg hover:shadow-xl transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0`}
+                >
+                  <Send className="w-4 h-4" />
+                </button>
               </div>
             </div>
-            
-            {/* Pagination Controls */}
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-600 disabled:hover:bg-transparent"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              
-              <div className="flex items-center space-x-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Show first page, last page, current page, and pages around current page
-                  if (
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                  ) {
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`px-3 py-1 text-sm rounded-lg transition-all duration-200 ${
-                          currentPage === page
-                            ? 'bg-green-600 text-white shadow-sm'
-                            : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  } else if (
-                    page === currentPage - 2 ||
-                    page === currentPage + 2
-                  ) {
-                    return (
-                      <span key={page} className="px-2 text-gray-400">
-                        ...
-                      </span>
-                    );
-                  }
-                  return null;
-                })}
-              </div>
-              
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-600 disabled:hover:bg-transparent"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
-
-      {/* Chat Overlay */}
-      <ChatOverlay 
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        tableData={filteredData}
-        tableName="Related Transactions"
-      />
-    </>
+    </div>
   );
 };
 
-export default RelatedTransactionsO;
+export default ChatOverlay;
