@@ -1,159 +1,236 @@
 "use client";
+import React, { useCallback } from "react";
+import ReactFlow, { Background, Controls, MiniMap, Node, Edge } from "reactflow";
+import { ZoomIn, ZoomOut, Maximize2, Minimize2, FileText } from "lucide-react";
+import "reactflow/dist/style.css";
 
-import AuthWrapper from "./Authwrapper";
-import { redirect } from "next/navigation";
-
-const apps = [
-  {
-    name: "Culture and Conduct",
-    description: "Empower your organization with ethical insights and behavioral analytics.",
-    color: "from-pink-400 via-red-400 to-yellow-400",
-    border: "border-pink-300 dark:border-pink-700",
-    bg: "bg-pink-50 dark:bg-pink-900",
-    hover: "hover:bg-pink-100 dark:hover:bg-pink-800",
-    text: "text-pink-700 dark:text-pink-300",
-  },
-  {
-    name: "SOC AI",
-    description: "AI-driven Security Operations Center for smarter threat detection.",
-    color: "from-blue-400 via-cyan-400 to-green-400",
-    border: "border-blue-300 dark:border-blue-700",
-    bg: "bg-blue-50 dark:bg-blue-900",
-    hover: "hover:bg-blue-100 dark:hover:bg-blue-800",
-    text: "text-blue-700 dark:text-blue-300",
-  },
-  {
-    name: "FinCrime",
-    description: "Advanced financial crime detection and compliance monitoring.",
-    color: "from-purple-400 via-fuchsia-400 to-indigo-400",
-    border: "border-purple-300 dark:border-purple-700",
-    bg: "bg-purple-50 dark:bg-purple-900",
-    hover: "hover:bg-purple-100 dark:hover:bg-purple-800",
-    text: "text-purple-700 dark:text-purple-300",
-    link: "/fincrime",
-  },
-  {
-    name: "Ask Kronos",
-    description: "Your AI-powered assistant for instant answers and insights.",
-    color: "from-yellow-400 via-orange-400 to-pink-400",
-    border: "border-yellow-300 dark:border-yellow-700",
-    bg: "bg-yellow-50 dark:bg-yellow-900",
-    hover: "hover:bg-yellow-100 dark:hover:bg-yellow-800",
-    text: "text-yellow-700 dark:text-yellow-300",
-  },
-  {
-    name: "Asset Level Monitoring",
-    description: "Real-time monitoring and analytics for all your assets.",
-    color: "from-green-400 via-emerald-400 to-teal-400",
-    border: "border-green-300 dark:border-green-700",
-    bg: "bg-green-50 dark:bg-green-900",
-    hover: "hover:bg-green-100 dark:hover:bg-green-800",
-    text: "text-green-700 dark:text-green-300",
-  },
-  {
-    name: "Cyber Fusion",
-    description: "Unified cyber intelligence and response platform.",
-    color: "from-indigo-400 via-blue-400 to-cyan-400",
-    border: "border-indigo-300 dark:border-indigo-700",
-    bg: "bg-indigo-50 dark:bg-indigo-900",
-    hover: "hover:bg-indigo-100 dark:hover:bg-indigo-800",
-    text: "text-indigo-700 dark:text-indigo-300",
-  },
-  {
-    name: "App Manager",
-    description: "Manage, deploy, and monitor all your applications in one place.",
-    color: "from-fuchsia-400 via-pink-400 to-red-400",
-    border: "border-fuchsia-300 dark:border-fuchsia-700",
-    bg: "bg-fuchsia-50 dark:bg-fuchsia-900",
-    hover: "hover:bg-fuchsia-100 dark:hover:bg-fuchsia-800",
-    text: "text-fuchsia-700 dark:text-fuchsia-300",
-  },
-  {
-    name: "Security Alerts",
-    description: "Stay ahead with real-time security alerts and actionable insights.",
-    color: "from-red-400 via-orange-400 to-yellow-400",
-    border: "border-red-300 dark:border-red-700",
-    bg: "bg-red-50 dark:bg-red-900",
-    hover: "hover:bg-red-100 dark:hover:bg-red-800",
-    text: "text-red-700 dark:text-red-300",
-  },
-];
-
-function Home() {
-  const handleNavigation = (link) => {
-    if (link) redirect(link);
-  };
-
-  const handleLogout = () => {
-    // If AuthWrapper manages session, you can call an API like /api/logout here if needed
-    // await fetch("/api/logout", { method: "POST" });
-    redirect("/login"); // redirect to login page
-  };
-
-  return (
-    <AuthWrapper>
-      <div className="relative font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="absolute top-8 right-8 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-all"
-        >
-          Logout
-        </button>
-
-        <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-          <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-blue-500 to-green-500 mb-4 drop-shadow-lg">
-            KSphere Apps
-          </h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-5xl">
-            {apps.map((app) => (
-              <a
-                key={app.name}
-                href={app.link}
-                className={`group relative overflow-hidden rounded-2xl border-2 ${app.border} ${app.bg} ${app.hover} transition-all shadow-xl flex flex-col items-center p-8 cursor-pointer`}
-                style={{ minHeight: 180 }}
-              >
-                <div
-                  className={`absolute inset-0 opacity-30 blur-2xl pointer-events-none bg-gradient-to-br ${app.color}`}
-                />
-                <span className={`relative z-10 text-2xl font-bold ${app.text} mb-2 drop-shadow`}>
-                  {app.name}
-                </span>
-                <span className="relative z-10 text-base text-gray-700 dark:text-gray-200 text-center font-medium">
-                  {app.description}
-                </span>
-                <span className="absolute top-4 right-4 text-xs px-2 py-1 rounded-full bg-white/70 dark:bg-black/30 text-gray-500 font-semibold shadow group-hover:scale-110 transition-transform">
-                  NEW
-                </span>
-              </a>
-            ))}
-          </div>
-        </main>
-
-        <footer className="row-start-3 flex gap-8 flex-wrap items-center justify-center text-sm text-gray-500 dark:text-gray-400">
-          <a
-            className="hover:underline hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
-            href="#"
-          >
-            Learn
-          </a>
-          <a
-            className="hover:underline hover:text-purple-600 dark:hover:text-purple-300 transition-colors"
-            href="#"
-          >
-            Examples
-          </a>
-          <a
-            className="hover:underline hover:text-pink-600 dark:hover:text-pink-300 transition-colors"
-            href="#"
-          >
-            Go to nextjs.org →
-          </a>
-        </footer>
+export default function CaseRelationDiagram({ relation, isFullscreen, onToggleFullscreen }) {
+  // Helper renderers
+  const renderEntityCard = (title, color, fields) => (
+    <div className="rounded-xl shadow-lg border border-gray-200 bg-white" style={{ minWidth: 170 }}>
+      <div className={`rounded-t-xl p-2 flex items-center`} style={{ background: color }}>
+        <div className="font-semibold text-white text-base mx-auto">{title}</div>
       </div>
-    </AuthWrapper>
+      <div className="p-2 space-y-1">
+        {fields.map((f, idx) => (
+          <div key={f.name || idx} className="flex justify-between text-xs font-mono">
+            <span className={f.isPrimaryKey ? "text-blue-800 font-bold flex gap-1" : f.isForeignKey ? "text-red-600 flex gap-1" : "text-gray-700"}>
+              {f.isPrimaryKey && <span>🔑</span>}
+              {f.isForeignKey && <span>🔗</span>}
+              {f.name}
+            </span>
+            <span className="text-gray-500">{f.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const nodes: Node[] = [
+    {
+      id: "case",
+      position: { x: 200, y: 100 },
+      data: {
+        label: renderEntityCard(
+          "Case",
+          "linear-gradient(90deg, #EF4444, #f87171)",
+          [
+            { name: "Case ID", value: relation.case.caseId, isPrimaryKey: true },
+            { name: "Date", value: relation.case.date },
+            { name: "Status", value: relation.case.status },
+            { name: "Decision", value: relation.case.decision },
+            { name: "Type", value: relation.case.type }
+          ]
+        ),
+      },
+      style: { width: 200, height: 145 },
+    },
+    {
+      id: "profile",
+      position: { x: 550, y: 120 },
+      data: {
+        label: renderEntityCard(
+          "Profile",
+          "linear-gradient(90deg, #3B82F6, #60a5fa)",
+          [
+            { name: "Profile ID", value: relation.profile.id, isPrimaryKey: true },
+            { name: "Name", value: relation.profile.name },
+            { name: "MMN", value: relation.profile.mmn },
+            { name: "Gender", value: relation.profile.gender },
+            { name: "DOB", value: relation.profile.dob },
+            { name: "Case ID", value: relation.case.caseId, isForeignKey: true },
+          ]
+        )
+      },
+      style: { width: 200, height: 170 }
+    },
+    {
+      id: "txn",
+      position: { x: 50, y: 320 },
+      data: {
+        label: renderEntityCard(
+          "Transaction Detail",
+          "linear-gradient(90deg, #8B5CF6, #a78bfa)",
+          [
+            { name: "Trans ID", value: relation.transaction.id, isPrimaryKey: true },
+            { name: "Type", value: relation.transaction.type },
+            { name: "Amount", value: relation.transaction.amount },
+            { name: "Frequency", value: relation.transaction.frequency },
+            { name: "Recent Date", value: relation.transaction.recentDate },
+            { name: "Beneficiary", value: relation.beneficiary.name },
+            { name: "Account", value: relation.transaction.account },
+            { name: "From Account", value: relation.transaction.fromAccount },
+            { name: "Case ID", value: relation.case.caseId, isForeignKey: true },
+          ]
+        )
+      },
+      style: { width: 220, height: 215 }
+    },
+    {
+      id: "rule",
+      position: { x: 120, y: 580 },
+      data: {
+        label: renderEntityCard(
+          "Rule",
+          "linear-gradient(90deg, #10B981, #6ee7b7)",
+          [
+            { name: "Rule ID", value: relation.rule.id, isPrimaryKey: true },
+            { name: "Rule Name", value: relation.rule.name },
+            { name: "Policy", value: relation.rule.policy },
+            { name: "Case ID", value: relation.case.caseId, isForeignKey: true }
+          ]
+        )
+      },
+      style: { width: 180, height: 140 }
+    },
+    {
+      id: "bene",
+      position: { x: 380, y: 420 },
+      data: {
+        label: renderEntityCard(
+          "Beneficiary Detail",
+          "linear-gradient(90deg, #F59E0B, #fbbf24)",
+          [
+            { name: "Bene ID", value: relation.beneficiary.id, isPrimaryKey: true },
+            { name: "Name", value: relation.beneficiary.name },
+            { name: "Amount", value: relation.beneficiary.amount },
+            { name: "Gender", value: relation.beneficiary.gender },
+            { name: "Added Date", value: relation.beneficiary.addedDate },
+            { name: "Trans ID", value: relation.transaction.id, isForeignKey: true }
+          ]
+        )
+      },
+      style: { width: 200, height: 155 }
+    },
+    {
+      id: "activity",
+      position: { x: 620, y: 350 },
+      data: {
+        label: (
+          <div className="rounded-xl shadow-lg border border-gray-200 bg-white" style={{ width: 220 }}>
+            <div className="rounded-t-xl p-2" style={{ background: "linear-gradient(90deg, #EC4899, #f472b6)" }}>
+              <span className="font-semibold text-white text-base mx-auto">Last 5 Activity</span>
+            </div>
+            <div className="overflow-x-auto p-2">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr>
+                    <th className="text-left font-bold text-slate-700">Event ID</th>
+                    <th className="text-left font-bold text-slate-700">Date</th>
+                    <th className="text-left font-bold text-slate-700">Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {relation.last5Activity.map((a, idx) => (
+                    <tr key={a.id} className={idx % 2 === 0 ? "bg-gray-50" : ""}>
+                      <td className="text-blue-900 font-semibold">{a.id}</td>
+                      <td className="text-slate-700">{a.date}</td>
+                      <td className="text-gray-600">{a.type.length > 12 ? a.type.slice(0, 12) + "..." : a.type}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      },
+      style: { width: 220, height: 180 }
+    }
+  ];
+
+  const edges: Edge[] = [
+    { id: 'e1', source: 'case', target: 'profile', animated: true, style: { stroke: "#6366f1", strokeWidth: 2 } },
+    { id: 'e2', source: 'case', target: 'txn', animated: true, style: { stroke: "#6366f1", strokeWidth: 2 } },
+    { id: 'e3', source: 'case', target: 'rule', animated: true, style: { stroke: "#6366f1", strokeWidth: 2 } },
+    { id: 'e4', source: 'txn', target: 'bene', animated: true, style: { stroke: "#6366f1", strokeWidth: 2 } },
+    { id: 'e5', source: 'profile', target: 'activity', animated: true, style: { stroke: "#6366f1", strokeWidth: 2 } }
+  ];
+
+  const onInit = useCallback(instance => {
+    instance.fitView({ padding: 0.14 });
+  }, []);
+
+  // For demo: implement zoom/controls logic yourself if needed
+  // Replace below as required for your parent layout
+  return (
+    <div className={`rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 ${isFullscreen ? 'fixed inset-4 z-50 bg-white' : ''}`}>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-slate-50 to-orange-50 px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          {/* Case Number */}
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-r from-orange-200 to-orange-300 rounded-lg">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Case #{relation.case.caseId}</h2>
+              <p className="text-sm text-gray-600">Case Relation Diagram</p>
+            </div>
+          </div>
+          {/* Controls */}
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 bg-white rounded-lg border border-gray-200 p-1">
+              <button
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-all duration-200"
+                title="Zoom Out"
+                // implement zoom out
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <span className="px-2 text-sm font-medium text-gray-700 min-w-[3rem] text-center">
+                {/* You should manage zoom state */}
+                100%
+              </span>
+              <button
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-all duration-200"
+                title="Zoom In"
+                // implement zoom in
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+            </div>
+            <button
+              className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 hover:scale-105"
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              onClick={onToggleFullscreen}
+            >
+              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Canvas */}
+      <div style={{ minHeight: 600, background: "transparent" }}>
+        <ReactFlow 
+          nodes={nodes} 
+          edges={edges} 
+          onInit={onInit}
+          fitView
+        >
+          <Background color="#f8fafc" gap={25} />
+          <Controls showInteractive={false} />
+        </ReactFlow>
+      </div>
+    </div>
   );
 }
-
-export default Home;
