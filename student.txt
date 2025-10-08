@@ -1,8 +1,22 @@
 "use client";
-import React from "react";
-import { FileText, AlertTriangle, User, Calendar } from "lucide-react";
+import React, { useState } from "react";
+import {
+  FileText,
+  AlertTriangle,
+  User,
+  Calendar,
+  X,
+  Edit,
+  Download,
+} from "lucide-react";
 
 export default function CaseDetails({ caseData }: { caseData: any }) {
+  const [notes, setNotes] = useState<string[]>([]);
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [noteText, setNoteText] = useState("");
+  const [status, setStatus] = useState(caseData.status || "Active");
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -36,6 +50,49 @@ export default function CaseDetails({ caseData }: { caseData: any }) {
     return "text-green-600 bg-green-50";
   };
 
+  // ✅ Add Note Handler
+  const handleAddNote = () => {
+    if (noteText.trim() !== "") {
+      setNotes([...notes, noteText]);
+      setNoteText("");
+      setShowNoteInput(false);
+    }
+  };
+
+  // ✅ Update Status Handler
+  const handleStatusChange = (newStatus: string) => {
+    setStatus(newStatus);
+    setShowStatusDropdown(false);
+  };
+
+  // ✅ Generate Report Handler
+  const handleGenerateReport = () => {
+    const reportContent = `
+--- Case Report ---
+Case ID: ${caseData.id}
+Title: ${caseData.title}
+Status: ${status}
+Priority: ${caseData.priority}
+Assignee: ${caseData.assignee}
+Profile: ${caseData.profile?.name} (${caseData.profile?.id})
+Created: ${caseData.created}
+Updated: ${caseData.updated}
+Risk Score: ${caseData.riskScore}/100
+Description: ${caseData.description}
+Notes:
+${notes.length > 0 ? notes.map((n, i) => `${i + 1}. ${n}`).join("\n") : "No notes yet."}
+-------------------
+    `;
+
+    const blob = new Blob([reportContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Case_${caseData.id}_Report.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
       {/* ---------- HEADER ---------- */}
@@ -55,10 +112,10 @@ export default function CaseDetails({ caseData }: { caseData: any }) {
         <div className="flex flex-wrap items-center space-x-2 mt-3 sm:mt-0">
           <span
             className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${getStatusColor(
-              caseData.status
+              status
             )}`}
           >
-            {caseData.status}
+            {status}
           </span>
           <span
             className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${getPriorityColor(
@@ -118,6 +175,20 @@ export default function CaseDetails({ caseData }: { caseData: any }) {
                 </span>
               </div>
             </div>
+
+            {/* Added Notes Section */}
+            {notes.length > 0 && (
+              <div className="mt-6 bg-white rounded-lg border border-gray-200 p-4">
+                <h4 className="text-sm font-semibold text-gray-800 mb-2">
+                  Notes
+                </h4>
+                <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
+                  {notes.map((n, i) => (
+                    <li key={i}>{n}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Middle: Risk Score */}
@@ -141,21 +212,72 @@ export default function CaseDetails({ caseData }: { caseData: any }) {
           </div>
 
           {/* Right: Quick Actions */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 relative">
             <h4 className="text-sm font-semibold text-gray-900 mb-3">
               Quick Actions
             </h4>
             <div className="space-y-2">
-              <button className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200">
-                Add Note
+              <button
+                onClick={() => setShowNoteInput(!showNoteInput)}
+                className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200 flex items-center"
+              >
+                <Edit className="w-4 h-4 mr-2" /> Add Note
               </button>
-              <button className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200">
-                Update Status
+              <button
+                onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200 flex items-center"
+              >
+                <Edit className="w-4 h-4 mr-2" /> Update Status
               </button>
-              <button className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200">
-                Generate Report
+              <button
+                onClick={handleGenerateReport}
+                className="w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200 flex items-center"
+              >
+                <Download className="w-4 h-4 mr-2" /> Generate Report
               </button>
             </div>
+
+            {/* Note Input Modal */}
+            {showNoteInput && (
+              <div className="absolute top-4 left-0 right-0 bg-white border border-gray-300 shadow-lg rounded-lg p-4 z-20">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-sm font-semibold">Add Note</h4>
+                  <button onClick={() => setShowNoteInput(false)}>
+                    <X className="w-4 h-4 text-gray-500" />
+                  </button>
+                </div>
+                <textarea
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
+                  placeholder="Type your note..."
+                />
+                <div className="mt-2 text-right">
+                  <button
+                    onClick={handleAddNote}
+                    className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-purple-700"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Status Dropdown */}
+            {showStatusDropdown && (
+              <div className="absolute top-16 left-0 right-0 bg-white border border-gray-300 shadow-lg rounded-lg p-3 z-20">
+                {["Active", "Under Review", "Closed"].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => handleStatusChange(s)}
+                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
