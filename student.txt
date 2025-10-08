@@ -1,12 +1,8 @@
-Cannot read properties of undefined (reading 'id')
-
-src/app/fincrime/components/PastEventsLog.tsx (201:33) @ CaseDetails
-
-
-  199 |             <div>
-  200 |               <h3 className="text-xl font-bold text-gray-900">
-> 201 |                 Case #{caseData.id || caseData.caseNumber}
-      |                                 ^
-  202 |               </h3>
-  203 |               <p className="text-sm text-gray-500">{caseData.title}</p>
-  204 |             </div>
+if (!caseData) {
+    // 🧩 Optional: show a fallback loader or placeholder
+    return (
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 text-center text-gray-500">
+        Loading case details...
+      </div>
+    );
+  }
