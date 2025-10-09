@@ -1,154 +1,110 @@
-"use client";
-import { useState } from "react";
-import {
-  UserCircle,
-  Lock,
-  Eye,
-  EyeOff,
-  Loader2,
-  Check,
-  LogIn,
-} from "lucide-react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
+import LoginPage from "./LoginPage";
 import { setSession } from "../fincrime/services/session";
-import Image from "next/image";
-import SCLogo from "../../assets/sclogo.png"
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [userid, setUserid] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+}));
+jest.mock("../fincrime/services/session");
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props: any) => <img {...props} />,
+}));
 
-  const handleLogin = () => {
-    // Prevent multiple triggers while loading/success
-    if (isLoading || isSuccess) return;
+describe("LoginPage", () => {
+  const mockPush = jest.fn();
 
-    setError("");
-    setIsLoading(true);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
+  });
 
-    setTimeout(() => {
-      if (userid === "admin" && password === "fin@1234") {
-        const token =
-          "fincrime_token_" + Math.random().toString(36).substring(2);
-        setSession(token);
-        setIsLoading(false);
-        setIsSuccess(true);
-        setTimeout(() => router.push("/"), 1500);
-      } else {
-        setIsLoading(false);
-        setError("Invalid credentials. Try again.");
-      }
-    }, 2000);
-  };
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
 
-  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  it("renders login form with all elements", () => {
+    render(<LoginPage />);
+    
+    expect(screen.getByText("Krono Sphere")).toBeInTheDocument();
+    expect(screen.getByText("Sign in to your account")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Enter your username")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Enter your password")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Sign In/i })).toBeDisabled();
+  });
 
-  return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* Header */}
-      <header className="w-full bg-white shadow-sm p-5 flex items-center gap-3 pl-10">
-          <Image
-          src={SCLogo}
-          alt="Standard Chartered"
-          className="h-7 w-auto"
-          priority
-        />
-        <span className="text-blue-600 font-semibold text-xl tracking-wide">
-          Krono Sphere
-        </span>
-      </header>
+  it("enables submit button when both fields are filled", async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<LoginPage />);
 
-      {/* Login Section */}
-      <div className="flex flex-1 items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md bg-white shadow-lg rounded-2xl border border-gray-200 p-10">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleLogin();
-            }}
-          >
-            {/* Title */}
-            <h2 className="text-center text-2xl font-semibold text-gray-800 mb-8">
-              Sign in to your account
-            </h2>
+    await user.type(screen.getByPlaceholderText("Enter your username"), "admin");
+    await user.type(screen.getByPlaceholderText("Enter your password"), "password");
 
-            {/* Username */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                User Name <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Enter your username"
-                  value={userid}
-                  onChange={(e) => setUserid(e.target.value)}
-                  className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-[15px]"
-                />
-              </div>
-            </div>
+    expect(screen.getByRole("button", { name: /Sign In/i })).not.toBeDisabled();
+  });
 
-            {/* Password */}
-            <div className="mb-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-[15px]"
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </div>
+  it("toggles password visibility", async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<LoginPage />);
 
-            {/* Error */}
-            {error && (
-              <p className="text-sm text-red-500 text-center mt-4">{error}</p>
-            )}
+    const passwordInput = screen.getByPlaceholderText("Enter your password");
+    const toggleButton = screen.getByRole("button", { type: "button" });
 
-            {/* Button */}
-            <button
-              type="submit"
-              disabled={isLoading || isSuccess || !userid || !password}
-              className="w-full mt-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2 shadow-md text-[15px]"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" /> Authenticating...
-                </>
-              ) : isSuccess ? (
-                <>
-                  <Check className="w-5 h-5" /> Access Granted
-                </>
-              ) : (
-                <>
-                  <LogIn className="w-5 h-5" /> Sign In
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-}
+    expect(passwordInput).toHaveAttribute("type", "password");
+    await user.click(toggleButton);
+    expect(passwordInput).toHaveAttribute("type", "text");
+  });
+
+  it("successfully logs in with correct credentials", async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<LoginPage />);
+
+    await user.type(screen.getByPlaceholderText("Enter your username"), "admin");
+    await user.type(screen.getByPlaceholderText("Enter your password"), "fin@1234");
+    await user.click(screen.getByRole("button", { name: /Sign In/i }));
+
+    expect(screen.getByText("Authenticating...")).toBeInTheDocument();
+
+    jest.advanceTimersByTime(2000);
+
+    await waitFor(() => {
+      expect(screen.getByText("Access Granted")).toBeInTheDocument();
+      expect(setSession).toHaveBeenCalledWith(expect.stringContaining("fincrime_token_"));
+    });
+
+    jest.advanceTimersByTime(1500);
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/"));
+  });
+
+  it("shows error message with invalid credentials", async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<LoginPage />);
+
+    await user.type(screen.getByPlaceholderText("Enter your username"), "wrong");
+    await user.type(screen.getByPlaceholderText("Enter your password"), "wrong");
+    await user.click(screen.getByRole("button", { name: /Sign In/i }));
+
+    jest.advanceTimersByTime(2000);
+
+    await waitFor(() => {
+      expect(screen.getByText("Invalid credentials. Try again.")).toBeInTheDocument();
+      expect(setSession).not.toHaveBeenCalled();
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+  });
+
+  it("submits form on Enter key press", async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<LoginPage />);
+
+    await user.type(screen.getByPlaceholderText("Enter your username"), "admin");
+    await user.type(screen.getByPlaceholderText("Enter your password"), "fin@1234");
+    await user.keyboard("{Enter}");
+
+    expect(screen.getByText("Authenticating...")).toBeInTheDocument();
+  });
+});
