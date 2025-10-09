@@ -79,29 +79,29 @@ function Home() {
             <a className="text-sm text-gray-600 hover:underline" href="#">Documentation</a>
             <a className="text-sm text-gray-600 hover:underline" href="#">Help</a>
             <span className="ml-4 text-sm text-gray-800 font-medium">Satti, Abhiram Reddy</span>
-            {/* Optionally add an avatar */}
           </nav>
         </header>
 
         {/* Cards Grid */}
-        <main className="px-8 mt-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+        <main className="px-8 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
             {apps.map((app) => (
               <div
                 key={app.name}
                 onClick={() => handleNavigation(app.link)}
-                className="relative cursor-pointer p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition group bg-white"
+                className="relative cursor-pointer p-8 rounded-2xl border border-gray-200 shadow-md hover:shadow-lg transition bg-white min-h-[220px] flex flex-col justify-start"
+                style={{ minWidth: "310px", maxWidth: "420px" }}
               >
-                <div className="flex flex-col space-y-4">
-                  <div className="flex items-center space-x-3 mb-1">
-                    <app.icon className="w-6 h-6 text-gray-500" />
-                    {/* Heading is blue, underlined, clickable */}
-                    <span className="text-base font-semibold text-blue-700 underline group-hover:text-blue-900">{app.name}</span>
+                <div className="mb-6">
+                  <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100 mb-3">
+                    <app.icon className="w-8 h-8 text-gray-500" />
                   </div>
-                  <div>
-                    <p className="text-gray-700 text-sm leading-relaxed">{app.description}</p>
-                  </div>
+                  <h2 className="text-xl font-semibold text-blue-700 underline mb-2">{app.name}</h2>
+                  <p className="text-gray-700 text-base leading-relaxed">{app.description}</p>
                 </div>
+                <button className="text-sm font-semibold text-blue-700 hover:underline mt-auto p-0 bg-transparent shadow-none">
+                  Open →
+                </button>
               </div>
             ))}
           </div>
