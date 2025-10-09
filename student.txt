@@ -1,5 +1,9 @@
- <button
-            onClick={handleGoBack}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 group"
-            title="Go back"
-          >
+ <div className="mb-4 flex items-center">
+        <button
+          onClick={handleGoBack}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+          title="Go back"
+        >
+          <ArrowLeft className="w-6 h-6 text-gray-700" />
+        </button>
+      </div>
