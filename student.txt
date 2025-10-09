@@ -1,23 +1,34 @@
-● CaseDetails Component › generates report file on clicking 'Generate Report'
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import CaseDetails from "@/components/CaseDetails";
 
-    TypeError: Failed to execute 'appendChild' on 'Node': parameter 1 is not of type 'Node'.
+// ✅ Mock Next.js App Router
+const mockPush = jest.fn();
+const mockBack = jest.fn();
 
-      134 |
-      135 |   it("generates report file on clicking 'Generate Report'", () => {
-    > 136 |     render(<CaseDetails caseData={mockCaseData} />);
-          |           ^
-      137 |     const generateButton = screen.getByText(/Generate Report/i);
-      138 |     fireEvent.click(generateButton);
-      139 |
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockPush,
+    back: mockBack,
+    prefetch: jest.fn(),
+  }),
+}));
 
-      at Object.exports.convert (node_modules/jsdom/lib/jsdom/living/generated/Node.js:25:9)
-      at HTMLBodyElement.appendChild (node_modules/jsdom/lib/jsdom/living/generated/Node.js:404:26)      
-      at render (node_modules/@testing-library/react/dist/pure.js:260:29)
-      at Object.<anonymous> (__tests__/CaseDetails.test.tsx:136:11)
+// ✅ Safe mocks for file download + URLs
+global.URL.createObjectURL = jest.fn(() => "mock-url");
+global.URL.revokeObjectURL = jest.fn();
+global.Blob = function (content: any, options: any) {
+  return { content, options };
+};
 
-Test Suites: 1 failed, 1 total                                                                           
-Tests:       8 failed, 8 total                                                                           
-Snapshots:   0 total
-Time:        1.045 s
-Ran all test suites.
-PS C:\Users\2030937\Documents\ADO\latest-code\latest-code> 
+// ✅ Fixed: createElement returns valid Node for <a>
+const mockClick = jest.fn();
+jest.spyOn(document, "createElement").mockImplementation((tagName: string) => {
+  if (tagName === "a") {
+    const anchor = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
+    anchor.click = mockClick;
+    return anchor;
+  }
+  return document.createElementNS("http://www.w3.org/1999/xhtml", tagName);
+});
