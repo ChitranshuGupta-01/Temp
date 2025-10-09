@@ -1,130 +1,156 @@
 "use client";
+import { useState } from 'react';
+import { Shield, UserCircle, Lock, Eye, EyeOff, LogIn, Loader2, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { setSession } from '../utils/session';
 
-import AuthWrapper from "./Authwrapper";
-import { redirect } from "next/navigation";
-import { Shield, Cpu, Lock, Activity, Network, Server, Bot, Bell } from "lucide-react";
+export default function LoginPage() {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [userid, setUserid] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-const apps = [
-  {
-    name: "Culture and Conduct",
-    description: "Ethical insights & behavioral analytics for organizational excellence.",
-    icon: Shield,
-    color: "from-pink-300 via-red-300 to-orange-300",
-    link: "",
-  },
-  {
-    name: "SOC AI",
-    description: "AI-driven Security Operations Center for smarter threat detection.",
-    icon: Cpu,
-    color: "from-blue-300 via-cyan-300 to-green-300",
-    link: "",
-  },
-  {
-    name: "FinCrime",
-    description: "Advanced financial crime detection and compliance monitoring.",
-    icon: Lock,
-    color: "from-purple-300 via-fuchsia-300 to-indigo-300",
-    link: "/fincrime",
-  },
-  {
-    name: "Ask Kronos",
-    description: "Your AI-powered assistant for instant insights and automation.",
-    icon: Bot,
-    color: "from-yellow-300 via-orange-300 to-pink-300",
-    link: "",
-  },
-  {
-    name: "Asset Level Monitoring",
-    description: "Real-time monitoring and analytics for all your assets.",
-    icon: Activity,
-    color: "from-green-300 via-emerald-300 to-teal-300",
-    link: "",
-  },
-  {
-    name: "Cyber Fusion",
-    description: "Unified cyber intelligence and response platform.",
-    icon: Network,
-    color: "from-indigo-300 via-blue-300 to-cyan-300",
-    link: "",
-  },
-  {
-    name: "App Manager",
-    description: "Deploy, manage, and monitor all your apps in one place.",
-    icon: Server,
-    color: "from-fuchsia-300 via-pink-300 to-red-300",
-    link: "",
-  },
-  {
-    name: "Security Alerts",
-    description: "Real-time security alerts with actionable insights.",
-    icon: Bell,
-    color: "from-red-300 via-orange-300 to-yellow-300",
-    link: "",
-  },
-];
+  const handleLogin = () => {
+    setError("");
+    setIsLoading(true);
 
-function Home() {
-  const handleNavigation = (link: string) => {
-    if (link) redirect(link);
+  
+    setTimeout(() => {
+      if (userid === "admin" && password === "fin@1234") {
+        
+        const token = "fincrime_token_" + Math.random().toString(36).substring(2);
+        setSession(token);
+        setIsLoading(false);
+        setIsSuccess(true);
+        //const expiry = new Date().getTime() + 2 * 60 * 1000; 
+
+
+        setTimeout(() => {
+          
+          router.push("/");
+        }, 1500);
+      } else {
+        setIsLoading(false);
+        setError("Invalid credentials. Try again.");
+      }
+    }, 2000);
   };
 
-  const handleLogout = () => {
-    redirect("/login");
-  };
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   return (
-    <AuthWrapper>
-      <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-gray-900 dark:text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 flex items-center justify-center p-4 relative overflow-hidden">
 
-        {/* Header */}
-        <header className="flex justify-between items-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent drop-shadow-md">
-            KSphere Apps
-          </h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 hover:opacity-90 text-white font-semibold rounded-lg shadow-md transition-all"
-          >
-            Logout
-          </button>
-        </header>
-
-        {/* Cards Grid */}
-        <main className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {apps.map((app) => (
-            <div
-              key={app.name}
-              onClick={() => handleNavigation(app.link)}
-              className={`relative group cursor-pointer p-6 rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${app.color}`}
-            >
-              {/* Overlay for glass effect */}
-              <div className="absolute inset-0 bg-white/40 dark:bg-gray-900/30 backdrop-blur-lg rounded-2xl"></div>
-
-              <div className="relative z-10 flex flex-col items-start space-y-4">
-                <div className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-xl shadow-sm">
-                  <app.icon className="w-8 h-8 text-gray-800 dark:text-white" />
-                </div>
-                <h2 className="text-xl font-semibold">{app.name}</h2>
-                <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
-                  {app.description}
-                </p>
-                <button className="mt-2 text-sm font-semibold text-blue-700 dark:text-blue-300 group-hover:underline">
-                  Open →
-                </button>
-              </div>
-            </div>
-          ))}
-        </main>
-
-        {/* Footer */}
-        <footer className="mt-16 flex justify-center text-sm text-gray-500 dark:text-gray-400 space-x-6">
-          <a href="#" className="hover:text-blue-600 transition">Learn</a>
-          <a href="#" className="hover:text-purple-600 transition">Examples</a>
-          <a href="#" className="hover:text-pink-600 transition">Go to nextjs.org →</a>
-        </footer>
+      {/* Animated Background Lines */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[20%] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-30 animate-[scan_4s_linear_infinite]" />
+        <div className="absolute top-[50%] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-30 animate-[scan_4s_linear_infinite_2s]" />
+        <div className="absolute top-[80%] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-30 animate-[scan_4s_linear_infinite_1s]" />
       </div>
-    </AuthWrapper>
+
+      {/* Login Box */}
+      <div className="w-full max-w-md bg-slate-800/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-emerald-400/20 p-12 relative z-10 animate-[slideIn_0.6s_ease-out]">
+        
+        {/* Logo and Title */}
+        <div className="text-center mb-10">
+          <div className="mb-4 animate-[pulse_2s_ease-in-out_infinite]">
+            <Shield className="w-14 h-14 text-emerald-400 mx-auto" style={{ filter: 'drop-shadow(0 0 20px rgba(52,211,153,0.5))' }} />
+          </div>
+          <h1 className="text-4xl font-bold text-emerald-400 mb-2 tracking-wider uppercase" style={{ textShadow: '0 0 20px rgba(52,211,153,0.5)' }}>
+            KRONOS
+          </h1>
+          <p className="text-slate-400 text-sm tracking-widest">
+            Secure Access Portal
+          </p>
+        </div>
+
+        {/* User ID Input */}
+        <div className="mb-6 relative">
+          <UserCircle className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
+          <input
+            type="text"
+            placeholder="User ID"
+            value={userid}
+            onChange={(e) => setUserid(e.target.value)}
+            className="w-full px-14 py-4 bg-slate-700/60 border-2 border-emerald-400/30 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:bg-slate-700/80 transition-all duration-300"
+          />
+        </div>
+
+        {/* Password Input */}
+        <div className="mb-6 relative">
+          <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
+          <input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-14 py-4 bg-slate-700/60 border-2 border-emerald-400/30 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:bg-slate-700/80 transition-all duration-300"
+          />
+          
+          {/* Eye Icon */}
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            className="absolute right-5 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-300 transition-colors"
+          >
+            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+
+        {/* Error Message */}
+        {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
+
+        {/* Login Button */}
+        <button
+          onClick={handleLogin}
+          disabled={isLoading || isSuccess || !userid || !password}
+          className="w-full py-4 bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-slate-900 font-bold text-base uppercase tracking-widest rounded-xl shadow-[0_8px_25px_rgba(52,211,153,0.3)] hover:shadow-[0_12px_35px_rgba(52,211,153,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 disabled:opacity-80 disabled:cursor-not-allowed"
+        >
+          <span className="flex items-center justify-center gap-2">
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Authenticating...
+              </>
+            ) : isSuccess ? (
+              <>
+                <Check className="w-5 h-5" />
+                Access Granted
+              </>
+            ) : (
+              <>
+                <LogIn className="w-5 h-5" />
+                Login
+              </>
+            )}
+          </span>
+        </button>
+      </div>
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes scan {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `}</style>
+    </div>
   );
 }
-
-export default Home;
