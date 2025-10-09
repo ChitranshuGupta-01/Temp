@@ -1,16 +1,13 @@
-ReferenceError: require is not defined in ES module scope, you can use import instead
-This file is being treated as an ES module because it has a '.js' file extension and 'C:\Users\2030937\Documents\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS sccuments\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS sccuments\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS sccuments\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
-cuments\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
-cuments\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
-cuments\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS sccuments\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS sccuments\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
-    at file:///C:/Users/2030937/Documents/ADO/latest-code/latest-code/jest.config.js:1:18
-    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:507:37)
-    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:441:47)
-    at loadESMFromCJS (node:internal/modules/cjs/loader:1567:24)
-    at Module._compile (node:internal/modules/cjs/loader:1720:5)
-    at Object..js (node:internal/modules/cjs/loader:1871:10)
-    at Module.load (node:internal/modules/cjs/loader:1470:32)
-    at Module._load (node:internal/modules/cjs/loader:1290:12)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:238:24)
-PS C:\Users\2030937\Documents\ADO\latest-code\latest-code>
+import nextJest from 'next/jest.js';
+
+const createJestConfig = nextJest({
+  dir: './',
+});
+
+const customJestConfig = {
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+};
+
+export default createJestConfig(customJestConfig);
+
