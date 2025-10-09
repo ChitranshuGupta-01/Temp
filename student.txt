@@ -1,143 +1,154 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import CaseDetails from "@/components/CaseDetails";
+"use client";
+import { useState } from "react";
+import {
+  UserCircle,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  Check,
+  LogIn,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { setSession } from "../fincrime/services/session";
+import Image from "next/image";
+import SCLogo from "../../assets/sclogo.png"
 
-// ✅ Mock Next.js router
-const mockPush = jest.fn();
-const mockBack = jest.fn();
+export default function LoginPage() {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [userid, setUserid] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    back: mockBack,
-    prefetch: jest.fn(),
-  }),
-}));
+  const handleLogin = () => {
+    // Prevent multiple triggers while loading/success
+    if (isLoading || isSuccess) return;
 
-// ✅ Mock URL + anchor creation (no Blob)
-global.URL.createObjectURL = jest.fn(() => "mock-url");
-global.URL.revokeObjectURL = jest.fn();
+    setError("");
+    setIsLoading(true);
 
-const mockClick = jest.fn();
-jest.spyOn(document, "createElement").mockImplementation((tagName: string) => {
-  if (tagName === "a") {
-    const anchor = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
-    anchor.click = mockClick;
-    return anchor;
-  }
-  return document.createElementNS("http://www.w3.org/1999/xhtml", tagName);
-});
-
-describe("CaseDetails Component", () => {
-  const mockCaseData = {
-    id: 101,
-    title: "Payment Fraud Investigation",
-    status: "Active",
-    priority: "High",
-    assignee: "John Doe",
-    profile: { name: "Jane Smith", id: "P123" },
-    created: "2025-10-01",
-    updated: "2025-10-05",
-    riskScore: 75,
-    description: "A suspected payment fraud case under review.",
+    setTimeout(() => {
+      if (userid === "admin" && password === "fin@1234") {
+        const token =
+          "fincrime_token_" + Math.random().toString(36).substring(2);
+        setSession(token);
+        setIsLoading(false);
+        setIsSuccess(true);
+        setTimeout(() => router.push("/"), 1500);
+      } else {
+        setIsLoading(false);
+        setError("Invalid credentials. Try again.");
+      }
+    }, 2000);
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-  // ✅ Render test
-  it("renders case details correctly", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      {/* Header */}
+      <header className="w-full bg-white shadow-sm p-5 flex items-center gap-3 pl-10">
+          <Image
+          src={SCLogo}
+          alt="Standard Chartered"
+          className="h-7 w-auto"
+          priority
+        />
+        <span className="text-blue-600 font-semibold text-xl tracking-wide">
+          Krono Sphere
+        </span>
+      </header>
 
-    expect(screen.getByText(/Case #101/i)).toBeInTheDocument();
-    expect(screen.getByText(/Payment Fraud Investigation/i)).toBeInTheDocument();
-    expect(screen.getByText(/High Priority/i)).toBeInTheDocument();
-    expect(screen.getByText(/A suspected payment fraud case/i)).toBeInTheDocument();
-    expect(screen.getByText(/Risk Score/i)).toBeInTheDocument();
-    expect(screen.getByText("75")).toBeInTheDocument();
-    expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
-    expect(screen.getByText(/Jane Smith/i)).toBeInTheDocument();
-  });
+      {/* Login Section */}
+      <div className="flex flex-1 items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md bg-white shadow-lg rounded-2xl border border-gray-200 p-10">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleLogin();
+            }}
+          >
+            {/* Title */}
+            <h2 className="text-center text-2xl font-semibold text-gray-800 mb-8">
+              Sign in to your account
+            </h2>
 
-  // ✅ Navigation (Go Back)
-  it("navigates back when Go Back button is clicked", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByTitle(/go back/i));
-    expect(mockBack).toHaveBeenCalledTimes(1);
-  });
+            {/* Username */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                User Name <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Enter your username"
+                  value={userid}
+                  onChange={(e) => setUserid(e.target.value)}
+                  className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-[15px]"
+                />
+              </div>
+            </div>
 
-  // ✅ Add Note
-  it("opens note input, adds note, and displays it", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Add Note/i));
+            {/* Password */}
+            <div className="mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-[15px]"
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+            </div>
 
-    const textarea = screen.getByPlaceholderText(/Type your note/i);
-    fireEvent.change(textarea, { target: { value: "New Note" } });
+            {/* Error */}
+            {error && (
+              <p className="text-sm text-red-500 text-center mt-4">{error}</p>
+            )}
 
-    fireEvent.click(screen.getByText(/Save/i));
-    expect(screen.getByText("New Note")).toBeInTheDocument();
-  });
-
-  // ✅ Edit Note
-  it("edits an existing note correctly", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Add Note/i));
-
-    const textarea = screen.getByPlaceholderText(/Type your note/i);
-    fireEvent.change(textarea, { target: { value: "Initial Note" } });
-    fireEvent.click(screen.getByText(/Save/i));
-
-    const editButtons = screen.getAllByRole("button");
-    const editButton = editButtons.find((btn) =>
-      btn.querySelector("svg")?.getAttribute("class")?.includes("text-blue")
-    );
-    if (editButton) fireEvent.click(editButton);
-
-    const editTextarea = screen.getByPlaceholderText(/Type your note/i);
-    fireEvent.change(editTextarea, { target: { value: "Edited Note" } });
-    fireEvent.click(screen.getByText(/Update/i));
-
-    expect(screen.getByText("Edited Note")).toBeInTheDocument();
-  });
-
-  // ✅ Delete Note
-  it("deletes a note successfully", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Add Note/i));
-
-    fireEvent.change(screen.getByPlaceholderText(/Type your note/i), {
-      target: { value: "Note to Delete" },
-    });
-    fireEvent.click(screen.getByText(/Save/i));
-
-    expect(screen.getByText("Note to Delete")).toBeInTheDocument();
-
-    const deleteButtons = screen.getAllByRole("button");
-    const deleteButton = deleteButtons.find((btn) =>
-      btn.querySelector("svg")?.getAttribute("class")?.includes("text-red")
-    );
-    if (deleteButton) fireEvent.click(deleteButton);
-
-    expect(screen.queryByText("Note to Delete")).not.toBeInTheDocument();
-  });
-
-  // ✅ Status Update
-  it("updates status using dropdown", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Update Status/i));
-    fireEvent.click(screen.getByText(/Closed/i));
-    expect(screen.getByText("Closed")).toBeInTheDocument();
-  });
-
-  // ✅ Generate Report (Blob-free)
-  it("triggers report generation when 'Generate Report' is clicked", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Generate Report/i));
-
-    expect(global.URL.createObjectURL).toHaveBeenCalledTimes(1);
-    expect(mockClick).toHaveBeenCalledTimes(1);
-    expect(global.URL.revokeObjectURL).toHaveBeenCalledTimes(1);
-  });
-});
+            {/* Button */}
+            <button
+              type="submit"
+              disabled={isLoading || isSuccess || !userid || !password}
+              className="w-full mt-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2 shadow-md text-[15px]"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" /> Authenticating...
+                </>
+              ) : isSuccess ? (
+                <>
+                  <Check className="w-5 h-5" /> Access Granted
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-5 h-5" /> Sign In
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
