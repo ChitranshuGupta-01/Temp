@@ -1,135 +1,22 @@
-// @ts-nocheck
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import LoginPage from "./LoginPage";
+ FAIL  __tests__/login.test.tsx
+  ● Test suite failed to run
+                                                                                                         
+    Cannot find module '../fincrime/services/session' from '__tests__/login.test.tsx'
 
-// Mock next/navigation
-const mockPush = jest.fn();
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: jest.fn(),
-    prefetch: jest.fn(),
-  }),
-}));
+      15 | // Mock session service
+      16 | const mockSetSession = jest.fn();
+    > 17 | jest.mock("../fincrime/services/session", () => ({
+         |      ^
+      18 |   setSession: mockSetSession,
+      19 | }));
+      20 |
 
-// Mock session service
-const mockSetSession = jest.fn();
-jest.mock("../fincrime/services/session", () => ({
-  setSession: mockSetSession,
-}));
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/index.js:863:11)
+      at Object.mock (__tests__/login.test.tsx:17:6)
 
-// Mock next/image
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: ({ src, alt, ...props }) => <img src={src} alt={alt} {...props} />,
-}));
-
-describe("LoginPage", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-  });
-
-  it("renders login form with all elements", () => {
-    render(<LoginPage />);
-    
-    expect(screen.getByText("Krono Sphere")).toBeInTheDocument();
-    expect(screen.getByText("Sign in to your account")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Enter your username")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Enter your password")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Sign In/i })).toBeDisabled();
-  });
-
-  it("enables submit button when both fields are filled", () => {
-    render(<LoginPage />);
-
-    const usernameInput = screen.getByPlaceholderText("Enter your username");
-    const passwordInput = screen.getByPlaceholderText("Enter your password");
-
-    fireEvent.change(usernameInput, { target: { value: "admin" } });
-    fireEvent.change(passwordInput, { target: { value: "password" } });
-
-    expect(screen.getByRole("button", { name: /Sign In/i })).not.toBeDisabled();
-  });
-
-  it("toggles password visibility", () => {
-    render(<LoginPage />);
-
-    const passwordInput = screen.getByPlaceholderText("Enter your password");
-    const toggleButton = screen.getByRole("button", { type: "button" });
-
-    expect(passwordInput).toHaveAttribute("type", "password");
-    
-    fireEvent.click(toggleButton);
-    expect(passwordInput).toHaveAttribute("type", "text");
-    
-    fireEvent.click(toggleButton);
-    expect(passwordInput).toHaveAttribute("type", "password");
-  });
-
-  it("successfully logs in with correct credentials", async () => {
-    render(<LoginPage />);
-
-    const usernameInput = screen.getByPlaceholderText("Enter your username");
-    const passwordInput = screen.getByPlaceholderText("Enter your password");
-    const submitButton = screen.getByRole("button", { name: /Sign In/i });
-
-    fireEvent.change(usernameInput, { target: { value: "admin" } });
-    fireEvent.change(passwordInput, { target: { value: "fin@1234" } });
-    fireEvent.click(submitButton);
-
-    expect(screen.getByText("Authenticating...")).toBeInTheDocument();
-
-    jest.advanceTimersByTime(2000);
-
-    await waitFor(() => {
-      expect(screen.getByText("Access Granted")).toBeInTheDocument();
-      expect(mockSetSession).toHaveBeenCalledWith(expect.stringContaining("fincrime_token_"));
-    });
-
-    jest.advanceTimersByTime(1500);
-    
-    await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/");
-    });
-  });
-
-  it("shows error message with invalid credentials", async () => {
-    render(<LoginPage />);
-
-    const usernameInput = screen.getByPlaceholderText("Enter your username");
-    const passwordInput = screen.getByPlaceholderText("Enter your password");
-    const submitButton = screen.getByRole("button", { name: /Sign In/i });
-
-    fireEvent.change(usernameInput, { target: { value: "wrong" } });
-    fireEvent.change(passwordInput, { target: { value: "wrong" } });
-    fireEvent.click(submitButton);
-
-    jest.advanceTimersByTime(2000);
-
-    await waitFor(() => {
-      expect(screen.getByText("Invalid credentials. Try again.")).toBeInTheDocument();
-      expect(mockSetSession).not.toHaveBeenCalled();
-      expect(mockPush).not.toHaveBeenCalled();
-    });
-  });
-
-  it("submits form on Enter key press", () => {
-    render(<LoginPage />);
-
-    const usernameInput = screen.getByPlaceholderText("Enter your username");
-    const passwordInput = screen.getByPlaceholderText("Enter your password");
-    const form = screen.getByRole("button", { name: /Sign In/i }).closest("form");
-
-    fireEvent.change(usernameInput, { target: { value: "admin" } });
-    fireEvent.change(passwordInput, { target: { value: "fin@1234" } });
-    fireEvent.submit(form);
-
-    expect(screen.getByText("Authenticating...")).toBeInTheDocument();
-  });
-});
+Test Suites: 2 failed, 2 total                                                                           
+Tests:       2 failed, 5 passed, 7 total                                                                 
+Snapshots:   0 total
+Time:        1.463 s
+Ran all test suites.
+PS C:\Users\2030937\Documents\ADO\latest-code\latest-code> 
