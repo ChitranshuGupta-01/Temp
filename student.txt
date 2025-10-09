@@ -1,65 +1,69 @@
-
 "use client";
 
 import AuthWrapper from "./Authwrapper";
 import { redirect } from "next/navigation";
-import { Shield, Cpu, Lock, Activity, Network, Server, Bot, Bell } from "lucide-react";
+import {
+  Shield,
+  Cpu,
+  Lock,
+  Activity,
+  Network,
+  Server,
+  Bot,
+  Bell,
+} from "lucide-react";
 
 const apps = [
   {
     name: "Culture and Conduct",
-    description: "Ethical insights & behavioral analytics for organizational excellence.",
+    description:
+      "Ethical insights & behavioral analytics for organizational excellence.",
     icon: Shield,
-    color: "from-pink-300 via-red-300 to-orange-300",
     link: "",
   },
   {
     name: "SOC AI",
-    description: "AI-driven Security Operations Center for smarter threat detection.",
+    description:
+      "AI-driven Security Operations Center for smarter threat detection.",
     icon: Cpu,
-    color: "from-blue-300 via-cyan-300 to-green-300",
     link: "",
   },
   {
     name: "FinCrime",
-    description: "Advanced financial crime detection and compliance monitoring.",
+    description:
+      "Advanced financial crime detection and compliance monitoring.",
     icon: Lock,
-    color: "from-purple-300 via-fuchsia-300 to-indigo-300",
     link: "/fincrime",
   },
   {
     name: "Ask Kronos",
-    description: "Your AI-powered assistant for instant insights and automation.",
+    description:
+      "Your AI-powered assistant for instant insights and automation.",
     icon: Bot,
-    color: "from-yellow-300 via-orange-300 to-pink-300",
     link: "",
   },
   {
     name: "Asset Level Monitoring",
     description: "Real-time monitoring and analytics for all your assets.",
     icon: Activity,
-    color: "from-green-300 via-emerald-300 to-teal-300",
     link: "",
   },
   {
     name: "Cyber Fusion",
     description: "Unified cyber intelligence and response platform.",
     icon: Network,
-    color: "from-indigo-300 via-blue-300 to-cyan-300",
     link: "",
   },
   {
     name: "App Manager",
     description: "Deploy, manage, and monitor all your apps in one place.",
     icon: Server,
-    color: "from-fuchsia-300 via-pink-300 to-red-300",
     link: "",
   },
   {
     name: "Security Alerts",
     description: "Real-time security alerts with actionable insights.",
     icon: Bell,
-    color: "from-red-300 via-orange-300 to-yellow-300",
     link: "",
   },
 ];
@@ -75,54 +79,56 @@ function Home() {
 
   return (
     <AuthWrapper>
-      <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-gray-900 dark:text-white p-8">
-
+      <div className="min-h-screen bg-white text-gray-900 p-8 font-sans">
         {/* Header */}
-        <header className="flex justify-between items-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent drop-shadow-md">
-            KSphere Apps
+        <header className="flex justify-between items-center mb-12 border-b border-gray-200 pb-4">
+          <h1 className="text-3xl font-bold text-blue-700 tracking-tight">
+            Krono Sphere
           </h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 hover:opacity-90 text-white font-semibold rounded-lg shadow-md transition-all"
-          >
-            Logout
-          </button>
+          <div className="flex items-center space-x-6 text-sm">
+            <a href="#" className="text-gray-600 hover:text-blue-600">
+              Home
+            </a>
+            <a href="#" className="text-gray-600 hover:text-blue-600">
+              Documentation
+            </a>
+            <a href="#" className="text-gray-600 hover:text-blue-600">
+              Help
+            </a>
+            <div className="flex items-center space-x-2 text-gray-800 font-medium">
+              <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                👤
+              </span>
+              <span>Satti, Abhiram Reddy</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition"
+            >
+              Logout
+            </button>
+          </div>
         </header>
 
         {/* Cards Grid */}
-        <main className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <main className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {apps.map((app) => (
             <div
               key={app.name}
               onClick={() => handleNavigation(app.link)}
-              className={`relative group cursor-pointer p-6 rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${app.color}`}
+              className="cursor-pointer border border-gray-300 rounded-lg p-6 hover:shadow-md transition-all bg-white"
             >
-              {/* Overlay for glass effect */}
-              <div className="absolute inset-0 bg-white/40 dark:bg-gray-900/30 backdrop-blur-lg rounded-2xl"></div>
-
-              <div className="relative z-10 flex flex-col items-start space-y-4">
-                <div className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-xl shadow-sm">
-                  <app.icon className="w-8 h-8 text-gray-800 dark:text-white" />
+              <div className="flex flex-col space-y-3">
+                <div className="text-blue-700 font-semibold text-lg hover:underline">
+                  {app.name}
                 </div>
-                <h2 className="text-xl font-semibold">{app.name}</h2>
-                <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
+                <p className="text-sm text-gray-600 leading-snug">
                   {app.description}
                 </p>
-                <button className="mt-2 text-sm font-semibold text-blue-700 dark:text-blue-300 group-hover:underline">
-                  Open →
-                </button>
               </div>
             </div>
           ))}
         </main>
-
-        {/* Footer */}
-        <footer className="mt-16 flex justify-center text-sm text-gray-500 dark:text-gray-400 space-x-6">
-          <a href="#" className="hover:text-blue-600 transition">Learn</a>
-          <a href="#" className="hover:text-purple-600 transition">Examples</a>
-          <a href="#" className="hover:text-pink-600 transition">Go to nextjs.org →</a>
-        </footer>
       </div>
     </AuthWrapper>
   );
