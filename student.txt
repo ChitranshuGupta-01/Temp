@@ -1,16 +1,23 @@
-import nextJest from 'next/jest.js';
+PS C:\Users\2030937\Documents\ADO\latest-code\latest-code> npm test
 
-const createJestConfig = nextJest({
-  dir: './', // path to your Next.js app
-});
+> ksphere-apps@0.1.0 test
+> jest
 
-/** @type {import('jest').Config} */
-const customJestConfig = {
-  testEnvironment: 'jsdom',
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-};
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\2030937\package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles:
+   * C:\Users\2030937\Documents\ADO\latest-code\latest-code\package-lock.json
+   * C:\Users\2030937\Documents\ADO\latest-code\package-lock.json
 
-export default createJestConfig(customJestConfig);
+Error: ● Validation Error:
+
+  Test environment jest-environment-jsdom cannot be found. Make sure the testEnvironment configuration option points to an existing node module.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+
+As of Jest 28 "jest-environment-jsdom" is no longer shipped by default, make sure to install it separately.
+PS C:\Users\2030937\Documents\ADO\latest-code\latest-code> 
