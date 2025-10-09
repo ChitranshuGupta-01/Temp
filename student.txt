@@ -66,18 +66,26 @@ function Home() {
 
   return (
     <AuthWrapper>
-        <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* Header */}
-      <header className="w-full bg-white shadow-sm p-5 flex items-center gap-3 pl-10">
-        <img
-          src="/assets/sclogo.png"
-          alt="Standard Chartered"
-          className="h-7 w-auto"
-        />
-        <span className="text-blue-600 font-semibold text-xl tracking-wide">
-          Krono Sphere
-        </span>
-      </header>
+      <div className="min-h-screen flex flex-col bg-gray-100">
+        {/* Header */}
+        <header className="w-full bg-white shadow-sm p-5 flex items-center justify-between pl-10">
+          <div className="flex items-center gap-3">
+            <img
+              src="/assets/sclogo.png"
+              alt="Standard Chartered"
+              className="h-7 w-auto"
+            />
+            <span className="text-blue-600 font-semibold text-xl tracking-wide">
+              Krono Sphere
+            </span>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 hover:opacity-90 text-white font-semibold rounded-lg shadow-md transition-all"
+          >
+            Logout
+          </button>
+        </header>
         <main className="px-10 mt-10 flex flex-col items-center">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12 w-full max-w-screen-xl">
             {apps.map((app) => (
