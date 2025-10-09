@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import sc from '../asset/sc.png';
 import {
   UserCircle,
   Lock,
@@ -47,7 +48,7 @@ export default function LoginPage() {
       {/* Header */}
       <header className="w-full bg-white shadow-sm p-5 flex items-center gap-3 pl-10">
         <img
-          src="/standardchartered-logo.png"
+          src="/sc.png"
           alt="Standard Chartered"
           className="h-7 w-auto"
         />
