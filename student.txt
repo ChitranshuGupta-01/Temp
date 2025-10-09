@@ -1,23 +1,14 @@
-PS C:\Users\2030937\Documents\ADO\latest-code\latest-code> npm test
 
-> ksphere-apps@0.1.0 test
-> jest
-
- ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
- We detected multiple lockfiles and selected the directory of C:\Users\2030937\package-lock.json as the root directory.
- To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
-   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
- Detected additional lockfiles:
-   * C:\Users\2030937\Documents\ADO\latest-code\latest-code\package-lock.json
-   * C:\Users\2030937\Documents\ADO\latest-code\package-lock.json
-
-Error: ● Validation Error:
-
-  Test environment jest-environment-jsdom cannot be found. Make sure the testEnvironment configuration option points to an existing node module.
-
-  Configuration Documentation:
-  https://jestjs.io/docs/configuration
-
-
-As of Jest 28 "jest-environment-jsdom" is no longer shipped by default, make sure to install it separately.
+ReferenceError: require is not defined in ES module scope, you can use import instead
+This file is being treated as an ES module because it has a '.js' file extension and 'C:\Users\2030937\Documents\ADO\latest-code\latest-code\package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+    at file:///C:/Users/2030937/Documents/ADO/latest-code/latest-code/jest.config.js:1:18
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:507:37)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:441:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1567:24)
+    at Module._compile (node:internal/modules/cjs/loader:1720:5)
+    at Object..js (node:internal/modules/cjs/loader:1871:10)
+    at Module.load (node:internal/modules/cjs/loader:1470:32)
+    at Module._load (node:internal/modules/cjs/loader:1290:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:238:24)
 PS C:\Users\2030937\Documents\ADO\latest-code\latest-code> 
