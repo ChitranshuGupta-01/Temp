@@ -1,139 +1,23 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import CaseDetails from "@/components/CaseDetails";
+● CaseDetails Component › generates report file on clicking 'Generate Report'
 
-// ✅ Fixed Next.js App Router mock
-const mockPush = jest.fn();
-const mockBack = jest.fn();
+    TypeError: Failed to execute 'appendChild' on 'Node': parameter 1 is not of type 'Node'.
 
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    back: mockBack,
-    prefetch: jest.fn(),
-  }),
-}));
+      134 |
+      135 |   it("generates report file on clicking 'Generate Report'", () => {
+    > 136 |     render(<CaseDetails caseData={mockCaseData} />);
+          |           ^
+      137 |     const generateButton = screen.getByText(/Generate Report/i);
+      138 |     fireEvent.click(generateButton);
+      139 |
 
-// ✅ Mock URL & file creation for "Generate Report"
-global.URL.createObjectURL = jest.fn(() => "mock-url");
-global.URL.revokeObjectURL = jest.fn();
-global.Blob = function (content: any, options: any) {
-  return { content, options };
-};
-document.createElement = jest.fn(() => ({
-  href: "",
-  download: "",
-  click: jest.fn(),
-}));
+      at Object.exports.convert (node_modules/jsdom/lib/jsdom/living/generated/Node.js:25:9)
+      at HTMLBodyElement.appendChild (node_modules/jsdom/lib/jsdom/living/generated/Node.js:404:26)      
+      at render (node_modules/@testing-library/react/dist/pure.js:260:29)
+      at Object.<anonymous> (__tests__/CaseDetails.test.tsx:136:11)
 
-describe("CaseDetails Component", () => {
-  const mockCaseData = {
-    id: 101,
-    title: "Payment Fraud Investigation",
-    status: "Active",
-    priority: "High",
-    assignee: "John Doe",
-    profile: { name: "Jane Smith", id: "P123" },
-    created: "2025-10-01",
-    updated: "2025-10-05",
-    riskScore: 75,
-    description: "A suspected payment fraud case under review.",
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  // ✅ Render
-  it("renders case details correctly", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-
-    expect(screen.getByText(/Case #101/i)).toBeInTheDocument();
-    expect(screen.getByText(/Payment Fraud Investigation/i)).toBeInTheDocument();
-    expect(screen.getByText(/High Priority/i)).toBeInTheDocument();
-    expect(screen.getByText(/A suspected payment fraud/i)).toBeInTheDocument();
-    expect(screen.getByText(/Risk Score/i)).toBeInTheDocument();
-    expect(screen.getByText("75")).toBeInTheDocument();
-    expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
-    expect(screen.getByText(/Jane Smith/i)).toBeInTheDocument();
-  });
-
-  // ✅ Navigation
-  it("navigates back when Go Back button is clicked", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByTitle(/go back/i));
-    expect(mockBack).toHaveBeenCalled();
-  });
-
-  // ✅ Add note flow
-  it("opens note input, adds note, and displays it", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Add Note/i));
-
-    const textarea = screen.getByPlaceholderText(/Type your note/i);
-    fireEvent.change(textarea, { target: { value: "New Note" } });
-
-    fireEvent.click(screen.getByText(/Save/i));
-    expect(screen.getByText("New Note")).toBeInTheDocument();
-  });
-
-  // ✅ Edit note
-  it("edits an existing note correctly", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Add Note/i));
-
-    const textarea = screen.getByPlaceholderText(/Type your note/i);
-    fireEvent.change(textarea, { target: { value: "Initial Note" } });
-    fireEvent.click(screen.getByText(/Save/i));
-
-    // Click edit
-    const editButtons = screen.getAllByRole("button");
-    const editButton = editButtons.find((btn) =>
-      btn.querySelector("svg")?.getAttribute("class")?.includes("text-blue")
-    );
-    if (editButton) fireEvent.click(editButton);
-
-    const editTextarea = screen.getByPlaceholderText(/Type your note/i);
-    fireEvent.change(editTextarea, { target: { value: "Edited Note" } });
-    fireEvent.click(screen.getByText(/Update/i));
-
-    expect(screen.getByText("Edited Note")).toBeInTheDocument();
-  });
-
-  // ✅ Delete note
-  it("deletes a note successfully", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Add Note/i));
-    fireEvent.change(screen.getByPlaceholderText(/Type your note/i), {
-      target: { value: "Note to Delete" },
-    });
-    fireEvent.click(screen.getByText(/Save/i));
-    expect(screen.getByText("Note to Delete")).toBeInTheDocument();
-
-    const deleteButtons = screen.getAllByRole("button");
-    const deleteButton = deleteButtons.find((btn) =>
-      btn.querySelector("svg")?.getAttribute("class")?.includes("text-red")
-    );
-    if (deleteButton) fireEvent.click(deleteButton);
-
-    expect(screen.queryByText("Note to Delete")).not.toBeInTheDocument();
-  });
-
-  // ✅ Status update
-  it("updates status using dropdown", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Update Status/i));
-    fireEvent.click(screen.getByText(/Closed/i));
-    expect(screen.getByText("Closed")).toBeInTheDocument();
-  });
-
-  // ✅ Generate report
-  it("triggers report generation on button click", () => {
-    render(<CaseDetails caseData={mockCaseData} />);
-    fireEvent.click(screen.getByText(/Generate Report/i));
-    expect(document.createElement).toHaveBeenCalledWith("a");
-    expect(global.URL.createObjectURL).toHaveBeenCalled();
-    expect(global.URL.revokeObjectURL).toHaveBeenCalled();
-  });
-});
+Test Suites: 1 failed, 1 total                                                                           
+Tests:       8 failed, 8 total                                                                           
+Snapshots:   0 total
+Time:        1.045 s
+Ran all test suites.
+PS C:\Users\2030937\Documents\ADO\latest-code\latest-code> 
